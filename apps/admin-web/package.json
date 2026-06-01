@@ -1,0 +1,22 @@
+{
+  "name": "@rentflo/admin-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5178",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@rentflo/ui": "*",
+    "@rentflo/utils": "*",
+    "@rentflo/types": "*",
+    "react-router": "7.13.0",
+    "lucide-react": "0.487.0",
+    "recharts": "2.15.2"
+  },
+  "peerDependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

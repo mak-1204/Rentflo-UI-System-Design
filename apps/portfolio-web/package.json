@@ -1,0 +1,21 @@
+{
+  "name": "@rentflo/portfolio-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5175",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@rentflo/ui": "*",
+    "@rentflo/utils": "*",
+    "@rentflo/types": "*",
+    "react-router": "7.13.0",
+    "lucide-react": "0.487.0"
+  },
+  "peerDependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
