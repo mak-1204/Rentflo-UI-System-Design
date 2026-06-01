@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; import { Card } from '@rentflo/ui';
+import { useState, useEffect, Component, ReactNode } from 'react'; import { Card } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 import { Input } from '@rentflo/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@rentflo/ui';
@@ -63,7 +63,58 @@ const PALETTE = [
   { name: 'Terrace', category: 'OUTDOOR', color: '#0F6E56', text: '#FFFFFF', initials: 'TC' },
 ];
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+  state = { hasError: false, error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-6 m-6 bg-red-50 border border-red-200 rounded-xl text-red-800 text-left space-y-4">
+          <h2 className="text-lg font-bold">Something went wrong in the Website Builder:</h2>
+          <pre className="p-3 bg-red-100/50 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap">
+            {this.state.error?.toString()}
+          </pre>
+          {this.state.error?.stack && (
+            <pre className="p-3 bg-red-100/50 rounded font-mono text-[10px] overflow-x-auto whitespace-pre-wrap">
+              {this.state.error.stack}
+            </pre>
+          )}
+          <div className="pt-2">
+            <button 
+              onClick={() => {
+                localStorage.removeItem('rentflo_builder_state');
+                window.location.reload();
+              }}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-sm text-xs transition-all cursor-pointer"
+            >
+              Clear Storage & Reset App
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export function OwnerWebsiteBuilder() {
+  return (
+    <ErrorBoundary>
+      <OwnerWebsiteBuilderComponent />
+    </ErrorBoundary>
+  );
+}
+
+function OwnerWebsiteBuilderComponent() {
   const [pgName, setPgName] = useState('Sunrise PG');
   const [tagline, setTagline] = useState('Your home away from home in Koramangala');
   
@@ -198,6 +249,8 @@ export function OwnerWebsiteBuilder() {
     startTop: number;
   } | null>(null);
 
+  const [copiedRoom, setCopiedRoom] = useState<{ room: RoomRectangle; sourceFloor: string } | null>(null);
+
   // Load custom state from localStorage on init with validation check
   useEffect(() => {
     const saved = localStorage.getItem('rentflo_builder_state');
@@ -208,7 +261,26 @@ export function OwnerWebsiteBuilder() {
         if (parsed.tagline) setTagline(parsed.tagline);
         if (parsed.amenities) setAmenities(parsed.amenities);
         if (parsed.categoryMedia) setCategoryMedia(parsed.categoryMedia);
-        if (parsed.roomsData) setRoomsData(parsed.roomsData);
+        if (parsed.roomsData) {
+          const normalized: Record<string, RoomRectangle[]> = {};
+          Object.keys(parsed.roomsData).forEach(floorKey => {
+            const list = parsed.roomsData[floorKey];
+            if (Array.isArray(list)) {
+              normalized[floorKey] = list.map(r => ({
+                ...r,
+                doors: r.doors || [],
+                windows: r.windows || [],
+                bedPositions: r.bedPositions || (r.beds > 0 ? getDefaultBedPositions(r.beds) : []),
+                bedStatuses: r.bedStatuses || (r.beds > 0 ? Array(r.beds).fill('Vacant') : []),
+                roomAmenities: r.roomAmenities || [],
+                labelPos: r.labelPos || { x: 50, y: 50 }
+              }));
+            } else {
+              normalized[floorKey] = [];
+            }
+          });
+          setRoomsData(normalized);
+        }
         if (parsed.canvasCols) setCanvasCols(parsed.canvasCols);
         if (parsed.canvasRows) setCanvasRows(parsed.canvasRows);
         if (parsed.mapCoords) setMapCoords(parsed.mapCoords);
@@ -395,6 +467,87 @@ export function OwnerWebsiteBuilder() {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [dragStart, resizeStart, draggedBed, draggedLabel, activeRoomId, activeFloor, gridSize, canvasCols, canvasRows]);
+
+  // Keyboard Shortcuts for Room Copy, Paste, and Delete (Ctrl+C, Ctrl+V, Delete, Backspace)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Bypassed if user is focused inside input elements (such as room name editor, or price input)
+      const activeEl = document.activeElement;
+      if (activeEl) {
+        const tagName = activeEl.tagName.toLowerCase();
+        if (tagName === 'input' || tagName === 'select' || tagName === 'textarea' || activeEl.getAttribute('contenteditable') === 'true') {
+          return;
+        }
+      }
+
+      // Compute selectedRoom locally inside the effect to avoid temporal dead zone
+      const currentRooms = (roomsData as Record<string, RoomRectangle[]>)[activeFloor] || [];
+      const currentSelectedRoom = activeRoomId ? currentRooms.find(r => r.id === activeRoomId) : undefined;
+
+      // Copy (Ctrl+C / Cmd+C)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+        if (activeRoomId && currentSelectedRoom) {
+          e.preventDefault();
+          setCopiedRoom({
+            room: currentSelectedRoom,
+            sourceFloor: activeFloor
+          });
+        }
+      }
+
+      // Paste (Ctrl+V / Cmd+V)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+        if (copiedRoom) {
+          e.preventDefault();
+          
+          const roomToPaste = copiedRoom.room;
+          const sameFloor = copiedRoom.sourceFloor === activeFloor;
+          
+          const offset = sameFloor ? 1 : 0;
+          const newX = Math.max(0, Math.min(canvasCols - roomToPaste.w, roomToPaste.x + offset));
+          const newY = Math.max(0, Math.min(canvasRows - roomToPaste.h, roomToPaste.y + offset));
+          
+          const newId = `room-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+          const pasted: RoomRectangle = {
+            ...roomToPaste,
+            id: newId,
+            x: newX,
+            y: newY,
+            bedPositions: roomToPaste.bedPositions ? roomToPaste.bedPositions.map(bp => ({ ...bp })) : undefined,
+            labelPos: roomToPaste.labelPos ? { ...roomToPaste.labelPos } : undefined,
+            doors: [...(roomToPaste.doors || [])],
+            windows: [...(roomToPaste.windows || [])],
+            bedStatuses: roomToPaste.bedStatuses ? [...roomToPaste.bedStatuses] : undefined,
+            roomAmenities: roomToPaste.roomAmenities ? [...roomToPaste.roomAmenities] : undefined
+          };
+
+          setRoomsData(prev => {
+            const list = prev[activeFloor] || [];
+            return { ...prev, [activeFloor]: [...list, pasted] };
+          });
+          setActiveRoomId(newId);
+        }
+      }
+
+      // Delete (Delete / Backspace)
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (activeRoomId) {
+          e.preventDefault();
+          setRoomsData(prev => {
+            const list = prev[activeFloor] || [];
+            const updated = list.filter(r => r.id !== activeRoomId);
+            return { ...prev, [activeFloor]: updated };
+          });
+          setActiveRoomId(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeRoomId, roomsData, copiedRoom, activeFloor, canvasCols, canvasRows]);
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -602,11 +755,14 @@ export function OwnerWebsiteBuilder() {
   const handleWallClick = (wall: 'left' | 'right' | 'top' | 'bottom') => {
     if (!activeRoomId || !selectedRoom) return;
 
-    const hasDoor = selectedRoom.doors.includes(wall);
-    const hasWindow = selectedRoom.windows.includes(wall);
+    const doorsList = selectedRoom.doors || [];
+    const windowsList = selectedRoom.windows || [];
 
-    let nextDoors = [...selectedRoom.doors];
-    let nextWindows = [...selectedRoom.windows];
+    const hasDoor = doorsList.includes(wall);
+    const hasWindow = windowsList.includes(wall);
+
+    let nextDoors = [...doorsList];
+    let nextWindows = [...windowsList];
 
     if (!hasDoor && !hasWindow) {
       // Add door
@@ -629,7 +785,7 @@ export function OwnerWebsiteBuilder() {
     const room = (roomsData[activeFloor] || []).find(r => r.id === activeRoomId);
     if (!room) return;
 
-    const currentList = [...room[field]];
+    const currentList = [...(room[field] || [])];
     const idx = currentList.indexOf(wall);
     if (idx >= 0) {
       currentList.splice(idx, 1);
@@ -662,6 +818,38 @@ export function OwnerWebsiteBuilder() {
     setFloors(nextFloors);
     setRoomsData(prev => ({ ...prev, [floorName]: [] }));
     setActiveFloor(floorName);
+  };
+
+  const handleCopyFloorLayout = (sourceFloor: string) => {
+    const sourceRooms = roomsData[sourceFloor] || [];
+    if (sourceRooms.length === 0) {
+      alert(`The source floor (${sourceFloor}) has no room blocks to copy.`);
+      return;
+    }
+    
+    const currentRooms = roomsData[activeFloor] || [];
+    if (currentRooms.length > 0) {
+      const proceed = window.confirm(`Copying the layout from "${sourceFloor}" will overwrite all ${currentRooms.length} room blocks on "${activeFloor}". Do you want to proceed?`);
+      if (!proceed) return;
+    }
+
+    // Deep clone blocks, giving them new unique IDs
+    const clonedRooms = sourceRooms.map((room, idx) => ({
+      ...room,
+      id: `room-${Date.now()}-${idx}-${Math.floor(Math.random() * 1000)}`,
+      bedPositions: room.bedPositions ? room.bedPositions.map(bp => ({ ...bp })) : undefined,
+      labelPos: room.labelPos ? { ...room.labelPos } : undefined,
+      doors: [...room.doors],
+      windows: [...room.windows],
+      bedStatuses: room.bedStatuses ? [...room.bedStatuses] : undefined,
+      roomAmenities: room.roomAmenities ? [...room.roomAmenities] : undefined
+    }));
+
+    setRoomsData(prev => ({
+      ...prev,
+      [activeFloor]: clonedRooms
+    }));
+    setActiveRoomId(null);
   };
 
   const activeRooms = roomsData[activeFloor] || [];
@@ -742,6 +930,7 @@ export function OwnerWebsiteBuilder() {
 
   // Helper to draw realistic swing Door symbols in red
   const renderDoors = (doors: ('left' | 'right' | 'top' | 'bottom')[]) => {
+    if (!doors || !Array.isArray(doors)) return null;
     return doors.map(wall => {
       if (wall === 'left') {
         return (
@@ -778,6 +967,7 @@ export function OwnerWebsiteBuilder() {
 
   // Helper to draw realistic Window frames in red double-lines (ladder-grill)
   const renderWindows = (windows: ('left' | 'right' | 'top' | 'bottom')[]) => {
+    if (!windows || !Array.isArray(windows)) return null;
     return windows.map(wall => {
       if (wall === 'left') {
         return (
@@ -896,6 +1086,23 @@ export function OwnerWebsiteBuilder() {
               >
                 + Add floor
               </button>
+              {floors.length > 1 && (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const sourceFloor = e.target.value;
+                    if (!sourceFloor) return;
+                    handleCopyFloorLayout(sourceFloor);
+                    e.target.value = "";
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 shadow-sm cursor-pointer outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]"
+                >
+                  <option value="" disabled>Copy layout from...</option>
+                  {floors.filter(f => f !== activeFloor).map(f => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Grid Controls Panel */}
@@ -1395,13 +1602,13 @@ export function OwnerWebsiteBuilder() {
                             <button 
                               onClick={() => handleWallClick('top')}
                               className={`absolute -top-1.5 left-2 right-2 h-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
-                                selectedRoom.doors.includes('top') ? 'bg-rose-500 border border-rose-600' :
-                                selectedRoom.windows.includes('top') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
+                                (selectedRoom.doors || []).includes('top') ? 'bg-rose-500 border border-rose-600' :
+                                (selectedRoom.windows || []).includes('top') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
                               title="Top Wall"
                             >
                               <span className="text-[8px] font-bold text-white leading-none scale-75">
-                                {selectedRoom.doors.includes('top') ? 'D' : selectedRoom.windows.includes('top') ? 'W' : ''}
+                                {(selectedRoom.doors || []).includes('top') ? 'D' : (selectedRoom.windows || []).includes('top') ? 'W' : ''}
                               </span>
                             </button>
 
@@ -1409,13 +1616,13 @@ export function OwnerWebsiteBuilder() {
                             <button 
                               onClick={() => handleWallClick('bottom')}
                               className={`absolute -bottom-1.5 left-2 right-2 h-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
-                                selectedRoom.doors.includes('bottom') ? 'bg-rose-500 border border-rose-600' :
-                                selectedRoom.windows.includes('bottom') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
+                                (selectedRoom.doors || []).includes('bottom') ? 'bg-rose-500 border border-rose-600' :
+                                (selectedRoom.windows || []).includes('bottom') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
                               title="Bottom Wall"
                             >
                               <span className="text-[8px] font-bold text-white leading-none scale-75">
-                                {selectedRoom.doors.includes('bottom') ? 'D' : selectedRoom.windows.includes('bottom') ? 'W' : ''}
+                                {(selectedRoom.doors || []).includes('bottom') ? 'D' : (selectedRoom.windows || []).includes('bottom') ? 'W' : ''}
                               </span>
                             </button>
 
@@ -1423,13 +1630,13 @@ export function OwnerWebsiteBuilder() {
                             <button 
                               onClick={() => handleWallClick('left')}
                               className={`absolute top-2 bottom-2 -left-1.5 w-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
-                                selectedRoom.doors.includes('left') ? 'bg-rose-500 border border-rose-600' :
-                                selectedRoom.windows.includes('left') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
+                                (selectedRoom.doors || []).includes('left') ? 'bg-rose-500 border border-rose-600' :
+                                (selectedRoom.windows || []).includes('left') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
                               title="Left Wall"
                             >
                               <span className="text-[8px] font-bold text-white leading-none scale-75">
-                                {selectedRoom.doors.includes('left') ? 'D' : selectedRoom.windows.includes('left') ? 'W' : ''}
+                                {(selectedRoom.doors || []).includes('left') ? 'D' : (selectedRoom.windows || []).includes('left') ? 'W' : ''}
                               </span>
                             </button>
 
@@ -1437,13 +1644,13 @@ export function OwnerWebsiteBuilder() {
                             <button 
                               onClick={() => handleWallClick('right')}
                               className={`absolute top-2 bottom-2 -right-1.5 w-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
-                                selectedRoom.doors.includes('right') ? 'bg-rose-500 border border-rose-600' :
-                                selectedRoom.windows.includes('right') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
+                                (selectedRoom.doors || []).includes('right') ? 'bg-rose-500 border border-rose-600' :
+                                (selectedRoom.windows || []).includes('right') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
                               title="Right Wall"
                             >
                               <span className="text-[8px] font-bold text-white leading-none scale-75">
-                                {selectedRoom.doors.includes('right') ? 'D' : selectedRoom.windows.includes('right') ? 'W' : ''}
+                                {(selectedRoom.doors || []).includes('right') ? 'D' : (selectedRoom.windows || []).includes('right') ? 'W' : ''}
                               </span>
                             </button>
                           </div>
