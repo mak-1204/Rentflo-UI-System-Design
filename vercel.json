@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "npm install --prefix apps/owner-web && npm run build --prefix apps/owner-web",
+  "outputDirectory": "apps/owner-web/dist",
+  "installCommand": "npm install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
