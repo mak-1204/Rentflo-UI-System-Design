@@ -271,7 +271,6 @@ export function PortfolioHero() {
   const [showConfirmVisit, setShowConfirmVisit] = useState(false);
   const [showCallback, setShowCallback] = useState(false);
   const [prefSharing, setPrefSharing] = useState<1 | 2 | 3>(1);
-  const [prefMediaType, setPrefMediaType] = useState<'photos' | 'videos'>('photos');
 
   const [customAlert, setCustomAlert] = useState<{ show: boolean; title: string; message: string }>({ show: false, title: '', message: '' });
   const [lightbox, setLightbox] = useState<{ show: boolean; currentIndex: number; mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] }>({ show: false, currentIndex: 0, mediaList: [] });
@@ -332,25 +331,14 @@ export function PortfolioHero() {
 
   useEffect(() => {
     if (showLeadPopup || lightbox.show || customAlert.show) {
-      const scrollY = window.scrollY;
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
     } else {
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
     }
     return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
     };
   }, [showLeadPopup, lightbox.show, customAlert.show]);
@@ -801,10 +789,43 @@ export function PortfolioHero() {
         {/* SECTION: PREFERRED SHARING SPACE SHOWCASE */}
         <section className="space-y-6 bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm text-left">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Preferred Sharing Spaces
-              </h2>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Preferred Sharing Spaces
+                </h2>
+                {(() => {
+                  const vac = getCategoryVacancies(prefSharing);
+                  let bgClass = '';
+                  let textClass = '';
+                  let borderClass = '';
+                  let indicatorColor = '';
+                  
+                  if (vac === 0) {
+                    bgClass = 'bg-rose-50';
+                    textClass = 'text-rose-700';
+                    borderClass = 'border-rose-200';
+                    indicatorColor = 'bg-rose-500';
+                  } else if (vac <= 2) {
+                    bgClass = 'bg-amber-50';
+                    textClass = 'text-amber-700';
+                    borderClass = 'border-amber-200';
+                    indicatorColor = 'bg-amber-500';
+                  } else {
+                    bgClass = 'bg-emerald-50';
+                    textClass = 'text-emerald-700';
+                    borderClass = 'border-emerald-200';
+                    indicatorColor = 'bg-emerald-500';
+                  }
+
+                  return (
+                    <Badge className={`${bgClass} ${textClass} ${borderClass} border font-extrabold text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm transition-all duration-300`}>
+                      <span className={`w-2 h-2 rounded-full ${indicatorColor} animate-pulse`} />
+                      {vac} Vacancies Left
+                    </Badge>
+                  );
+                })()}
+              </div>
               <p className="text-sm text-slate-500 mt-1">Explore room galleries and video walkthroughs by occupancy preferences</p>
             </div>
             
@@ -828,81 +849,56 @@ export function PortfolioHero() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Left: media showcase column (8 cols) */}
             <div className="lg:col-span-8 flex flex-col space-y-4">
-              <div className="flex justify-between items-center bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPrefMediaType('photos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      prefMediaType === 'photos' 
-                        ? 'bg-[#14b8a6] text-white shadow' 
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    📷 Gallery Photos
-                  </button>
-                  <button
-                    onClick={() => setPrefMediaType('videos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      prefMediaType === 'videos' 
-                        ? 'bg-[#14b8a6] text-white shadow' 
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    🎥 Video Tour
-                  </button>
-                </div>
-
-                <Badge className="bg-[#ecfdf5] text-[#047857] border border-[#10b981]/20 font-extrabold text-[10px]">
-                  🟢 {getCategoryVacancies(prefSharing)} Vacancies Left
-                </Badge>
-              </div>
-
-              {/* Media viewer panel */}
-              <div className="bg-slate-100 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[360px] max-h-[420px] transition-all">
-                {prefMediaType === 'photos' ? (
-                  (() => {
-                    const photos = categoryMedia[`${prefSharing} Sharing`] || 
-                                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
-                                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
-                                    ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
-                    
-                    return (
-                      <div className="w-full h-full flex flex-col items-center justify-center p-2 cursor-pointer" onClick={() => openLightbox('photo')}>
-                        <img 
-                          src={photos[0]} 
-                          alt={`${prefSharing} sharing room`}
-                          className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity"
-                          style={{ maxHeight: '380px' }}
-                        />
-                        {photoTags[photos[0]] && (
-                          <div className="absolute bottom-4 left-4 bg-slate-900/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 shadow">
-                            ✨ {photoTags[photos[0]]}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center p-4 cursor-pointer" onClick={() => openLightbox('video')}>
-                    {videoUrl ? (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <video 
-                          src={videoUrl} 
-                          className="w-full h-full rounded-lg bg-black object-contain pointer-events-none"
-                          style={{ maxHeight: '380px' }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/35 hover:bg-black/25 rounded-lg transition-all">
-                          <div className="w-16 h-16 rounded-full bg-[#14b8a6]/95 hover:bg-[#14b8a6] text-white flex items-center justify-center text-xl shadow-lg transform hover:scale-105 transition-all">
-                            ▶ Play Tour
-                          </div>
+              {/* Media viewer panel displaying both Gallery and Video Tour */}
+              <div className={`grid grid-cols-1 ${videoUrl ? 'md:grid-cols-2' : ''} gap-4 w-full`}>
+                {/* Photo Gallery Card */}
+                {(() => {
+                  const photos = categoryMedia[`${prefSharing} Sharing`] || 
+                                 (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
+                                  prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
+                                  ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
+                  
+                  return (
+                    <div 
+                      className="bg-slate-100 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[300px] max-h-[360px] cursor-pointer group shadow-sm hover:shadow-md hover:border-[#14b8a6]/40 transition-all duration-300"
+                      onClick={() => openLightbox('photo')}
+                    >
+                      <img 
+                        src={photos[0]} 
+                        alt={`${prefSharing} sharing room`}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                      {photoTags[photos[0]] && (
+                        <div className="absolute bottom-4 left-4 bg-slate-900/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 shadow-lg">
+                          ✨ {photoTags[photos[0]]}
                         </div>
+                      )}
+                      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm border border-slate-200/50 flex items-center gap-1.5 transform group-hover:scale-105 transition-transform">
+                        <span>📷</span>
+                        <span>View Gallery ({photos.length})</span>
                       </div>
-                    ) : (
-                      <div className="text-center text-slate-400 p-8">
-                        <p className="text-sm font-bold">No custom video walkthrough uploaded yet</p>
-                        <p className="text-xs mt-1">Please configure a walkthrough URL in your RentFlo Owner Dashboard.</p>
+                    </div>
+                  );
+                })()}
+
+                {/* Video Tour Card */}
+                {videoUrl && (
+                  <div 
+                    className="bg-slate-100 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[300px] max-h-[360px] cursor-pointer group shadow-sm hover:shadow-md hover:border-[#14b8a6]/40 transition-all duration-300"
+                    onClick={() => openLightbox('video')}
+                  >
+                    <video 
+                      src={videoUrl} 
+                      className="w-full h-full object-cover bg-black pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 text-white z-10">
+                      <div className="w-14 h-14 rounded-full bg-[#14b8a6]/90 group-hover:bg-[#14b8a6] text-white flex items-center justify-center text-lg shadow-lg transform group-hover:scale-110 transition-all duration-300">
+                        ▶
                       </div>
-                    )}
+                      <span className="text-xs font-black uppercase tracking-wider bg-black/25 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10">Play Video Tour</span>
+                    </div>
                   </div>
                 )}
               </div>
