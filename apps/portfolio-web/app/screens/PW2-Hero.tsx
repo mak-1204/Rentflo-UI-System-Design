@@ -74,6 +74,43 @@ export function PortfolioHero() {
     ],
   });
 
+  // Photo Tag Overlays
+  const [photoTags, setPhotoTags] = useState<Record<string, string>>({
+    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80': 'Spacious Common Area',
+    'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80': 'Modern 2 Sharing Room',
+    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80': 'Equipped Gym & Play Area'
+  });
+
+  // Commute Proximity & Optimizer
+  const [commuteWalkTime, setCommuteWalkTime] = useState('5 mins');
+  const [commuteBikeTime, setCommuteBikeTime] = useState('2 mins');
+  const [commuteTransitTime, setCommuteTransitTime] = useState('300m away');
+  const [commuteDestination, setCommuteDestination] = useState('Manyata Tech Park');
+
+  // Food Menu Tabular Editor
+  const [foodMenu, setFoodMenu] = useState<Record<string, { breakfast: string; lunch: string; dinner: string }>>({
+    Mon: { breakfast: 'Poha, Sev, Chutney', lunch: 'Rice, Dal, Cabbage Sabzi', dinner: 'Chapati, Aloo Jeera, Salad' },
+    Tue: { breakfast: 'Uttapam, Sambar', lunch: 'Jeera Rice, Chole Masala', dinner: 'Chapati, Bhindi Fry, Curd' },
+    Wed: { breakfast: 'Idli, Vada, Sambar', lunch: 'Rice, Dal Fry, Potato Roast, Papad', dinner: 'Chapati, Paneer Butter Masala, Salad' },
+    Thu: { breakfast: 'Bread Omelette / Jam', lunch: 'Veg Biryani, Raita', dinner: 'Chapati, Egg Curry / Dal Tadka' },
+    Fri: { breakfast: 'Dosa, Tomato Chutney', lunch: 'Rice, Sambhar, Beetroot Poriyal', dinner: 'Chapati, Mixed Veg Korma, Salad' },
+    Sat: { breakfast: 'Poori, Aloo Masala', lunch: 'Lemon Rice, Curd Rice', dinner: 'Chapati, Kadai Paneer, Salad' },
+    Sun: { breakfast: 'Special Masala Dosa', lunch: 'Chicken Biryani / Veg Pulao', dinner: 'Chapati, Dal Makhani, Custard' },
+  });
+
+  // House Rules
+  const [houseRules, setHouseRules] = useState<string[]>([
+    'No smoking inside rooms',
+    'Friends allowed until 8 PM, No overnight stay',
+    'Noise curfew after 11 PM',
+    'Main gate closes at 11 PM',
+    '1-month advance notice required before vacating'
+  ]);
+
+  // Deposit and Rent Inclusions
+  const [depositAmount, setDepositAmount] = useState('₹10,000 (1 Month Rent)');
+  const [rentInclusions, setRentInclusions] = useState('Includes 3 Meals, Wi-Fi, Housekeeping');
+
   // Dynamic floor layouts state
   const [floors, setFloors] = useState(['Ground floor', '1st floor', '2nd floor']);
   const [activeFloor, setActiveFloor] = useState('Ground floor');
@@ -193,6 +230,15 @@ export function PortfolioHero() {
         if (parsed.mapCoords) setMapCoords(parsed.mapCoords);
         if (parsed.address) setAddress(parsed.address);
         if (parsed.testimonials) setTestimonials(parsed.testimonials);
+        if (parsed.photoTags) setPhotoTags(parsed.photoTags);
+        if (parsed.commuteWalkTime) setCommuteWalkTime(parsed.commuteWalkTime);
+        if (parsed.commuteBikeTime) setCommuteBikeTime(parsed.commuteBikeTime);
+        if (parsed.commuteTransitTime) setCommuteTransitTime(parsed.commuteTransitTime);
+        if (parsed.commuteDestination) setCommuteDestination(parsed.commuteDestination);
+        if (parsed.foodMenu) setFoodMenu(parsed.foodMenu);
+        if (parsed.houseRules) setHouseRules(parsed.houseRules);
+        if (parsed.depositAmount) setDepositAmount(parsed.depositAmount);
+        if (parsed.rentInclusions) setRentInclusions(parsed.rentInclusions);
         if (parsed.floors) {
           setFloors(parsed.floors);
           if (!parsed.floors.includes(activeFloor)) {
@@ -202,6 +248,13 @@ export function PortfolioHero() {
       } catch (e) {
         console.error('Error loading portfolio state', e);
       }
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -217,6 +270,67 @@ export function PortfolioHero() {
   const [visitTime, setVisitTime] = useState('4 PM');
   const [showConfirmVisit, setShowConfirmVisit] = useState(false);
   const [showCallback, setShowCallback] = useState(false);
+  const [prefSharing, setPrefSharing] = useState<1 | 2 | 3>(1);
+  const [prefMediaType, setPrefMediaType] = useState<'photos' | 'videos'>('photos');
+
+  const [customAlert, setCustomAlert] = useState<{ show: boolean; title: string; message: string }>({ show: false, title: '', message: '' });
+  const [lightbox, setLightbox] = useState<{ show: boolean; currentIndex: number; mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] }>({ show: false, currentIndex: 0, mediaList: [] });
+
+  const openLightbox = (initialType: 'photo' | 'video') => {
+    const photos = categoryMedia[`${prefSharing} Sharing`] || 
+                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
+                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
+                    ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
+    
+    const mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] = [];
+    photos.forEach(p => {
+      mediaList.push({ url: p, type: 'photo', tag: photoTags[p] || `${prefSharing} Sharing Room` });
+    });
+    if (videoUrl) {
+      mediaList.push({ url: videoUrl, type: 'video', tag: 'Virtual Tour Walkthrough' });
+    }
+
+    let initialIndex = 0;
+    if (initialType === 'video' && videoUrl) {
+      initialIndex = mediaList.findIndex(m => m.type === 'video');
+      if (initialIndex === -1) initialIndex = 0;
+    }
+
+    setLightbox({
+      show: true,
+      currentIndex: initialIndex,
+      mediaList
+    });
+  };
+
+  const handleNextMedia = () => {
+    setLightbox(prev => {
+      if (prev.mediaList.length <= 1) return prev;
+      return {
+        ...prev,
+        currentIndex: (prev.currentIndex + 1) % prev.mediaList.length
+      };
+    });
+  };
+
+  const getCategoryVacancies = (bedsCount: number) => {
+    let count = 0;
+    Object.values(roomsData).forEach(rooms => {
+      if (Array.isArray(rooms)) {
+        rooms.forEach(r => {
+          if (r.beds === bedsCount) {
+            if (r.bedStatuses) {
+              count += r.bedStatuses.filter(s => s === 'Vacant').length;
+            } else {
+              if (r.vacancy === 'Vacant') count += r.beds;
+              else if (r.vacancy === '1/2 Filled') count += 1;
+            }
+          }
+        });
+      }
+    });
+    return count;
+  };
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   
@@ -410,203 +524,443 @@ export function PortfolioHero() {
     });
   };
 
+  // Extract all photos from categoryMedia for the Hero Carousel
+  const allPhotos: { url: string; category: string }[] = [];
+  Object.keys(categoryMedia).forEach(cat => {
+    if (Array.isArray(categoryMedia[cat])) {
+      categoryMedia[cat].forEach(url => {
+        allPhotos.push({ url, category: cat });
+      });
+    }
+  });
+
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    if (allPhotos.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % allPhotos.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [allPhotos.length]);
+
+  const getMinPrice = () => {
+    let minPrice = Infinity;
+    Object.values(roomsData).forEach(rooms => {
+      if (Array.isArray(rooms)) {
+        rooms.forEach(r => {
+          if (r.pricePerBed && r.pricePerBed < minPrice) {
+            minPrice = r.pricePerBed;
+          }
+        });
+      }
+    });
+    return minPrice === Infinity ? 6500 : minPrice;
+  };
+
+  const getUniqueRoomTypes = () => {
+    const typesMap: Record<string, { price: number; amenities: string[]; typeName: string; beds: number; photo?: string }> = {};
+    Object.keys(roomsData).forEach(floorKey => {
+      const rooms = roomsData[floorKey];
+      if (Array.isArray(rooms)) {
+        rooms.forEach(r => {
+          const bedsCount = r.beds;
+          if (bedsCount > 0) {
+            const typeKey = r.sharingType || `${bedsCount} Sharing`;
+            const roomPhoto = categoryMedia[`${bedsCount} Sharing`]?.[0] || categoryMedia['1 Sharing']?.[0] || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80';
+            if (!typesMap[typeKey] || (r.pricePerBed && r.pricePerBed < typesMap[typeKey].price)) {
+              typesMap[typeKey] = {
+                price: r.pricePerBed || 8500,
+                amenities: r.roomAmenities || ['Wi-Fi', 'Wardrobe', 'Attached Washroom'],
+                typeName: r.type,
+                beds: bedsCount,
+                photo: roomPhoto
+              };
+            }
+          }
+        });
+      }
+    });
+    return Object.keys(typesMap).map(key => ({
+      key,
+      ...typesMap[key]
+    }));
+  };
+
+  const dynamicRoomTypes = getUniqueRoomTypes();
+  const pricingCards = dynamicRoomTypes.length > 0 ? dynamicRoomTypes : [
+    { key: '1 Sharing', price: 8500, amenities: ['AC', 'Attached Washroom', 'Wi-Fi', 'Wardrobe'], typeName: 'Single room', beds: 1, photo: categoryMedia['1 Sharing']?.[0] },
+    { key: '2 Sharing', price: 6500, amenities: ['Attached Washroom', 'Wi-Fi', 'Wardrobe'], typeName: 'Double room', beds: 2, photo: categoryMedia['2 Sharing']?.[0] }
+  ];
+
   return (
     <div 
-      className="min-h-screen bg-[#0D0D0D] text-[#F5F5F0] font-sans pb-24 relative text-left"
+      className="min-h-screen bg-[#f3f4f6] text-[#1f2937] font-sans pb-28 relative text-left"
       style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       
-      {/* Dynamic Header */}
-      <header className="sticky top-0 z-40 bg-[#0D0D0D]/90 backdrop-blur-md border-b border-neutral-900 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <span className="font-bold text-white tracking-wider text-2xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+      {/* SECTION 1: STICKY TOP NAVIGATION BAR */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3.5 flex justify-between items-center">
+          <span className="font-extrabold text-slate-800 tracking-tight text-xl flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <span className="w-8 h-8 rounded-lg bg-[#14b8a6] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-teal-500/20">R</span>
             {pgName}
           </span>
-          <div className="flex gap-4 items-center">
-            <span className="text-xs text-amber-500 font-semibold md:flex items-center gap-1 hidden bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
-              <Star className="w-3.5 h-3.5 fill-current" /> 4.8 Rating
+          <div className="flex gap-3 items-center">
+            <span className="text-[10px] text-slate-400 font-semibold md:flex items-center gap-1 hidden bg-slate-50 border border-slate-200 px-2 py-1 rounded">
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black shadow-sm">R</span> Rentflo.</span>
             </span>
-            <a href="#cta-section">
-              <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} className="h-9 px-4 text-xs font-semibold">
-                Schedule Visit
-              </Button>
-            </a>
+            <span className="text-[10px] text-[#047857] font-bold md:flex items-center gap-1 hidden bg-[#d1fae5] px-2.5 py-1 rounded border border-[#10b981]/20">
+              <Star className="w-3.5 h-3.5 fill-[#10b981] text-[#10b981]" /> 4.8 Resident Rated
+            </span>
+            <div className="flex gap-1.5">
+              <a href="tel:9876543210" className="inline-flex items-center justify-center p-2 rounded-lg border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors shadow-sm" title="Call PG Owner">
+                <PhoneCall className="w-4 h-4 text-[#14b8a6]" />
+              </a>
+              <a href="#cta-section" onClick={(e) => { e.preventDefault(); scrollToSection('cta-section'); }}>
+                <Button style={{ background: '#10b981', color: '#FFFFFF' }} className="h-9 px-4 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:bg-[#059669] transition-all">
+                  Schedule Visit
+                </Button>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Smart Filter Preferences Alert Banner */}
+        <div className="bg-[#ecfdf5] border-t border-b border-[#d1fae5] py-2 px-4 md:px-6">
+          <div className="max-w-6xl mx-auto flex items-center justify-between text-[11px] text-[#047857] font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-ping" />
+              <span>Showing: <strong>{leadForm.type || 'Single/Double'} Sharing</strong> · AC Available · Near {commuteDestination}</span>
+            </div>
+            <span className="bg-[#d1fae5] px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-[#047857] font-bold border border-[#10b981]/10">Smart Filter Active</span>
           </div>
         </div>
       </header>
 
-      {/* Hero Banner Section */}
-      <div className="relative h-[480px] w-full flex items-center justify-start overflow-hidden">
-        <img 
-          src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80" 
-          alt="Sunrise PG Room" 
-          className="absolute inset-0 w-full h-full object-cover brightness-50"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0D0D0D] via-[#0D0D0D]/70 to-transparent" />
+      {/* SECTION 2: THE HERO SECTION */}
+      <div className="relative h-[480px] w-full flex items-center justify-start overflow-hidden bg-slate-900">
+        {allPhotos.length > 0 ? (
+          <div className="absolute inset-0 w-full h-full">
+            {allPhotos.map((slide, idx) => (
+              <div 
+                key={idx}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${activeSlide === idx ? 'opacity-55' : 'opacity-0'}`}
+              >
+                <img 
+                  src={slide.url} 
+                  alt={slide.category} 
+                  className="w-full h-full object-cover"
+                />
+                {photoTags[slide.url] && (
+                  <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded shadow-lg border border-white/10 z-20">
+                    ✨ {photoTags[slide.url]}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <img 
+            src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80" 
+            alt="Sunrise PG Room" 
+            className="absolute inset-0 w-full h-full object-cover brightness-50 opacity-60"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent" />
         
-        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 space-y-4 w-full">
-          <Badge className="bg-[#1D9E75] text-white py-1 px-3">Sunrise Premium Rooms</Badge>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+        {/* Carousel indicators */}
+        {allPhotos.length > 1 && (
+          <div className="absolute bottom-4 right-6 z-20 flex gap-1">
+            {allPhotos.map((_, i) => (
+              <button 
+                key={i} 
+                onClick={() => setActiveSlide(i)}
+                className={`w-2 h-2 rounded-full transition-all ${activeSlide === i ? 'bg-[#14b8a6] w-4' : 'bg-white/40'}`} 
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 space-y-5 w-full">
+          <Badge className="bg-[#14b8a6] text-white py-1 px-3.5 text-[10px] font-extrabold uppercase tracking-wider rounded border-none shadow-sm">PREMIUM CO-LIVING</Badge>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
             {pgName}
           </h1>
-          <p className="text-sm md:text-lg text-neutral-300 max-w-lg italic font-medium">"{tagline}"</p>
+          <p className="text-sm md:text-lg text-slate-200 max-w-lg italic font-medium">"{tagline}"</p>
+          
+          {/* Glassmorphic Stats Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl pt-2">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
+              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">500+</p>
+              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Premium Beds</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
+              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">150+</p>
+              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Reviews</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
+              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">2+</p>
+              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">PG Properties</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
+              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">3+</p>
+              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Cities</p>
+            </div>
+          </div>
           
           <div className="flex items-center gap-3 flex-wrap pt-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-xs" style={{ color: '#F5F5F0' }}>
-              <MapPin className="w-4 h-4 text-[#1D9E75]" /> Koramangala 4th Block, Bengaluru
+            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-white">
+              <MapPin className="w-4 h-4 text-[#14b8a6]" /> Koramangala 4th Block, Bengaluru
             </span>
-            <span className="text-xs text-amber-500 font-semibold flex items-center gap-1 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
-              <Star className="w-3.5 h-3.5 fill-current" /> 4.8 (24 active residents)
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#ecfdf5] border border-[#d1fae5] text-xs text-[#047857] font-bold">
+              <span className="text-slate-400 font-normal">Starting Price:</span>
+              <span>₹{getMinPrice()}/mo</span>
+            </div>
+            <a href="#map-commute-section" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d1fae5] border border-[#10b981]/20 text-xs text-[#047857] font-bold hover:bg-[#10b981]/15 transition-all">
+              <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
+              <span>{commuteWalkTime} away from your office ({commuteDestination})</span>
+            </a>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 md:px-12 py-12 space-y-16">
-        
-        {/* PW3: PHOTO GALLERY */}
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Explore PG Galleries
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Object.keys(categoryMedia).map(catName => (
-              <Card key={catName} className="p-4 border border-neutral-900 bg-[#121212] space-y-3">
-                <Badge style={{ background: '#1A1A1A', color: '#F5F5F0' }} className="border border-neutral-800 uppercase tracking-wider text-[9px] px-2 py-0.5">
-                  {catName}
-                </Badge>
-                <div className="relative h-48 rounded-lg overflow-hidden bg-neutral-950">
-                  <img src={categoryMedia[catName]?.[0]} alt={catName} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 space-y-16">
 
-        {/* VIDEO WALKTHROUGH TOUR */}
-        {videoUrl && (
-          <section className="space-y-6">
-            <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              Virtual Property Tour
-            </h2>
-            <div className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-neutral-900 bg-[#121212] p-4 flex flex-col items-center shadow-2xl">
-              <video src={videoUrl} controls className="w-full rounded-xl bg-black shadow-lg" style={{ maxHeight: '420px' }} />
+        {/* SECTION: PREFERRED SHARING SPACE SHOWCASE */}
+        <section className="space-y-6 bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm text-left">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Preferred Sharing Spaces
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">Explore room galleries and video walkthroughs by occupancy preferences</p>
             </div>
-          </section>
-        )}
-
-        {/* PW4: ROOM TYPES & PRICING */}
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Pricing & Occupancies
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              { type: '1 Sharing / Single Occupancy', price: '₹8,500', spec: 'Private Bed · AC · Attached Bath · 180 sqft', desc: 'Perfect for working professionals seeking absolute privacy.' },
-              { type: '2 Sharing / Double Sharing', price: '₹6,500', spec: 'Twin Beds · Non-AC · Shared Bath · 220 sqft', desc: 'Spacious roommate sharing with individual storage and study tables.' }
-            ].map((room, idx) => (
-              <Card 
-                key={idx} 
-                className={`p-6 border transition-all cursor-pointer hover:border-[#1D9E75] flex flex-col justify-between ${selectedRoom === room.type ? 'border-[#1D9E75] bg-[#121212]' : 'border-neutral-900 bg-[#161616]'}`}
-                onClick={() => setSelectedRoom(room.type)}
-              >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-bold text-white text-lg">{room.type}</h3>
-                      <p className="text-xs text-neutral-400 mt-1">{room.spec}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-[#1D9E75]">{room.price}<span className="text-xs text-neutral-450 font-normal">/mo</span></p>
-                      <span className="inline-block mt-1 text-[9px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                        2 keys left
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed">{room.desc}</p>
-                </div>
-                <Button 
-                  variant={selectedRoom === room.type ? 'default' : 'outline'} 
-                  className="w-full mt-6 font-bold uppercase tracking-wider text-xs h-10" 
-                  style={{
-                    background: selectedRoom === room.type ? '#1D9E75' : 'transparent',
-                    borderColor: '#1D9E75',
-                    color: selectedRoom === room.type ? '#FFFFFF' : '#1D9E75'
-                  }}
-                >
-                  {selectedRoom === room.type ? 'Active Selection' : 'Check Availability'}
-                </Button>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* PW5: AMENITIES & ARCHITECTURAL FLOOR PLAN */}
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Amenities & Floor Blueprints
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
-            {/* Left Column: Amenities List */}
-            <div className="space-y-4 lg:col-span-1">
-              <h3 className="text-base font-semibold text-white">Amenities Offered</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
-                {Object.keys(amenities).filter(k => amenities[k]).map((amName, i) => (
-                  <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl border border-neutral-800 bg-[#121212]">
-                    <span className="text-[#1D9E75] font-bold">✓</span>
-                    <span className="text-xs font-semibold text-neutral-300 truncate">{amName}</span>
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              {([1, 2, 3] as const).map(num => (
+                <button
+                  key={num}
+                  onClick={() => setPrefSharing(num)}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                    prefSharing === num 
+                      ? 'bg-white text-slate-800 shadow' 
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {num === 1 ? 'Single' : num === 2 ? 'Double' : '3 Sharing'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* Left: media showcase column (8 cols) */}
+            <div className="lg:col-span-8 flex flex-col space-y-4">
+              <div className="flex justify-between items-center bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPrefMediaType('photos')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      prefMediaType === 'photos' 
+                        ? 'bg-[#14b8a6] text-white shadow' 
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    📷 Gallery Photos
+                  </button>
+                  <button
+                    onClick={() => setPrefMediaType('videos')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      prefMediaType === 'videos' 
+                        ? 'bg-[#14b8a6] text-white shadow' 
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    🎥 Video Tour
+                  </button>
+                </div>
+
+                <Badge className="bg-[#ecfdf5] text-[#047857] border border-[#10b981]/20 font-extrabold text-[10px]">
+                  🟢 {getCategoryVacancies(prefSharing)} Vacancies Left
+                </Badge>
+              </div>
+
+              {/* Media viewer panel */}
+              <div className="bg-slate-100 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[360px] max-h-[420px] transition-all">
+                {prefMediaType === 'photos' ? (
+                  (() => {
+                    const photos = categoryMedia[`${prefSharing} Sharing`] || 
+                                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
+                                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
+                                    ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
+                    
+                    return (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-2 cursor-pointer" onClick={() => openLightbox('photo')}>
+                        <img 
+                          src={photos[0]} 
+                          alt={`${prefSharing} sharing room`}
+                          className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity"
+                          style={{ maxHeight: '380px' }}
+                        />
+                        {photoTags[photos[0]] && (
+                          <div className="absolute bottom-4 left-4 bg-slate-900/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 shadow">
+                            ✨ {photoTags[photos[0]]}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center p-4 cursor-pointer" onClick={() => openLightbox('video')}>
+                    {videoUrl ? (
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <video 
+                          src={videoUrl} 
+                          className="w-full h-full rounded-lg bg-black object-contain pointer-events-none"
+                          style={{ maxHeight: '380px' }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/35 hover:bg-black/25 rounded-lg transition-all">
+                          <div className="w-16 h-16 rounded-full bg-[#14b8a6]/95 hover:bg-[#14b8a6] text-white flex items-center justify-center text-xl shadow-lg transform hover:scale-105 transition-all">
+                            ▶ Play Tour
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-slate-400 p-8">
+                        <p className="text-sm font-bold">No custom video walkthrough uploaded yet</p>
+                        <p className="text-xs mt-1">Please configure a walkthrough URL in your RentFlo Owner Dashboard.</p>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
-            {/* Right Column: Architectural blueprint rendering */}
-            <div className="lg:col-span-2 p-5 rounded-xl border border-neutral-900 bg-[#121212] space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">Architectural Floor Layout</p>
-                  <p className="text-[10px] text-neutral-400 mt-0.5">Click room boxes to inspect layout specs and vacancies</p>
-                </div>
+            {/* Right: details, pricing and booking quick card (4 cols) */}
+            <div className="lg:col-span-4 flex flex-col justify-between p-6 rounded-xl border border-slate-200 bg-[#f8fafc]">
+              <div className="space-y-4">
+                <Badge className="bg-[#14b8a6] text-white border-none py-1 px-3 text-[9px] font-bold uppercase tracking-wider rounded">
+                  {prefSharing === 1 ? 'Private Suite' : prefSharing === 2 ? 'Double Comfort' : 'Triple Shared'}
+                </Badge>
                 
-                <div className="flex gap-1 overflow-x-auto scrollbar-none">
-                  {floors.map(fl => (
-                    <button
-                      key={fl}
-                      onClick={() => { setActiveFloor(fl); setSelectedCellCoords(null); }}
-                      className={`px-2.5 py-1 rounded text-[10px] font-semibold border whitespace-nowrap transition-all ${activeFloor === fl ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-neutral-950 text-neutral-400 border-neutral-850'}`}
-                    >
-                      {fl}
-                    </button>
-                  ))}
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-800">
+                    {prefSharing === 1 ? 'Single Room' : prefSharing === 2 ? 'Double Sharing' : 'Triple Sharing'}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">Fully furnished premium layout style</p>
+                </div>
+
+                <div className="space-y-2 border-t border-b border-slate-200/60 py-3 text-left">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-medium">Monthly Price:</span>
+                    <span className="text-lg font-black text-[#14b8a6]">
+                      ₹{prefSharing === 1 ? '8,500' : prefSharing === 2 ? '6,500' : '5,500'}/mo
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-medium">Security Deposit:</span>
+                    <span className="font-bold text-slate-700">1 Month Rent</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-medium">Active Vacancies:</span>
+                    <span className="font-extrabold text-[#047857] bg-[#d1fae5] px-2 py-0.5 rounded text-[10px]">
+                      {getCategoryVacancies(prefSharing)} open beds
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inclusions</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {['3 Meals Daily', 'Hi-Speed WiFi', 'Housekeeping', 'Laundromat Access'].map((inc, i) => (
+                      <span key={i} className="text-[10.5px] font-bold bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded-lg">
+                        ✓ {inc}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Occupancy Filter Chips */}
-              <div className="flex gap-1 overflow-x-auto pb-1 border-t pt-3 border-neutral-850 scrollbar-none">
-                {['All', 'Single', 'Double', 'Triple', 'Common'].map(opt => (
-                  <button
-                    key={opt}
-                    onClick={() => { setOccupancyFilter(opt); setSelectedCellCoords(null); }}
-                    className={`px-3 py-1 text-[9px] rounded-full border whitespace-nowrap transition-all ${occupancyFilter === opt ? 'bg-orange-500 text-white border-orange-500 font-bold' : 'bg-neutral-950 text-neutral-400 border-neutral-850'}`}
-                  >
-                    {opt === 'All' ? 'All Layouts' : opt === 'Common' ? 'Common Areas' : `${opt} Sharing`}
-                  </button>
-                ))}
+              <a href="#cta-section" onClick={(e) => { e.preventDefault(); scrollToSection('cta-section'); }} className="w-full mt-6 block">
+                <Button 
+                  style={{ background: '#10b981', color: '#FFFFFF' }} 
+                  className="w-full font-bold uppercase tracking-wider text-xs h-11 rounded-xl shadow-md hover:bg-[#059669]"
+                >
+                  Schedule Visit for this room →
+                </Button>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: INTERACTIVE FLOOR PLAN & ROOM SELECTION */}
+        <section className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Interactive Blueprint & Floor Plans
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">Tap room boxes to inspect real-time bed vacancies, ventilation and orientation</p>
+            </div>
+            
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-200 text-xs font-bold text-orange-600 animate-pulse">
+              🔥 Urgency Alert: Only 2 beds remaining on {activeFloor}!
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            {/* Blueprint rendering container */}
+            <div className="lg:col-span-2 p-5 rounded-xl border border-slate-200 bg-white space-y-4 shadow-sm flex flex-col justify-between">
+              <div className="flex flex-col gap-4 text-left border-b border-slate-100 pb-4">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Select Floor</span>
+                  <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
+                    {floors.map(fl => (
+                      <button
+                        key={fl}
+                        onClick={() => { setActiveFloor(fl); setSelectedCellCoords(null); }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border whitespace-nowrap transition-all shadow-sm ${
+                          activeFloor === fl 
+                            ? 'bg-[#14b8a6] text-white border-[#14b8a6]' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        🏢 {fl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Filter Sharing Options</span>
+                  <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
+                    {['All', 'Single', 'Double', 'Triple', 'Common'].map(opt => (
+                      <button
+                        key={opt}
+                        onClick={() => { setOccupancyFilter(opt); setSelectedCellCoords(null); }}
+                        className={`px-2.5 py-1 text-[10px] rounded-full border whitespace-nowrap transition-all font-bold ${
+                          occupancyFilter === opt 
+                            ? 'bg-[#10b981] text-white border-[#10b981] shadow-sm' 
+                            : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
+                        }`}
+                      >
+                        {opt === 'All' ? 'All Layouts' : opt === 'Common' ? 'Common Areas' : `${opt} Sharing`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Blueprint Grid Vector Layout */}
-              <div className="p-4 bg-neutral-950 rounded-lg border border-neutral-900 overflow-auto flex justify-center scrollbar-none">
+              {/* Visual blueprint drawing board */}
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 overflow-auto flex justify-center scrollbar-none flex-grow mt-4">
                 <div 
-                  className="relative border border-neutral-800 bg-[#0d0f12] select-none rounded"
+                  className="relative border border-slate-300 bg-[#f8fafc] select-none rounded shadow-inner"
                   style={{
                     width: `${canvasCols * mobileCellSize}px`, 
                     height: `${canvasRows * mobileCellSize}px`,
-                    backgroundImage: `linear-gradient(to right, #1f2937 0.5px, transparent 0.5px), linear-gradient(to bottom, #1f2937 0.5px, transparent 0.5px)`,
+                    backgroundImage: `linear-gradient(to right, #e2e8f0 0.5px, transparent 0.5px), linear-gradient(to bottom, #e2e8f0 0.5px, transparent 0.5px)`,
                     backgroundSize: `${mobileCellSize}px ${mobileCellSize}px`
                   }}
                 >
@@ -628,20 +982,20 @@ export function PortfolioHero() {
                           top: `${top}px`,
                           width: `${width}px`,
                           height: `${height}px`,
-                          borderColor: isSelected ? '#EF9F27' : '#374151',
-                          borderWidth: '4px',
+                          borderColor: isSelected ? '#14b8a6' : '#475569',
+                          borderWidth: isSelected ? '3px' : '2px',
                           opacity: matches ? 1.0 : 0.22,
-                          boxShadow: isSelected ? '0 0 10px rgba(239, 159, 39, 0.5)' : 'none',
+                          boxShadow: isSelected ? '0 0 10px rgba(20, 184, 166, 0.4)' : 'none',
                           zIndex: isSelected ? 30 : 10
                         }}
                       >
-                        {/* Vacancy status badge pill (matching user's second ss) */}
-                        <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-slate-650 text-white rounded-[3px] text-[7px] px-1.5 py-0.5 leading-none font-bold uppercase whitespace-nowrap shadow-sm z-20 border border-slate-700">
-                          {room.vacancy}
+                        {/* Vacancy tag overlay */}
+                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded-[3px] text-[6.5px] px-1 py-0.2 leading-none font-bold uppercase whitespace-nowrap z-20 pointer-events-none scale-90">
+                          {room.vacancy === '1/2 Filled' ? '1 Bed Open' : room.vacancy}
                         </div>
 
                         {/* Room label/number */}
-                        <div className="text-[10px] font-bold text-slate-800 pointer-events-none z-10">
+                        <div className="text-[9.5px] font-extrabold text-slate-800 pointer-events-none z-10">
                           {room.customName}
                         </div>
 
@@ -658,171 +1012,269 @@ export function PortfolioHero() {
                   })}
                 </div>
               </div>
-
-              {/* Sub-blueprint detail inspector */}
-              {selectedRoomDetails && (
-                <div className="bg-[#0C447C] p-5 rounded-xl border border-cyan-400/30 space-y-3 text-left">
-                  <div className="flex justify-between items-center">
-                    <p className="text-xs font-bold text-white uppercase tracking-wider">
-                      Room Inspector: Room {selectedRoomDetails.customName} ({selectedRoomDetails.type})
-                    </p>
-                    <button onClick={() => setSelectedCellCoords(null)} className="p-1 hover:bg-white/10 rounded">
-                      <X className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-cyan-100">
-                    <div className="bg-black/30 p-3 rounded border border-white/5 space-y-1">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Occupancy</p>
-                      <p className="font-bold text-white text-sm">{selectedRoomDetails.type}</p>
-                    </div>
-                    <div className="bg-black/30 p-3 rounded border border-white/5 space-y-1">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Vacancy Status</p>
-                      <Badge className="bg-emerald-500 text-white font-bold text-[10px] border-none shadow-none">{selectedRoomDetails.vacancy}</Badge>
-                    </div>
-                    <div className="bg-black/30 p-3 rounded border border-white/5 space-y-1">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Beds Count</p>
-                      <p className="font-bold text-white text-sm">🛏️ {selectedRoomDetails.beds} Mattresses</p>
-                    </div>
-                    <div className="bg-black/30 p-3 rounded border border-white/5 space-y-1">
-                      <p className="text-slate-400 text-[10px] uppercase font-bold">Fixtures</p>
-                      <p className="font-semibold text-white">🚪 {selectedRoomDetails.doors.length} Doors · 🪟 {selectedRoomDetails.windows.length} Windows</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
+            {/* Sub-blueprint detail inspector (Right Column) */}
+            <div className="lg:col-span-1 flex flex-col h-full">
+              {selectedRoomDetails ? (
+                <Card className="p-6 border border-[#14b8a6] bg-teal-50/20 text-slate-800 rounded-xl space-y-4 shadow-md text-left transition-all h-full flex flex-col justify-between min-h-[300px]">
+                  <div className="space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="flex justify-between items-center border-b border-[#14b8a6]/20 pb-2">
+                      <div>
+                        <p className="text-[10px] font-bold text-[#14b8a6] uppercase tracking-wider">Room Inspector</p>
+                        <h3 className="text-lg font-bold text-slate-800">Room {selectedRoomDetails.customName}</h3>
+                      </div>
+                      <button onClick={() => setSelectedCellCoords(null)} className="p-1 hover:bg-slate-100 rounded text-slate-500">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3.5 text-xs flex-grow py-4">
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Layout Type:</span>
+                        <span className="font-bold text-slate-800">{selectedRoomDetails.type}</span>
+                      </div>
+
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Beds Config:</span>
+                        <span className="font-bold text-[#047857] bg-[#d1fae5] px-2 py-0.5 rounded text-[10px]">
+                          🛏️ {selectedRoomDetails.beds} Sharing
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Ventilation & View:</span>
+                        <span className="font-bold text-teal-700">
+                          🛣️ Road Facing (Good ventilation)
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Real-time Vacancy:</span>
+                        <Badge className="bg-[#10b981] text-white border-none text-[9px] font-bold">
+                          {selectedRoomDetails.vacancy === 'Vacant' ? '🟢 1+ Beds Available' : selectedRoomDetails.vacancy === '1/2 Filled' ? '🟢 1 Bed Left' : '🔴 Full'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {selectedRoomDetails.beds > 0 && (
+                      <div className="pt-2">
+                        <a href="#cta-section" onClick={(e) => { e.preventDefault(); setSelectedCellCoords(null); scrollToSection('cta-section'); }} className="w-full">
+                          <Button style={{ background: '#10b981', color: '#FFFFFF' }} className="w-full font-bold uppercase tracking-wider text-[10px] h-10 rounded-lg hover:bg-[#059669]">
+                            Reserve Room {selectedRoomDetails.customName} →
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 border border-slate-200 bg-white text-slate-500 rounded-xl space-y-4 shadow-sm text-center h-full flex flex-col justify-center items-center min-h-[300px] py-12">
+                  <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-[#14b8a6]">
+                    <Compass className="w-6 h-6 animate-spin" style={{ animationDuration: '8s' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">Select a Room Block</h3>
+                    <p className="text-xs text-slate-400 mt-1">Click on any room block in the blueprint to inspect real-time bed-wise vacancies, prices, amenities, and window orientation details.</p>
+                  </div>
+                </Card>
+              )}
+            </div>
           </div>
         </section>
 
-        {/* PW6: WEEKLY FOOD MENU */}
-        <section className="space-y-6 max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Included Food Menu
-          </h2>
+        {/* SECTION: PROPERTY AMENITIES & FACILITIES */}
+        <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-left">
+          <h2 className="text-xl font-extrabold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>Property Amenities & Facilities</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {Object.keys(amenities).filter(k => amenities[k]).map((amName, i) => (
+              <div key={i} className="flex items-center gap-2.5 p-3.5 rounded-xl border border-slate-100 bg-[#f8fafc] shadow-sm">
+                <span className="text-[#10b981] font-bold">✓</span>
+                <span className="text-xs font-bold text-slate-700 truncate">{amName}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 justify-center scrollbar-none">
+        {/* SECTION: LOCATION & COMMUTE OPTIMIZER */}
+        <section id="map-commute-section" className="space-y-6">
+          <div className="text-center md:text-left">
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Location & Commute Optimizer
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Check proximity to your office and transit networks</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            <div className="lg:col-span-1 flex flex-col justify-between gap-4">
+              <Card className="p-5 border border-slate-200 bg-white flex items-center gap-4 rounded-xl shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-xl shadow-inner text-[#14b8a6]">🚶</div>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Walk Proximity</p>
+                  <p className="text-base font-extrabold text-slate-800 mt-0.5">{commuteWalkTime}</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">away from your office ({commuteDestination})</p>
+                </div>
+              </Card>
+
+              <Card className="p-5 border border-slate-200 bg-white flex items-center gap-4 rounded-xl shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-xl shadow-inner text-orange-500">🏍️</div>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bike / Auto Commute</p>
+                  <p className="text-base font-extrabold text-slate-800 mt-0.5">{commuteBikeTime}</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Quick door-to-office transit</p>
+                </div>
+              </Card>
+
+              <Card className="p-5 border border-slate-200 bg-white flex items-center gap-4 rounded-xl shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-xl shadow-inner text-blue-500">🚇</div>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nearest Transit</p>
+                  <p className="text-base font-extrabold text-slate-800 mt-0.5">{commuteTransitTime}</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Metro or major bus stop link</p>
+                </div>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white shadow-sm h-72 md:h-auto min-h-[300px] overflow-hidden relative">
+              <iframe
+                title="Google Map location"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                src={`https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: FOOD & MENU TRANSPARENCY */}
+        <section className="space-y-6 max-w-4xl mx-auto text-center bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="space-y-2">
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Structured Weekly Food Menu
+            </h2>
+            <p className="text-sm text-slate-500 max-w-lg mx-auto">We serve fresh, nutritious meals daily. View this week's menu preview below.</p>
+          </div>
+
+          <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center scrollbar-none pt-2">
             {days.map((day) => (
               <button
                 key={day}
                 onClick={() => setSelectedDay(day)}
-                className="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border"
-                style={{
-                  background: selectedDay === day ? '#1D9E75' : '#1A1A1A',
-                  color: selectedDay === day ? '#FFFFFF' : '#9CA3AF',
-                  borderColor: selectedDay === day ? '#1D9E75' : '#1A1A1A'
-                }}
+                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border shadow-sm ${
+                  selectedDay === day 
+                    ? 'bg-[#14b8a6] text-white border-[#14b8a6]' 
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                }`}
               >
                 {day}
               </button>
             ))}
           </div>
 
-          <Card className="p-6 border border-neutral-800 space-y-4 max-w-md mx-auto" style={{ background: '#141414' }}>
-            <div className="text-left">
-              <p className="text-xs font-semibold text-[#EF9F27] uppercase tracking-wider">Breakfast · 8:00–9:00 AM</p>
-              <p className="text-sm font-medium text-white mt-1">{menu[selectedDay].breakfast}</p>
-            </div>
-            <div className="pt-3 border-t border-neutral-850 text-left">
-              <p className="text-xs font-semibold text-[#EF9F27] uppercase tracking-wider">Lunch · 12:00–1:00 PM</p>
-              <p className="text-sm font-medium text-white mt-1">{menu[selectedDay].lunch}</p>
-            </div>
-            <div className="pt-3 border-t border-neutral-850 text-left">
-              <p className="text-xs font-semibold text-[#EF9F27] uppercase tracking-wider">Dinner · 7:00–8:00 PM</p>
-              <p className="text-sm font-medium text-white mt-1">{menu[selectedDay].dinner}</p>
-            </div>
-          </Card>
-        </section>
-
-        {/* PW7: GEOLOCATION MAP */}
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            PG Location Map
-          </h2>
-          
-          <div className="h-64 bg-neutral-900 rounded-xl overflow-hidden relative border border-neutral-800 flex items-center justify-center">
-            <svg className="absolute inset-0 w-full h-full text-teal-900/10" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="darkGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#262626" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#darkGrid)" />
-              <line x1="0" y1="100" x2="600" y2="100" stroke="#1A1A1A" strokeWidth="20" />
-              <line x1="180" y1="0" x2="180" y2="400" stroke="#1A1A1A" strokeWidth="20" />
-            </svg>
-
-            {/* Render dynamically dropped pin */}
-            <div 
-              className="absolute flex flex-col items-center -mt-8 transition-all"
-              style={{
-                left: `${((mapCoords.lng - 77.6200) / 0.0150) * 100}%`,
-                top: `${(1 - (mapCoords.lat - 12.9300) / 0.0100) * 100}%`,
-              }}
-            >
-              <MapPin className="w-8 h-8 text-[#1D9E75] fill-current animate-bounce" />
-              <Badge style={{ background: '#1D9E75', color: '#FFFFFF' }} className="text-[8px] -mt-1 shadow-md">
-                Office Location
-              </Badge>
-            </div>
-
-            <div className="absolute bottom-3 left-3 right-3 bg-neutral-950/95 backdrop-blur-sm p-3 rounded-lg border border-neutral-800 text-[10px] text-neutral-400">
-              <p className="font-semibold text-white">Office Coordinates: {mapCoords.lat}, {mapCoords.lng}</p>
-              <p className="truncate mt-0.5">{address}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* PW8: REVIEWS */}
-        <section className="space-y-6">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Resident Testimonials
-          </h2>
-          {testimonials.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {testimonials.map((rev, i) => (
-                <Card key={i} className="p-6 border border-neutral-800 space-y-3 bg-[#121212]">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{rev.name}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5">{rev.duration}</p>
-                    </div>
-                    <span className="text-[10px] font-semibold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded border border-[#1D9E75]/20">
-                      Verified Resident
-                    </span>
-                  </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed italic">"{rev.comment}"</p>
-                </Card>
-              ))}
+          {foodMenu[selectedDay] ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto pt-3">
+              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
+                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Breakfast · 8:00 AM</p>
+                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].breakfast}</p>
+              </Card>
+              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
+                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Lunch · 12:30 PM</p>
+                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].lunch}</p>
+              </Card>
+              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
+                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Dinner · 7:30 PM</p>
+                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].dinner}</p>
+              </Card>
             </div>
           ) : (
-            <p className="text-sm text-neutral-400 italic text-center py-6">No testimonials published yet.</p>
+            <p className="text-xs text-slate-400 italic">No food details scheduled for {selectedDay}.</p>
           )}
-        </section>
 
-        {/* PW9: HOUSE RULES */}
-        <section className="space-y-6 max-w-xl mx-auto">
-          <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3 text-center" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            House Rules
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-neutral-400">
-            {['No smoking inside rooms', 'Guests allowed till 9 PM', 'Noise curfew after 11 PM', 'Main gate closes at 11 PM', 'Valid Govt ID required'].map(rule => (
-              <div key={rule} className="flex items-center gap-2.5 p-3 rounded-lg border border-neutral-850 bg-[#121212]">
-                <Check className="w-4 h-4 text-[#EF9F27] flex-shrink-0" />
-                <span>{rule}</span>
-              </div>
-            ))}
+          <div className="bg-[#f0fdfa] border border-teal-200 rounded-xl p-4 flex gap-3 text-left max-w-xl mx-auto mt-6 shadow-sm">
+            <span className="text-2xl mt-0.5">🍱</span>
+            <div>
+              <p className="text-xs font-extrabold text-teal-800">RentFlo Food Tech System</p>
+              <p className="text-[10.5px] text-teal-700 leading-relaxed mt-0.5">We minimize food waste to keep your rent affordable. Book/skip meals effortlessly via our tenant app before 6 PM cutoff once you move in!</p>
+            </div>
           </div>
         </section>
 
-        {/* PW10: CTA BOOK VISIT FORM */}
-        <section id="cta-section" className="p-8 md:p-12 rounded-2xl flex flex-col items-center text-center space-y-6 border border-[#1D9E75]/20 relative overflow-hidden max-w-4xl mx-auto" style={{ background: 'linear-gradient(135deg, #0F6E56 0%, #073D2F 100%)' }}>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-            Ready to book your stay?
+        {/* SECTION: SOCIAL PROOF & HOUSE RULES */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+          
+          <section className="space-y-6 flex flex-col justify-between">
+            <div className="text-left">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Resident Social Proof
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Read what active co-living residents say about our facilities</p>
+            </div>
+            
+            {testimonials.length > 0 ? (
+              <div className="space-y-4 flex-1 mt-4">
+                {testimonials.map((rev, i) => (
+                  <Card key={i} className="p-5 border border-slate-200 bg-white rounded-xl space-y-3 shadow-sm text-left">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-extrabold text-slate-800">{rev.name}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{rev.duration}</p>
+                      </div>
+                      <span className="text-[9px] font-bold text-[#047857] bg-[#d1fae5] px-2.5 py-0.5 rounded border border-[#10b981]/20">
+                        Verified Resident
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed italic">"{rev.comment}"</p>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 italic text-center py-6">No testimonials published yet.</p>
+            )}
+          </section>
+
+          <section className="space-y-6">
+            <div className="text-left">
+              <h2 className="text-2xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Co-living House Rules
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Simple policies to ensure safety and comfort for all co-living members</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 pt-4">
+              {houseRules.map((rule, idx) => (
+                <div key={idx} className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 bg-white shadow-sm text-xs font-semibold text-slate-700 text-left">
+                  <div className="w-5 h-5 rounded-full bg-[#ecfdf5] border border-[#d1fae5] flex items-center justify-center text-[#10b981] flex-shrink-0">✓</div>
+                  <span>{rule}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Video Tour walkthrough if url defined */}
+        {videoUrl && (
+          <section className="space-y-6 pt-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-extrabold text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>Virtual Property Tour</h2>
+              <p className="text-xs text-slate-500 mt-1">Take a quick walkthrough tour of the co-living spaces</p>
+            </div>
+            <div className="w-full max-w-2xl mx-auto rounded-2xl overflow-hidden border border-slate-200 bg-white p-3.5 shadow-md flex flex-col items-center">
+              <video src={videoUrl} controls className="w-full rounded-xl bg-black shadow-inner" style={{ maxHeight: '380px' }} />
+            </div>
+          </section>
+        )}
+
+        {/* SECTION: PHYSICAL VISIT / CALL CTA SECTION */}
+        <section id="cta-section" className="p-8 md:p-12 rounded-2xl flex flex-col items-center text-center space-y-6 border border-slate-200 bg-white shadow-md relative overflow-hidden max-w-4xl mx-auto">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#14b8a6]/10 rounded-full translate-x-12 -translate-y-12" />
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Book Your Physical Tour
           </h2>
-          <span className="px-3.5 py-1 rounded bg-amber-500 text-neutral-900 text-xs font-bold uppercase tracking-wider">
-            Only 2 rooms available for booking
+          <p className="text-sm text-slate-500 max-w-md">Schedule a physical visit or request a call from our co-living operations manager immediately.</p>
+          <span className="px-3.5 py-1 rounded bg-[#d1fae5] text-[#047857] text-xs font-bold uppercase tracking-wider border border-[#10b981]/20 shadow-sm">
+            Only 2 room vacancies remaining this week
           </span>
 
           <div className="w-full max-w-md space-y-4 pt-2">
@@ -830,27 +1282,28 @@ export function PortfolioHero() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button 
                   onClick={() => setShowConfirmVisit(true)} 
-                  className="flex-1 h-11 bg-white hover:bg-neutral-100 text-neutral-950 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2"
+                  className="flex-1 h-11 text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm"
+                  style={{ background: '#10b981' }}
                 >
                   <CalendarCheck className="w-4 h-4" /> Schedule Visit
                 </Button>
                 <Button 
                   onClick={() => setShowCallback(true)} 
                   variant="outline" 
-                  className="flex-1 h-11 border-white text-white hover:bg-white/10 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2"
+                  className="flex-1 h-11 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm"
                 >
-                  <PhoneCall className="w-4 h-4" /> Request Callback
+                  <PhoneCall className="w-4 h-4 text-[#14b8a6]" /> Request Callback
                 </Button>
               </div>
             ) : showConfirmVisit ? (
-              <div className="bg-black/40 p-5 rounded-xl space-y-4 text-left border border-white/10">
-                <p className="text-sm font-semibold text-white">Select Visit Slot</p>
+              <div className="bg-slate-50 p-5 rounded-xl space-y-4 text-left border border-slate-200 shadow-inner">
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Visit Slot</p>
                 <div className="flex gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
                   {['Today', 'Tomorrow', 'Day After'].map(d => (
                     <button
                       key={d}
                       onClick={() => setVisitDate(d)}
-                      className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all border ${visitDate === d ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-neutral-900 text-neutral-400 border-neutral-800'}`}
+                      className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all border text-xs font-bold ${visitDate === d ? 'bg-[#14b8a6] text-white border-[#14b8a6] shadow' : 'bg-white text-slate-600 border-slate-200'}`}
                     >
                       {d}
                     </button>
@@ -861,34 +1314,36 @@ export function PortfolioHero() {
                     <button
                       key={t}
                       onClick={() => setVisitTime(t)}
-                      className={`py-2 rounded-lg transition-all border text-center ${visitTime === t ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-neutral-900 text-neutral-400 border-neutral-800'}`}
+                      className={`py-2 rounded-lg transition-all border font-bold text-center text-xs ${visitTime === t ? 'bg-[#14b8a6] text-white border-[#14b8a6] shadow' : 'bg-white text-slate-600 border-slate-200'}`}
                     >
                       {t}
                     </button>
                   ))}
                 </div>
                 <Button 
-                  className="w-full bg-[#1D9E75] text-white mt-2 font-bold uppercase tracking-wider text-xs h-10 hover:opacity-90"
+                  className="w-full text-white mt-2 font-bold uppercase tracking-wider text-xs h-10 hover:opacity-90 rounded-lg shadow"
+                  style={{ background: '#10b981' }}
                   onClick={() => {
-                    alert(`Visit scheduled for ${visitDate} at ${visitTime}!`);
+                    setCustomAlert({ show: true, title: 'Visit Tour Scheduled', message: `Physical visit tour scheduled for ${visitDate} at ${visitTime}!` });
                     setShowConfirmVisit(false);
                   }}
                 >
-                  Confirm Visit
+                  Confirm Visit Tour
                 </Button>
               </div>
             ) : (
-              <div className="bg-black/40 p-5 rounded-xl space-y-3 text-left border border-white/10">
-                <p className="text-sm font-semibold text-white">We'll call you back shortly</p>
-                <p className="text-xs text-neutral-300 leading-relaxed">Requesting a callback to phone number entered during gate login.</p>
+              <div className="bg-slate-50 p-5 rounded-xl space-y-3 text-left border border-slate-200 shadow-inner">
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Manager will call you back shortly</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">We will initiate a callback request to the verification phone number entered during portal gate entrance login.</p>
                 <Button 
-                  className="w-full bg-[#1D9E75] text-white font-bold uppercase tracking-wider text-xs h-10 hover:opacity-90 animate-pulse"
+                  className="w-full text-white font-bold uppercase tracking-wider text-xs h-10 hover:opacity-90 rounded-lg shadow"
+                  style={{ background: '#10b981' }}
                   onClick={() => {
-                    alert('Callback confirmed! Expect a call shortly.');
+                    setCustomAlert({ show: true, title: 'Callback Requested', message: 'Callback request registered! Expect a call within 15 minutes.' });
                     setShowCallback(false);
                   }}
                 >
-                  Confirm Callback
+                  Confirm Callback Request
                 </Button>
               </div>
             )}
@@ -897,39 +1352,56 @@ export function PortfolioHero() {
 
       </div>
 
-      {/* Sticky Bottom Bar CTA */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-neutral-900 bg-[#0D0D0D]/95 backdrop-blur-md z-20">
+      {/* SECTION 8 CONTINUED: STICKY FOOTER ACTION CLOSE FOOTER */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/95 backdrop-blur-md z-30 shadow-lg">
         <div className="max-w-6xl mx-auto p-4 flex justify-between items-center px-6">
           <div>
-            <p className="text-2xl font-bold text-white">₹8,500<span className="text-xs text-neutral-450 font-normal">/mo</span></p>
-            <p className="text-[10px] text-amber-500 font-semibold uppercase tracking-wider">Only 2 rooms left</p>
+            <p className="text-xl font-black text-[#14b8a6]">₹{getMinPrice()}<span className="text-xs text-slate-400 font-normal">/mo starting</span></p>
+            <p className="text-[9.5px] text-[#14b8a6] font-bold uppercase tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping" />
+              {activeRooms.filter(r => r.beds > 0 && r.vacancy !== 'Occupied').length} Rooms Vacant on Floor
+            </p>
+            <span className="text-[9px] text-slate-400 font-semibold md:flex items-center gap-0.5 hidden mt-0.5">
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7.5px] font-black">R</span> Rentflo.</span>
+            </span>
           </div>
-          <a href="#cta-section">
-            <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} className="font-semibold px-6 hover:opacity-90 h-10">
-              Book Visit
-            </Button>
-          </a>
+          <div className="flex gap-2">
+            <a href="tel:9876543210" className="md:inline-flex hidden items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-bold rounded-lg shadow-sm transition-all">
+              <PhoneCall className="w-3.5 h-3.5 text-[#14b8a6]" /> Call PG Owner
+            </a>
+            <a href="#cta-section" onClick={(e) => { e.preventDefault(); scrollToSection('cta-section'); }}>
+              <Button style={{ background: '#10b981', color: '#FFFFFF' }} className="font-bold uppercase tracking-wider text-xs px-6 hover:opacity-90 h-10 rounded-lg shadow-md shadow-emerald-500/20">
+                Book Visit
+              </Button>
+            </a>
+          </div>
         </div>
       </div>
 
+      {/* LIGHT MODE COHESIVE LEAD CAPTURE POPUP MODAL */}
       {showLeadPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative max-w-2xl w-full bg-[#131313] border border-neutral-850 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="relative max-w-2xl w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row text-left">
             
             {/* Left Side: Lead Capture Form */}
             <div className="w-full md:w-1/2 p-6 space-y-4 flex flex-col justify-center">
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-wide" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                  You're one step away
+                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Unlock Co-living Explore
                 </h2>
-                <p className="text-[11px] text-neutral-400 mt-1">
-                  Enter your details to explore {pgName}
-                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-[11px] text-slate-500">
+                    Enter your details to view rooms blueprint and vacancies at {pgName}
+                  </p>
+                  <span className="text-[9px] text-slate-400 font-semibold flex items-center gap-0.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded">
+                    by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">R</span> Rentflo.</span>
+                  </span>
+                </div>
               </div>
 
               <form onSubmit={handleLeadSubmit} className="space-y-3.5 text-left">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
                     Full Name
                   </label>
                   <input
@@ -938,16 +1410,16 @@ export function PortfolioHero() {
                     placeholder="e.g. Akshay Kumar"
                     value={leadForm.name}
                     onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
                     Phone Number
                   </label>
                   <div className="flex">
-                    <span className="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-neutral-800 bg-neutral-950 text-xs" style={{ color: '#9CA3AF' }}>
+                    <span className="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 text-xs text-slate-500 font-bold">
                       +91
                     </span>
                     <input
@@ -957,74 +1429,59 @@ export function PortfolioHero() {
                       placeholder="98765 43210"
                       value={leadForm.phone}
                       onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
-                      className="w-full px-3 py-2 rounded-r-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                      className="w-full px-3 py-2 rounded-r-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
-                    Looking for?
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
+                    Looking for Sharing?
                   </label>
                   <select
                     value={leadForm.type}
                     onChange={(e) => setLeadForm({ ...leadForm, type: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold cursor-pointer"
                   >
                     <option value="Single">Single Occupancy</option>
-                    <option value="Double">Double Occupancy</option>
-                    <option value="Triple">Triple Occupancy</option>
+                    <option value="Double">Double Sharing</option>
+                    <option value="Triple">Triple Sharing</option>
                   </select>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity" 
-                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                  className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all rounded-lg shadow-md shadow-teal-500/10" 
+                  style={{ background: '#14b8a6', color: '#FFFFFF' }}
                 >
-                  Explore {pgName} →
+                  Explore properties now →
                 </Button>
               </form>
             </div>
 
-            {/* Right Side: Map Location */}
-            <div className="w-full md:w-1/2 p-6 bg-neutral-950 border-t md:border-t-0 md:border-l border-neutral-900 flex flex-col justify-between min-h-[300px]">
+            {/* Right Side: Map Proximity Optimizer */}
+            <div className="w-full md:w-1/2 p-6 bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 flex flex-col justify-between min-h-[300px]">
               <div>
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Office Location</h3>
-                <p className="text-[10px] text-neutral-400 mt-0.5">Find us here at the main office</p>
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider" style={{ fontFamily: 'Outfit, sans-serif' }}>Office Proximity</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Explore transit pathways and commutes</p>
               </div>
 
               {/* Map grid visualization */}
-              <div className="flex-1 my-4 bg-neutral-900 rounded-lg overflow-hidden relative border border-neutral-800/80 flex items-center justify-center h-36">
-                <svg className="absolute inset-0 w-full h-full text-teal-900/10" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="modalDarkGrid" width="16" height="16" patternUnits="userSpaceOnUse">
-                      <path d="M 16 0 L 0 0 0 16" fill="none" stroke="#222222" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#modalDarkGrid)" />
-                  <line x1="0" y1="60" x2="300" y2="60" stroke="#1A1A1A" strokeWidth="12" />
-                  <line x1="100" y1="0" x2="100" y2="200" stroke="#1A1A1A" strokeWidth="12" />
-                </svg>
-
-                {/* Render dynamically dropped pin */}
-                <div 
-                  className="absolute flex flex-col items-center -mt-6 transition-all"
-                  style={{
-                    left: `${((mapCoords.lng - 77.6200) / 0.0150) * 100}%`,
-                    top: `${(1 - (mapCoords.lat - 12.9300) / 0.0100) * 100}%`,
-                  }}
-                >
-                  <MapPin className="w-6 h-6 text-[#1D9E75] fill-current animate-bounce" />
-                  <Badge style={{ background: '#1D9E75', color: '#FFFFFF' }} className="text-[7px] -mt-1 shadow-md border-none scale-90 px-1 py-0">
-                    Office Location
-                  </Badge>
-                </div>
+              <div className="flex-1 my-4 bg-white rounded-lg overflow-hidden relative border border-slate-200/80 h-36">
+                <iframe
+                  title="Google Map Proximity"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`}
+                />
               </div>
 
-              <div className="text-[9px] text-neutral-450 space-y-1">
-                <p className="font-semibold text-white">Office Coordinates: {mapCoords.lat}, {mapCoords.lng}</p>
-                <p className="line-clamp-2">{address}</p>
+              <div className="text-[9.5px] text-slate-500 space-y-1">
+                <p className="font-bold text-slate-700">Office Proximity Link</p>
+                <p className="line-clamp-2 leading-relaxed">{address}</p>
               </div>
             </div>
 
@@ -1032,6 +1489,104 @@ export function PortfolioHero() {
         </div>
       )}
 
+      {/* Powered by Rentflo Footer branding */}
+      <footer className="w-full bg-slate-50 border-t border-slate-200 py-6 mt-16 text-center text-xs text-slate-400 font-semibold space-y-2 pb-32">
+        <p>© {new Date().getFullYear()} {pgName}. All rights reserved.</p>
+        <div className="flex items-center justify-center gap-1.5 text-[10px]">
+          <span>Co-living platform powered by</span>
+          <a href="https://rentflo.com" target="_blank" rel="noopener noreferrer" className="text-[#14b8a6] font-bold inline-flex items-center gap-0.5 hover:underline">
+            <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black shadow-sm">R</span> Rentflo.
+          </a>
+        </div>
+      </footer>
+
+      {/* CUSTOM CONFIRMATION ALERT MODAL */}
+      {customAlert.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-sm p-6 bg-white border border-slate-200 rounded-2xl shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#10b981] flex items-center justify-center text-2xl mx-auto border border-emerald-100">
+              ✓
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>{customAlert.title}</h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{customAlert.message}</p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+              <Button 
+                style={{ background: '#10b981', color: '#FFFFFF' }} 
+                className="w-full font-bold uppercase tracking-wider text-xs h-10 rounded-lg"
+                onClick={() => setCustomAlert({ show: false, title: '', message: '' })}
+              >
+                Awesome
+              </Button>
+              <div className="flex items-center justify-center gap-1 text-[8.5px] text-slate-400 font-bold">
+                <span>Verified securely by</span>
+                <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">R</span> Rentflo.</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* INTERACTIVE MEDIA LIGHTBOX POPUP MODAL */}
+      {lightbox.show && lightbox.mediaList.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-4 text-white">
+          <div className="relative w-full max-w-4xl flex flex-col items-center justify-center space-y-4">
+            {/* Top Close Button & Info */}
+            <div className="w-full flex justify-between items-center text-xs">
+              <span className="font-semibold bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                Media {lightbox.currentIndex + 1} of {lightbox.mediaList.length}
+              </span>
+              <button 
+                onClick={() => setLightbox({ show: false, currentIndex: 0, mediaList: [] })}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Media Content Area */}
+            <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
+              {lightbox.mediaList[lightbox.currentIndex].type === 'photo' ? (
+                <img 
+                  src={lightbox.mediaList[lightbox.currentIndex].url} 
+                  alt="Gallery Preview"
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <video 
+                  src={lightbox.mediaList[lightbox.currentIndex].url} 
+                  controls 
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
+
+            {/* Bottom Caption & Navigation Control */}
+            <div className="w-full flex flex-col md:flex-row justify-between items-center gap-3 pt-2">
+              <p className="text-sm font-semibold tracking-wide italic text-slate-300">
+                ✨ {lightbox.mediaList[lightbox.currentIndex].tag || 'Preview Media'}
+              </p>
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  style={{ background: '#14b8a6', color: '#FFFFFF' }} 
+                  className="px-6 font-bold uppercase tracking-wider text-xs h-10 rounded-xl"
+                  onClick={handleNextMedia}
+                >
+                  Next →
+                </Button>
+              </div>
+            </div>
+
+            {/* Powered by Rentflo branding overlay */}
+            <div className="text-[9.5px] text-slate-500 font-semibold flex items-center justify-center gap-0.5">
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">R</span> Rentflo.</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

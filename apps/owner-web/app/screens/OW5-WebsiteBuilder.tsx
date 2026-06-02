@@ -152,6 +152,45 @@ function OwnerWebsiteBuilderComponent() {
   const [newPhotoUrls, setNewPhotoUrls] = useState<Record<string, string>>({});
   const [newCategoryName, setNewCategoryName] = useState('');
 
+  // Photo Tag Overlays
+  const [photoTags, setPhotoTags] = useState<Record<string, string>>({
+    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80': 'Spacious Common Area',
+    'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80': 'Modern 2 Sharing Room',
+    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80': 'Equipped Gym & Play Area'
+  });
+
+  // Commute Proximity & Optimizer
+  const [commuteWalkTime, setCommuteWalkTime] = useState('5 mins');
+  const [commuteBikeTime, setCommuteBikeTime] = useState('2 mins');
+  const [commuteTransitTime, setCommuteTransitTime] = useState('300m away');
+  const [commuteDestination, setCommuteDestination] = useState('Manyata Tech Park');
+
+  // Food Menu Tabular Editor
+  const [selectedFoodDay, setSelectedFoodDay] = useState('Mon');
+  const [foodMenu, setFoodMenu] = useState<Record<string, { breakfast: string; lunch: string; dinner: string }>>({
+    Mon: { breakfast: 'Poha, Sev, Chutney', lunch: 'Rice, Dal, Cabbage Sabzi', dinner: 'Chapati, Aloo Jeera, Salad' },
+    Tue: { breakfast: 'Uttapam, Sambar', lunch: 'Jeera Rice, Chole Masala', dinner: 'Chapati, Bhindi Fry, Curd' },
+    Wed: { breakfast: 'Idli, Vada, Sambar', lunch: 'Rice, Dal Fry, Potato Roast, Papad', dinner: 'Chapati, Paneer Butter Masala, Salad' },
+    Thu: { breakfast: 'Bread Omelette / Jam', lunch: 'Veg Biryani, Raita', dinner: 'Chapati, Egg Curry / Dal Tadka' },
+    Fri: { breakfast: 'Dosa, Tomato Chutney', lunch: 'Rice, Sambhar, Beetroot Poriyal', dinner: 'Chapati, Mixed Veg Korma, Salad' },
+    Sat: { breakfast: 'Poori, Aloo Masala', lunch: 'Lemon Rice, Curd Rice', dinner: 'Chapati, Kadai Paneer, Salad' },
+    Sun: { breakfast: 'Special Masala Dosa', lunch: 'Chicken Biryani / Veg Pulao', dinner: 'Chapati, Dal Makhani, Custard' },
+  });
+
+  // House Rules Editor
+  const [houseRules, setHouseRules] = useState<string[]>([
+    'No smoking inside rooms',
+    'Friends allowed until 8 PM, No overnight stay',
+    'Noise curfew after 11 PM',
+    'Main gate closes at 11 PM',
+    '1-month advance notice required before vacating'
+  ]);
+  const [newRuleText, setNewRuleText] = useState('');
+
+  // Deposit and Rent Inclusions
+  const [depositAmount, setDepositAmount] = useState('₹10,000 (1 Month Rent)');
+  const [rentInclusions, setRentInclusions] = useState('Includes 3 Meals, Wi-Fi, Housekeeping');
+
   // Testimonials state and inputs
   const [testimonials, setTestimonials] = useState<any[]>([
     { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
@@ -302,6 +341,15 @@ function OwnerWebsiteBuilderComponent() {
         if (parsed.mapCoords) setMapCoords(parsed.mapCoords);
         if (parsed.address) setAddress(parsed.address);
         if (parsed.floors) setFloors(parsed.floors);
+        if (parsed.photoTags) setPhotoTags(parsed.photoTags);
+        if (parsed.commuteWalkTime) setCommuteWalkTime(parsed.commuteWalkTime);
+        if (parsed.commuteBikeTime) setCommuteBikeTime(parsed.commuteBikeTime);
+        if (parsed.commuteTransitTime) setCommuteTransitTime(parsed.commuteTransitTime);
+        if (parsed.commuteDestination) setCommuteDestination(parsed.commuteDestination);
+        if (parsed.foodMenu) setFoodMenu(parsed.foodMenu);
+        if (parsed.houseRules) setHouseRules(parsed.houseRules);
+        if (parsed.depositAmount) setDepositAmount(parsed.depositAmount);
+        if (parsed.rentInclusions) setRentInclusions(parsed.rentInclusions);
       } catch (e) {
         console.error(e);
       }
@@ -323,9 +371,40 @@ function OwnerWebsiteBuilderComponent() {
       floors,
       videoUrl,
       testimonials,
+      photoTags,
+      commuteWalkTime,
+      commuteBikeTime,
+      commuteTransitTime,
+      commuteDestination,
+      foodMenu,
+      houseRules,
+      depositAmount,
+      rentInclusions,
     }));
     window.dispatchEvent(new Event('rentflo_website_update'));
-  }, [pgName, tagline, amenities, categoryMedia, roomsData, canvasCols, canvasRows, mapCoords, address, floors, videoUrl, testimonials]);
+  }, [
+    pgName,
+    tagline,
+    amenities,
+    categoryMedia,
+    roomsData,
+    canvasCols,
+    canvasRows,
+    mapCoords,
+    address,
+    floors,
+    videoUrl,
+    testimonials,
+    photoTags,
+    commuteWalkTime,
+    commuteBikeTime,
+    commuteTransitTime,
+    commuteDestination,
+    foodMenu,
+    houseRules,
+    depositAmount,
+    rentInclusions,
+  ]);
 
   // Compatibility saveState helper
   const saveState = (updatedState?: any) => {
@@ -1065,8 +1144,10 @@ function OwnerWebsiteBuilderComponent() {
           <TabsList className="bg-white border border-slate-200 rounded-lg p-1 text-slate-500 flex flex-wrap gap-1 shadow-sm">
             <TabsTrigger value="cover" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">General</TabsTrigger>
             <TabsTrigger value="floor_plan" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Architect Blueprint Plan</TabsTrigger>
-            <TabsTrigger value="location" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Office Location</TabsTrigger>
+            <TabsTrigger value="location" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Office Location & Commute</TabsTrigger>
             <TabsTrigger value="amenities" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Amenities</TabsTrigger>
+            <TabsTrigger value="food" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Food Menu</TabsTrigger>
+            <TabsTrigger value="rules" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">House Rules</TabsTrigger>
             <TabsTrigger value="media" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Photos & Videos</TabsTrigger>
           </TabsList>
 
@@ -1074,13 +1155,25 @@ function OwnerWebsiteBuilderComponent() {
           <TabsContent value="cover" className="space-y-4 mt-4">
             <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
               <h3 className="text-sm font-semibold text-slate-855 uppercase tracking-wider">General Branding</h3>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">PG Name</label>
-                <Input value={pgName} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setPgName(e.target.value); saveState({ pgName: e.target.value }); }} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">PG Name</label>
+                  <Input value={pgName} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setPgName(e.target.value); }} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Branding Tagline</label>
+                  <Input value={tagline} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setTagline(e.target.value); }} />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Branding Tagline</label>
-                <Input value={tagline} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setTagline(e.target.value); saveState({ tagline: e.target.value }); }} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Refundable Deposit Details</label>
+                  <Input value={depositAmount} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setDepositAmount(e.target.value); }} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Rent Inclusions Description</label>
+                  <Input value={rentInclusions} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setRentInclusions(e.target.value); }} />
+                </div>
               </div>
             </Card>
 
@@ -1833,6 +1926,31 @@ function OwnerWebsiteBuilderComponent() {
                 </div>
               </div>
             </Card>
+
+            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Office Proximity & Commute Times</h3>
+                <p className="text-xs text-slate-500 mt-1">Configure approximate commute details shown to prospects working at this target office.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Target Office Name</label>
+                  <Input value={commuteDestination} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteDestination(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Walking Commute Time</label>
+                  <Input value={commuteWalkTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteWalkTime(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Bike/Auto Commute Time</label>
+                  <Input value={commuteBikeTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteBikeTime(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Nearest Transit Hub Proximity</label>
+                  <Input value={commuteTransitTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteTransitTime(e.target.value)} />
+                </div>
+              </div>
+            </Card>
           </TabsContent>
           {/* TAB 4: AMENITIES */}
           <TabsContent value="amenities" className="space-y-4 mt-4">
@@ -1853,7 +1971,143 @@ function OwnerWebsiteBuilderComponent() {
             </Card>
           </TabsContent>
 
-          {/* TAB 5: PHOTOS & VIDEOS GALLERY */}
+          {/* TAB 5: WEEKLY FOOD MENU */}
+          <TabsContent value="food" className="space-y-4 mt-4">
+            <Card className="p-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Weekly Food Menu Editor</h3>
+                <p className="text-xs text-slate-500 mt-1">Configure what meals are served to residents each day of the week.</p>
+              </div>
+
+              {/* Day selector tabs inside editor */}
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedFoodDay(day)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${
+                      selectedFoodDay === day 
+                        ? 'bg-[#1D9E75] text-white border-[#1D9E75] shadow-sm' 
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Editing Meals for {selectedFoodDay}</p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Breakfast (8:00 AM - 9:00 AM)</label>
+                    <Input 
+                      value={foodMenu[selectedFoodDay]?.breakfast || ''} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFoodMenu(prev => ({
+                          ...prev,
+                          [selectedFoodDay]: { ...prev[selectedFoodDay], breakfast: val }
+                        }));
+                      }}
+                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      placeholder="e.g. Idli, Vada, Chutney"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Lunch (12:00 PM - 1:00 PM)</label>
+                    <Input 
+                      value={foodMenu[selectedFoodDay]?.lunch || ''} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFoodMenu(prev => ({
+                          ...prev,
+                          [selectedFoodDay]: { ...prev[selectedFoodDay], lunch: val }
+                        }));
+                      }}
+                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      placeholder="e.g. Rice, Sambar, Veg Curry, Curd"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dinner (7:00 PM - 8:00 PM)</label>
+                    <Input 
+                      value={foodMenu[selectedFoodDay]?.dinner || ''} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFoodMenu(prev => ({
+                          ...prev,
+                          [selectedFoodDay]: { ...prev[selectedFoodDay], dinner: val }
+                        }));
+                      }}
+                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      placeholder="e.g. Chapati, Paneer Masala, Rice, Dal"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-teal-50 border border-teal-200 rounded-lg text-teal-850 space-y-1">
+                <p className="text-xs font-bold">💡 RentFlo Food Tech Feature</p>
+                <p className="text-[10px] leading-relaxed text-teal-700">Tenants can skip/confirm meals before the 6 PM cutoff. Skipping meals awards them cashback or keeps their rent pricing affordable!</p>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* TAB 6: HOUSE RULES */}
+          <TabsContent value="rules" className="space-y-4 mt-4">
+            <Card className="p-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">House Rules Manager</h3>
+                <p className="text-xs text-slate-500 mt-1">Specify curfew, visitor rules, and other policies displayed on the portfolio website.</p>
+              </div>
+
+              {/* Add rule form */}
+              <div className="flex gap-2">
+                <Input 
+                  value={newRuleText}
+                  onChange={(e) => setNewRuleText(e.target.value)}
+                  placeholder="Add a new rule (e.g. Main gate closes at 11:30 PM)"
+                  className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] text-xs h-9"
+                />
+                <Button
+                  onClick={() => {
+                    if (!newRuleText.trim()) return;
+                    setHouseRules(prev => [...prev, newRuleText.trim()]);
+                    setNewRuleText('');
+                  }}
+                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                  className="h-9 px-4 text-xs font-semibold rounded-lg shadow-sm"
+                >
+                  Add Rule
+                </Button>
+              </div>
+
+              {/* Rules list */}
+              <div className="space-y-2 mt-4">
+                {houseRules.map((rule, idx) => (
+                  <div key={idx} className="p-3 border border-slate-200 rounded-lg bg-slate-50/50 flex justify-between items-center text-xs">
+                    <span className="text-slate-700 font-medium">{rule}</span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] px-2 font-semibold"
+                      onClick={() => {
+                        setHouseRules(prev => prev.filter((_, i) => i !== idx));
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* TAB 7: PHOTOS & VIDEOS GALLERY */}
           <TabsContent value="media" className="space-y-4 mt-4">
             <Card className="p-6 space-y-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
               <div>
@@ -1961,20 +2215,31 @@ function OwnerWebsiteBuilderComponent() {
                       {categoryMedia[catName]?.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-2">
                           {categoryMedia[catName].map((photoUrl, index) => (
-                            <div key={index} className="relative group rounded-md border border-slate-200 bg-white overflow-hidden h-20 shadow-sm">
-                              <img src={photoUrl} alt={`${catName} - ${index}`} className="w-full h-full object-cover" />
-                              <button 
-                                onClick={() => {
-                                  setCategoryMedia(prev => ({
-                                    ...prev,
-                                    [catName]: (prev[catName] || []).filter((_, idx) => idx !== index)
-                                  }));
+                            <div key={index} className="flex flex-col border border-slate-200 bg-white rounded-md p-1.5 shadow-sm space-y-1">
+                              <div className="relative group rounded overflow-hidden h-16 bg-slate-100">
+                                <img src={photoUrl} alt={`${catName} - ${index}`} className="w-full h-full object-cover" />
+                                <button 
+                                  onClick={() => {
+                                    setCategoryMedia(prev => ({
+                                      ...prev,
+                                      [catName]: (prev[catName] || []).filter((_, idx) => idx !== index)
+                                    }));
+                                  }}
+                                  className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
+                                  title="Delete Photo"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <Input
+                                value={photoTags[photoUrl] || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPhotoTags(prev => ({ ...prev, [photoUrl]: val }));
                                 }}
-                                className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
-                                title="Delete Photo"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
+                                placeholder="Tag (e.g. Equipped Gym)"
+                                className="h-6 text-[9px] bg-slate-50 border-slate-250 focus:ring-[#1D9E75] px-1 text-slate-800"
+                              />
                             </div>
                           ))}
                         </div>
