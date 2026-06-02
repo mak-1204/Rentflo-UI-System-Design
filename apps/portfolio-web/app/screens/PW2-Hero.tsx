@@ -276,6 +276,44 @@ export function PortfolioHero() {
   const [customAlert, setCustomAlert] = useState<{ show: boolean; title: string; message: string }>({ show: false, title: '', message: '' });
   const [lightbox, setLightbox] = useState<{ show: boolean; currentIndex: number; mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] }>({ show: false, currentIndex: 0, mediaList: [] });
 
+  const [addressSearch, setAddressSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedOfficeAddress, setSelectedOfficeAddress] = useState('');
+  const [showPGMap, setShowPGMap] = useState(false);
+
+  const mockSuggestions = [
+    { bold: 'Periya', normal: 'medu, Choolai, Chennai, Tamil Nadu, India' },
+    { bold: 'Periya', normal: 'palayam, Tamil Nadu, India' },
+    { bold: 'Periya', normal: 'met, Chennai, Tamil Nadu, India' },
+    { bold: 'Periya', normal: 'r Thidal, EVK Sampath Salai, Periyar Thidal, Vepery, Chennai, Tamil Nadu, India' },
+    { bold: 'Periya', normal: 'r Nagar, Perambur, Chennai, Tamil Nadu, India' }
+  ];
+
+  useEffect(() => {
+    if (showLeadPopup || lightbox.show || customAlert.show) {
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+    };
+  }, [showLeadPopup, lightbox.show, customAlert.show]);
+
   const openLightbox = (initialType: 'photo' | 'video') => {
     const photos = categoryMedia[`${prefSharing} Sharing`] || 
                    (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
@@ -1158,7 +1196,7 @@ export function PortfolioHero() {
             <p className="text-sm text-slate-500 max-w-lg mx-auto">We serve fresh, nutritious meals daily. View this week's menu preview below.</p>
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center scrollbar-none pt-2">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 md:justify-center scrollbar-none pt-2 justify-start px-2">
             {days.map((day) => (
               <button
                 key={day}
@@ -1380,111 +1418,173 @@ export function PortfolioHero() {
 
       {/* LIGHT MODE COHESIVE LEAD CAPTURE POPUP MODAL */}
       {showLeadPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="relative max-w-2xl w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row text-left">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="relative max-w-md w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl p-5 md:p-6 text-left space-y-3.5 max-h-[92vh] overflow-y-auto overscroll-contain"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             
-            {/* Left Side: Lead Capture Form */}
-            <div className="w-full md:w-1/2 p-6 space-y-4 flex flex-col justify-center">
-              <div>
-                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {/* Header info */}
+            <div>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
                   Unlock Co-living Explore
                 </h2>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-[11px] text-slate-500">
-                    Enter your details to view rooms blueprint and vacancies at {pgName}
-                  </p>
-                  <span className="text-[9px] text-slate-400 font-semibold flex items-center gap-0.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded">
-                    by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">R</span> Rentflo.</span>
-                  </span>
-                </div>
+                <span className="text-[9px] text-slate-400 font-semibold flex items-center gap-0.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded">
+                  by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">R</span> Rentflo.</span>
+                </span>
               </div>
-
-              <form onSubmit={handleLeadSubmit} className="space-y-3.5 text-left">
-                <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Akshay Kumar"
-                    value={leadForm.name}
-                    onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
-                    Phone Number
-                  </label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 text-xs text-slate-500 font-bold">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      maxLength={10}
-                      placeholder="98765 43210"
-                      value={leadForm.phone}
-                      onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
-                      className="w-full px-3 py-2 rounded-r-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
-                    Looking for Sharing?
-                  </label>
-                  <select
-                    value={leadForm.type}
-                    onChange={(e) => setLeadForm({ ...leadForm, type: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold cursor-pointer"
-                  >
-                    <option value="Single">Single Occupancy</option>
-                    <option value="Double">Double Sharing</option>
-                    <option value="Triple">Triple Sharing</option>
-                  </select>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all rounded-lg shadow-md shadow-teal-500/10" 
-                  style={{ background: '#14b8a6', color: '#FFFFFF' }}
-                >
-                  Explore properties now →
-                </Button>
-              </form>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Enter your details to view rooms blueprint and vacancies at {pgName}
+              </p>
             </div>
-
-            {/* Right Side: Map Proximity Optimizer */}
-            <div className="w-full md:w-1/2 p-6 bg-slate-50 border-t md:border-t-0 md:border-l border-slate-200 flex flex-col justify-between min-h-[300px]">
+ 
+            {/* Form */}
+            <form onSubmit={handleLeadSubmit} className="space-y-3 text-left">
+              {/* Name */}
               <div>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider" style={{ fontFamily: 'Outfit, sans-serif' }}>Office Proximity</h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Explore transit pathways and commutes</p>
-              </div>
-
-              {/* Map grid visualization */}
-              <div className="flex-1 my-4 bg-white rounded-lg overflow-hidden relative border border-slate-200/80 h-36">
-                <iframe
-                  title="Google Map Proximity"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`}
+                <label className="text-[9px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Akshay Kumar"
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
                 />
               </div>
-
-              <div className="text-[9.5px] text-slate-500 space-y-1">
-                <p className="font-bold text-slate-700">Office Proximity Link</p>
-                <p className="line-clamp-2 leading-relaxed">{address}</p>
+ 
+              {/* Phone */}
+              <div>
+                <label className="text-[9px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
+                  Phone Number
+                </label>
+                <div className="flex">
+                  <span className="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 text-xs text-slate-500 font-bold">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="98765 43210"
+                    value={leadForm.phone}
+                    onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                    className="w-full px-3 py-1.5 rounded-r-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold"
+                  />
+                </div>
               </div>
-            </div>
-
+ 
+              {/* Look for sharing */}
+              <div>
+                <label className="text-[9px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400">
+                  Looking for Sharing?
+                </label>
+                <select
+                  value={leadForm.type}
+                  onChange={(e) => setLeadForm({ ...leadForm, type: e.target.value })}
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 text-xs text-slate-800 font-semibold cursor-pointer"
+                >
+                  <option value="Single">Single Occupancy</option>
+                  <option value="Double">Double Sharing</option>
+                  <option value="Triple">Triple Sharing</option>
+                </select>
+              </div>
+ 
+              {/* Autocomplete Office Search */}
+              <div className="relative pt-2">
+                <div className="relative border-2 border-blue-500 rounded-xl bg-white px-3 py-2">
+                  <span className="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-slate-500">
+                    Address
+                  </span>
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Type address..."
+                      value={addressSearch}
+                      onChange={(e) => {
+                        setAddressSearch(e.target.value);
+                        setShowSuggestions(e.target.value.length > 0);
+                      }}
+                      className="w-full bg-transparent focus:outline-none text-xs text-slate-800 font-semibold pr-6"
+                    />
+                    <span className="absolute right-3 text-slate-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+                
+                {showSuggestions && (
+                  <div className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden text-slate-800">
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 bg-slate-50 text-[10px] font-bold text-slate-400 tracking-wider">
+                      <span>SUGGESTIONS</span>
+                      <button type="button" onClick={() => setShowSuggestions(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                    </div>
+                    <div className="divide-y divide-slate-100 text-xs">
+                      {mockSuggestions.map((item, idx) => (
+                        <div 
+                          key={idx} 
+                          onClick={() => {
+                            setAddressSearch(item.bold + item.normal);
+                            setShowSuggestions(false);
+                            setSelectedOfficeAddress(item.bold + item.normal);
+                          }}
+                          className="cursor-pointer hover:bg-slate-50 px-4 py-2.5 text-left transition-colors"
+                        >
+                          <strong className="text-slate-800 font-bold">{item.bold}</strong>
+                          <span className="text-slate-500 font-normal">{item.normal}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bg-slate-50 px-4 py-2 border-t border-slate-100 flex items-center justify-start text-[9px] text-slate-400 font-medium">
+                      <span>powered by Google</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+ 
+              {/* Option to look the PG location in maps */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPGMap(!showPGMap)}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-teal-50 hover:bg-teal-100/80 border border-teal-200/50 rounded-xl text-xs font-bold text-[#14b8a6] transition-all"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  {showPGMap ? 'Close PG Map View' : 'View PG Locations in Google Maps'}
+                </button>
+                
+                {showPGMap && (
+                  <div className="mt-2 h-40 rounded-xl overflow-hidden border border-slate-200 shadow-inner transition-all">
+                    <iframe
+                      title="Google Map PG location"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`}
+                    />
+                  </div>
+                )}
+              </div>
+ 
+              <Button 
+                type="submit" 
+                className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all rounded-lg shadow-md shadow-teal-500/10" 
+                style={{ background: '#14b8a6', color: '#FFFFFF' }}
+              >
+                Explore properties now →
+              </Button>
+            </form>
           </div>
         </div>
       )}
