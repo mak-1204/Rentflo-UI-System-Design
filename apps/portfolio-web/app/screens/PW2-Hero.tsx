@@ -15,7 +15,27 @@ interface RoomRectangle {
   windows: ('left' | 'right' | 'top' | 'bottom')[];
   vacancy: 'Vacant' | 'Occupied' | '1/2 Filled';
   color: string;
+  bedStatuses?: ('Vacant' | 'Occupied')[];
+  bedPositions?: { x: number; y: number; w?: number; h?: number; rotated?: boolean }[];
 }
+
+const getDefaultBedPositions = (bedsCount: number) => {
+  if (bedsCount === 1) {
+    return [{ x: 15, y: 35, w: 70, h: 30 }];
+  } else if (bedsCount === 2) {
+    return [
+      { x: 15, y: 12, w: 70, h: 26 },
+      { x: 15, y: 62, w: 70, h: 26 }
+    ];
+  } else if (bedsCount === 3) {
+    return [
+      { x: 6, y: 10, w: 44, h: 26 },
+      { x: 50, y: 10, w: 44, h: 26 },
+      { x: 25, y: 62, w: 50, h: 26 }
+    ];
+  }
+  return [];
+};
 
 export function PortfolioHero() {
   const navigate = useNavigate();
@@ -25,6 +45,11 @@ export function PortfolioHero() {
   const [tagline, setTagline] = useState('Your home away from home in Koramangala');
   const [address, setAddress] = useState('No. 14, 5th Cross, Koramangala 4th Block, Bengaluru, 560034');
   const [mapCoords, setMapCoords] = useState({ lat: 12.9345, lng: 77.6269 });
+  const [videoUrl, setVideoUrl] = useState('https://www.w3schools.com/html/mov_bbb.mp4');
+  const [testimonials, setTestimonials] = useState<any[]>([
+    { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
+    { name: 'Rohit K.', duration: 'Staying since 1 year', comment: 'Very clean common areas, the WiFi speed is constant at 150Mbps, food menu is varied and fresh.' }
+  ]);
 
   const [amenities, setAmenities] = useState<Record<string, boolean>>({
     'Gigabit WiFi': true,
@@ -123,6 +148,34 @@ export function PortfolioHero() {
   const [occupancyFilter, setOccupancyFilter] = useState('All');
   const [selectedCellCoords, setSelectedCellCoords] = useState<string | null>(null);
 
+  // Lead popup states
+  const [showLeadPopup, setShowLeadPopup] = useState(true);
+  const [leadForm, setLeadForm] = useState({
+    name: '',
+    phone: '',
+    type: 'Single',
+  });
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await fetch('http://localhost:3000/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pgId: 'prop-1',
+          name: leadForm.name,
+          phone: leadForm.phone,
+          preferredSharing: leadForm.type === 'Single' ? 1 : leadForm.type === 'Double' ? 2 : 3,
+          source: 'portfolio-web'
+        })
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    setShowLeadPopup(false);
+  };
+
   // Load state from localStorage on load & list for updates
   const loadState = () => {
     const saved = localStorage.getItem('rentflo_builder_state');
@@ -133,11 +186,13 @@ export function PortfolioHero() {
         if (parsed.tagline) setTagline(parsed.tagline);
         if (parsed.amenities) setAmenities(parsed.amenities);
         if (parsed.categoryMedia) setCategoryMedia(parsed.categoryMedia);
+        if (parsed.videoUrl) setVideoUrl(parsed.videoUrl);
         if (parsed.roomsData) setRoomsData(parsed.roomsData);
         if (parsed.canvasCols) setCanvasCols(parsed.canvasCols);
         if (parsed.canvasRows) setCanvasRows(parsed.canvasRows);
         if (parsed.mapCoords) setMapCoords(parsed.mapCoords);
         if (parsed.address) setAddress(parsed.address);
+        if (parsed.testimonials) setTestimonials(parsed.testimonials);
         if (parsed.floors) {
           setFloors(parsed.floors);
           if (!parsed.floors.includes(activeFloor)) {
@@ -175,8 +230,15 @@ export function PortfolioHero() {
     Sun: { breakfast: 'Special Masala Dosa', lunch: 'Chicken Biryani / Veg Pulao', dinner: 'Chapati, Dal Makhani, Custard' },
   };
 
-  // Determine responsive cell size
-  const mobileCellSize = Math.max(16, Math.min(32, Math.floor(480 / canvasCols)));
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Determine responsive cell size based on window width
+  const mobileCellSize = Math.max(12, Math.min(32, Math.floor((Math.min(windowWidth - 48, 600)) / canvasCols)));
 
   // Determine filter match
   const matchesOccupancyFilter = (room: RoomRectangle) => {
@@ -199,71 +261,64 @@ export function PortfolioHero() {
     const bedsCount = room.beds;
     const vacancy = room.vacancy;
     const bedStatuses = room.bedStatuses || Array(bedsCount).fill(vacancy === 'Vacant' ? 'Vacant' : 'Occupied');
+    const positions = room.bedPositions && room.bedPositions.length === bedsCount
+      ? room.bedPositions
+      : getDefaultBedPositions(bedsCount);
     
     const beds = [];
     const getBedStyle = (isVacant: boolean) => {
-      return `absolute bg-slate-400 border-[3.5px] border-slate-700 rounded-md flex items-center justify-center shadow z-15 transition-all`;
+      return `absolute border-[2px] rounded flex items-center justify-center shadow z-15 transition-all text-white ${
+        isVacant 
+          ? 'bg-[#1D9E75] border-[#085041]' 
+          : 'bg-[#993C1D] border-[#791F1F]'
+      }`;
     };
 
     const isBedVacant = (idx: number) => {
       return bedStatuses[idx] === 'Vacant';
     };
 
-    if (bedsCount === 1) {
-      const vacant = isBedVacant(0);
+    for (let i = 0; i < bedsCount; i++) {
+      const pos = positions[i];
+      if (!pos) continue;
+      const vacant = isBedVacant(i);
+      const isRotated = pos.rotated;
+      const bedW = isRotated ? (pos.h || 26) : (pos.w || 70);
+      const bedH = isRotated ? (pos.w || 70) : (pos.h || 26);
+      
       beds.push(
-        <div key="bed-1" className={getBedStyle(vacant)} style={{ top: '35%', left: '15%', width: '70%', height: '30%' }}>
-          <div className="absolute left-1.5 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[9px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-1">
-            {vacant ? 'Vacant' : ''}
-          </span>
-        </div>
-      );
-    } else if (bedsCount === 2) {
-      const vacant1 = isBedVacant(0);
-      const vacant2 = isBedVacant(1);
-      beds.push(
-        <div key="bed-1" className={getBedStyle(vacant1)} style={{ top: '8px', left: '15%', width: '70%', height: '26%' }}>
-          <div className="absolute left-1.5 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[9px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-1">
-            {vacant1 ? 'Vacant' : ''}
-          </span>
-        </div>
-      );
-      beds.push(
-        <div key="bed-2" className={getBedStyle(vacant2)} style={{ bottom: '8px', left: '15%', width: '70%', height: '26%' }}>
-          <div className="absolute left-1.5 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[9px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-1">
-            {vacant2 ? 'Vacant' : ''}
-          </span>
-        </div>
-      );
-    } else {
-      const vacant1 = isBedVacant(0);
-      const vacant2 = isBedVacant(1);
-      const vacant3 = isBedVacant(2);
-      beds.push(
-        <div key="bed-1" className={getBedStyle(vacant1)} style={{ top: '8px', left: '6px', width: '44%', height: '26%' }}>
-          <div className="absolute left-1 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[8px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-0.5">
-            {vacant1 ? 'Vac' : ''}
-          </span>
-        </div>
-      );
-      beds.push(
-        <div key="bed-2" className={getBedStyle(vacant2)} style={{ top: '8px', right: '6px', width: '44%', height: '26%' }}>
-          <div className="absolute left-1 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[8px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-0.5">
-            {vacant2 ? 'Vac' : ''}
-          </span>
-        </div>
-      );
-      beds.push(
-        <div key="bed-3" className={getBedStyle(vacant3)} style={{ bottom: '8px', left: '25%', width: '50%', height: '26%' }}>
-          <div className="absolute left-1.5 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700 rounded-sm" />
-          <span className="text-[9px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-1">
-            {vacant3 ? 'Vacant' : ''}
-          </span>
+        <div 
+          key={`bed-${i}`} 
+          className={getBedStyle(vacant)} 
+          style={{ 
+            left: `${pos.x}%`, 
+            top: `${pos.y}%`, 
+            width: `${bedW}%`, 
+            height: `${bedH}%` 
+          }}
+          title={`Bed ${i + 1} (${vacant ? 'Vacant' : 'Occupied'})`}
+        >
+          {isRotated ? (
+            <>
+              <div className="absolute top-1 left-1 right-1 h-[18%] bg-white border-b border-slate-700/20 rounded-[1px]" />
+              <span 
+                className="text-[6.5px] font-bold text-white uppercase tracking-widest mt-[18%] truncate px-0.5 py-1 pointer-events-none select-none flex items-center justify-center leading-none text-center h-full w-full"
+                style={{
+                  writingMode: 'vertical-rl',
+                  transform: 'rotate(180deg)'
+                }}
+              >
+                {vacant ? 'Vacant' : 'Occupied'}
+              </span>
+            </>
+          ) : (
+            <>
+              <div className="absolute left-1 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700/20 rounded-[1px]" />
+              <span className="text-[7.5px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-0.5 pointer-events-none select-none">
+                {vacant ? 'Vacant' : 'Occupied'}
+              </span>
+            </>
+          )}
         </div>
       );
     }
@@ -429,6 +484,18 @@ export function PortfolioHero() {
             ))}
           </div>
         </section>
+
+        {/* VIDEO WALKTHROUGH TOUR */}
+        {videoUrl && (
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              Virtual Property Tour
+            </h2>
+            <div className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-neutral-900 bg-[#121212] p-4 flex flex-col items-center shadow-2xl">
+              <video src={videoUrl} controls className="w-full rounded-xl bg-black shadow-lg" style={{ maxHeight: '420px' }} />
+            </div>
+          </section>
+        )}
 
         {/* PW4: ROOM TYPES & PRICING */}
         <section className="space-y-6">
@@ -712,25 +779,26 @@ export function PortfolioHero() {
           <h2 className="text-3xl font-semibold border-b border-neutral-900 pb-3" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
             Resident Testimonials
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
-              { name: 'Rohit K.', duration: 'Staying since 1 year', comment: 'Very clean common areas, the WiFi speed is constant at 150Mbps, food menu is varied and fresh.' }
-            ].map((rev, i) => (
-              <Card key={i} className="p-6 border border-neutral-800 space-y-3 bg-[#121212]">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-semibold text-white">{rev.name}</p>
-                    <p className="text-xs text-neutral-400 mt-0.5">{rev.duration}</p>
+          {testimonials.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {testimonials.map((rev, i) => (
+                <Card key={i} className="p-6 border border-neutral-800 space-y-3 bg-[#121212]">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{rev.name}</p>
+                      <p className="text-xs text-neutral-400 mt-0.5">{rev.duration}</p>
+                    </div>
+                    <span className="text-[10px] font-semibold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded border border-[#1D9E75]/20">
+                      Verified Resident
+                    </span>
                   </div>
-                  <span className="text-[10px] font-semibold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded border border-[#1D9E75]/20">
-                    Verified Resident
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-300 leading-relaxed italic">"{rev.comment}"</p>
-              </Card>
-            ))}
-          </div>
+                  <p className="text-xs text-neutral-300 leading-relaxed italic">"{rev.comment}"</p>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-neutral-400 italic text-center py-6">No testimonials published yet.</p>
+          )}
         </section>
 
         {/* PW9: HOUSE RULES */}
@@ -843,6 +911,126 @@ export function PortfolioHero() {
           </a>
         </div>
       </div>
+
+      {showLeadPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="relative max-w-2xl w-full bg-[#131313] border border-neutral-850 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row text-left">
+            
+            {/* Left Side: Lead Capture Form */}
+            <div className="w-full md:w-1/2 p-6 space-y-4 flex flex-col justify-center">
+              <div>
+                <h2 className="text-2xl font-bold text-white tracking-wide" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                  You're one step away
+                </h2>
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  Enter your details to explore {pgName}
+                </p>
+              </div>
+
+              <form onSubmit={handleLeadSubmit} className="space-y-3.5 text-left">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Akshay Kumar"
+                    value={leadForm.name}
+                    onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
+                    Phone Number
+                  </label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-neutral-800 bg-neutral-950 text-xs" style={{ color: '#9CA3AF' }}>
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      placeholder="98765 43210"
+                      value={leadForm.phone}
+                      onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                      className="w-full px-3 py-2 rounded-r-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider block mb-1" style={{ color: '#9CA3AF' }}>
+                    Looking for?
+                  </label>
+                  <select
+                    value={leadForm.type}
+                    onChange={(e) => setLeadForm({ ...leadForm, type: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-800 focus:outline-none focus:ring-1 focus:ring-[#1D9E75] bg-neutral-950 text-xs text-[#F5F5F0]"
+                  >
+                    <option value="Single">Single Occupancy</option>
+                    <option value="Double">Double Occupancy</option>
+                    <option value="Triple">Triple Occupancy</option>
+                  </select>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity" 
+                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                >
+                  Explore {pgName} →
+                </Button>
+              </form>
+            </div>
+
+            {/* Right Side: Map Location */}
+            <div className="w-full md:w-1/2 p-6 bg-neutral-950 border-t md:border-t-0 md:border-l border-neutral-900 flex flex-col justify-between min-h-[300px]">
+              <div>
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Office Location</h3>
+                <p className="text-[10px] text-neutral-400 mt-0.5">Find us here at the main office</p>
+              </div>
+
+              {/* Map grid visualization */}
+              <div className="flex-1 my-4 bg-neutral-900 rounded-lg overflow-hidden relative border border-neutral-800/80 flex items-center justify-center h-36">
+                <svg className="absolute inset-0 w-full h-full text-teal-900/10" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="modalDarkGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+                      <path d="M 16 0 L 0 0 0 16" fill="none" stroke="#222222" strokeWidth="0.5" />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#modalDarkGrid)" />
+                  <line x1="0" y1="60" x2="300" y2="60" stroke="#1A1A1A" strokeWidth="12" />
+                  <line x1="100" y1="0" x2="100" y2="200" stroke="#1A1A1A" strokeWidth="12" />
+                </svg>
+
+                {/* Render dynamically dropped pin */}
+                <div 
+                  className="absolute flex flex-col items-center -mt-6 transition-all"
+                  style={{
+                    left: `${((mapCoords.lng - 77.6200) / 0.0150) * 100}%`,
+                    top: `${(1 - (mapCoords.lat - 12.9300) / 0.0100) * 100}%`,
+                  }}
+                >
+                  <MapPin className="w-6 h-6 text-[#1D9E75] fill-current animate-bounce" />
+                  <Badge style={{ background: '#1D9E75', color: '#FFFFFF' }} className="text-[7px] -mt-1 shadow-md border-none scale-90 px-1 py-0">
+                    Office Location
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="text-[9px] text-neutral-450 space-y-1">
+                <p className="font-semibold text-white">Office Coordinates: {mapCoords.lat}, {mapCoords.lng}</p>
+                <p className="line-clamp-2">{address}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -152,6 +152,15 @@ function OwnerWebsiteBuilderComponent() {
   const [newPhotoUrls, setNewPhotoUrls] = useState<Record<string, string>>({});
   const [newCategoryName, setNewCategoryName] = useState('');
 
+  // Testimonials state and inputs
+  const [testimonials, setTestimonials] = useState<any[]>([
+    { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
+    { name: 'Rohit K.', duration: 'Staying since 1 year', comment: 'Very clean common areas, the WiFi speed is constant at 150Mbps, food menu is varied and fresh.' }
+  ]);
+  const [newTestimonialName, setNewTestimonialName] = useState('');
+  const [newTestimonialDuration, setNewTestimonialDuration] = useState('');
+  const [newTestimonialComment, setNewTestimonialComment] = useState('');
+
   // Floor Selection
   const [activeFloor, setActiveFloor] = useState('Ground floor');
   const [floors, setFloors] = useState(['Ground floor', '1st floor', '2nd floor']);
@@ -267,6 +276,7 @@ function OwnerWebsiteBuilderComponent() {
         if (parsed.amenities) setAmenities(parsed.amenities);
         if (parsed.categoryMedia) setCategoryMedia(parsed.categoryMedia);
         if (parsed.videoUrl) setVideoUrl(parsed.videoUrl);
+        if (parsed.testimonials) setTestimonials(parsed.testimonials);
         if (parsed.roomsData) {
           const normalized: Record<string, RoomRectangle[]> = {};
           Object.keys(parsed.roomsData).forEach(floorKey => {
@@ -312,9 +322,10 @@ function OwnerWebsiteBuilderComponent() {
       address,
       floors,
       videoUrl,
+      testimonials,
     }));
     window.dispatchEvent(new Event('rentflo_website_update'));
-  }, [pgName, tagline, amenities, categoryMedia, roomsData, canvasCols, canvasRows, mapCoords, address, floors, videoUrl]);
+  }, [pgName, tagline, amenities, categoryMedia, roomsData, canvasCols, canvasRows, mapCoords, address, floors, videoUrl, testimonials]);
 
   // Compatibility saveState helper
   const saveState = (updatedState?: any) => {
@@ -912,20 +923,20 @@ function OwnerWebsiteBuilderComponent() {
             <>
               <div className="absolute top-1 left-1 right-1 h-[18%] bg-white border-b border-slate-700/20 rounded-[1px]" />
               <span 
-                className="text-[7.5px] font-bold text-white uppercase tracking-widest mt-[18%] truncate px-0.5 py-1 pointer-events-none select-none flex items-center justify-center leading-none text-center h-full w-full"
+                className="text-[7px] font-bold text-white uppercase tracking-wider mt-[18%] truncate px-0.5 py-1 pointer-events-none select-none flex items-center justify-center leading-none text-center h-full w-full"
                 style={{
                   writingMode: 'vertical-rl',
                   transform: 'rotate(180deg)'
                 }}
               >
-                {vacant ? 'Vacant' : 'Occupied'}
+                {vacant ? 'Vac' : 'Occ'}
               </span>
             </>
           ) : (
             <>
               <div className="absolute left-1 top-1 bottom-1 w-[18%] bg-white border-r border-slate-700/20 rounded-[1px]" />
-              <span className="text-[8px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-0.5 pointer-events-none select-none">
-                {vacant ? 'Vacant' : 'Occupied'}
+              <span className="text-[7.5px] font-bold text-white uppercase tracking-wider ml-[18%] truncate px-0.5 pointer-events-none select-none">
+                {vacant ? 'Vac' : 'Occ'}
               </span>
             </>
           )}
@@ -1062,7 +1073,7 @@ function OwnerWebsiteBuilderComponent() {
           {/* TAB 1: COVER INFO */}
           <TabsContent value="cover" className="space-y-4 mt-4">
             <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-850 uppercase tracking-wider">General Branding</h3>
+              <h3 className="text-sm font-semibold text-slate-855 uppercase tracking-wider">General Branding</h3>
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">PG Name</label>
                 <Input value={pgName} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setPgName(e.target.value); saveState({ pgName: e.target.value }); }} />
@@ -1070,6 +1081,90 @@ function OwnerWebsiteBuilderComponent() {
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Branding Tagline</label>
                 <Input value={tagline} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setTagline(e.target.value); saveState({ tagline: e.target.value }); }} />
+              </div>
+            </Card>
+
+            {/* Resident Testimonials Card */}
+            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-855 uppercase tracking-wider">Resident Testimonials</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Manage the reviews displayed on the portfolio website.</p>
+              </div>
+
+              {/* Add Testimonial Form */}
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                <p className="text-xs font-bold text-slate-700">Add New Testimonial</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-medium text-slate-500 mb-1">Resident Name</label>
+                    <Input 
+                      value={newTestimonialName} 
+                      onChange={(e) => setNewTestimonialName(e.target.value)} 
+                      placeholder="e.g. Vijay Nair" 
+                      className="bg-white border-slate-200 text-slate-900 text-xs h-8"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-slate-500 mb-1">Duration / Subtitle</label>
+                    <Input 
+                      value={newTestimonialDuration} 
+                      onChange={(e) => setNewTestimonialDuration(e.target.value)} 
+                      placeholder="e.g. Staying since 8 months" 
+                      className="bg-white border-slate-200 text-slate-900 text-xs h-8"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-1">Comment / Review</label>
+                  <textarea 
+                    value={newTestimonialComment} 
+                    onChange={(e) => setNewTestimonialComment(e.target.value)} 
+                    placeholder="Enter review comment..." 
+                    className="w-full p-2.5 bg-white border border-slate-200 rounded-md text-slate-900 text-xs focus:ring-[#1D9E75] focus:outline-none min-h-[60px]"
+                  />
+                </div>
+                <Button 
+                  onClick={() => {
+                    if (!newTestimonialName.trim() || !newTestimonialComment.trim()) return;
+                    setTestimonials(prev => [
+                      ...prev,
+                      {
+                        name: newTestimonialName.trim(),
+                        duration: newTestimonialDuration.trim() || 'Resident',
+                        comment: newTestimonialComment.trim()
+                      }
+                    ]);
+                    setNewTestimonialName('');
+                    setNewTestimonialDuration('');
+                    setNewTestimonialComment('');
+                  }}
+                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                  className="text-xs h-8 px-4 font-semibold rounded-md shadow-sm"
+                >
+                  Add Testimonial
+                </Button>
+              </div>
+
+              {/* List of current testimonials */}
+              <div className="space-y-3 mt-4">
+                {testimonials.map((t, idx) => (
+                  <div key={idx} className="p-3 border border-slate-200 rounded-lg bg-white flex justify-between items-start gap-4">
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-slate-800">{t.name} <span className="text-[10px] text-slate-400 font-medium font-sans">({t.duration})</span></p>
+                      <p className="text-xs text-slate-600 italic">"{t.comment}"</p>
+                    </div>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] px-2"
+                      onClick={() => {
+                        setTestimonials(prev => prev.filter((_, i) => i !== idx));
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                ))}
               </div>
             </Card>
           </TabsContent>
@@ -1153,7 +1248,7 @@ function OwnerWebsiteBuilderComponent() {
             </Card>
 
             {/* Vector Layout Canvas */}
-            <div className="flex flex-col lg:flex-row gap-4 h-[550px] overflow-hidden">
+            <div className="flex flex-col lg:flex-row gap-4 lg:h-[550px] lg:overflow-hidden h-auto overflow-visible">
               
               {/* Palette Column Left */}
               <div className="w-full lg:w-56 bg-white border border-slate-200 p-4 rounded-xl overflow-y-auto space-y-4 text-left shadow-sm">
