@@ -64,21 +64,21 @@ export function PortfolioHero() {
   
   const [categoryMedia, setCategoryMedia] = useState<Record<string, string[]>>({
     '1 Sharing': [
-      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
     ],
     '2 Sharing': [
-      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80',
     ],
     'Play Room': [
-      'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80',
     ],
   });
 
   // Photo Tag Overlays
   const [photoTags, setPhotoTags] = useState<Record<string, string>>({
-    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80': 'Spacious Common Area',
-    'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80': 'Modern 2 Sharing Room',
-    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80': 'Equipped Gym & Play Area'
+    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80': 'Premium Studio Single Room',
+    'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80': 'Boutique Twin Sharing Room',
+    'https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80': 'Vibrant Social Lounge & Workspace'
   });
 
   // Commute Proximity & Optimizer
@@ -289,6 +289,47 @@ export function PortfolioHero() {
     { bold: 'Periya', normal: 'r Nagar, Perambur, Chennai, Tamil Nadu, India' }
   ];
 
+  const [dynamicSuggestions, setDynamicSuggestions] = useState(mockSuggestions);
+
+  useEffect(() => {
+    if (!addressSearch) {
+      setDynamicSuggestions(mockSuggestions);
+      return;
+    }
+    if (addressSearch.toLowerCase() === 'periya') {
+      setDynamicSuggestions(mockSuggestions);
+      return;
+    }
+    if (addressSearch.length < 3) return;
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearch)}&limit=5`
+        );
+        const data = await response.json();
+        if (data && Array.isArray(data)) {
+          const formatted = data.map((item: any) => {
+            const displayName = item.display_name;
+            const commaIndex = displayName.indexOf(',');
+            let bold = displayName;
+            let normal = '';
+            if (commaIndex !== -1) {
+              bold = displayName.substring(0, commaIndex);
+              normal = displayName.substring(commaIndex);
+            }
+            return { bold, normal };
+          });
+          setDynamicSuggestions(formatted);
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      }
+    }, 450);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [addressSearch]);
+
   useEffect(() => {
     if (showLeadPopup || lightbox.show || customAlert.show) {
       const scrollY = window.scrollY;
@@ -316,9 +357,9 @@ export function PortfolioHero() {
 
   const openLightbox = (initialType: 'photo' | 'video') => {
     const photos = categoryMedia[`${prefSharing} Sharing`] || 
-                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
-                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
-                    ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
+                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80'] :
+                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80'] :
+                    ['https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80']);
     
     const mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] = [];
     photos.forEach(p => {
@@ -605,7 +646,7 @@ export function PortfolioHero() {
           const bedsCount = r.beds;
           if (bedsCount > 0) {
             const typeKey = r.sharingType || `${bedsCount} Sharing`;
-            const roomPhoto = categoryMedia[`${bedsCount} Sharing`]?.[0] || categoryMedia['1 Sharing']?.[0] || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80';
+            const roomPhoto = categoryMedia[`${bedsCount} Sharing`]?.[0] || categoryMedia['1 Sharing']?.[0] || 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80';
             if (!typesMap[typeKey] || (r.pricePerBed && r.pricePerBed < typesMap[typeKey].price)) {
               typesMap[typeKey] = {
                 price: r.pricePerBed || 8500,
@@ -664,17 +705,6 @@ export function PortfolioHero() {
             </div>
           </div>
         </div>
-
-        {/* Smart Filter Preferences Alert Banner */}
-        <div className="bg-[#ecfdf5] border-t border-b border-[#d1fae5] py-2 px-4 md:px-6">
-          <div className="max-w-6xl mx-auto flex items-center justify-between text-[11px] text-[#047857] font-semibold">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-ping" />
-              <span>Showing: <strong>{leadForm.type || 'Single/Double'} Sharing</strong> · AC Available · Near {commuteDestination}</span>
-            </div>
-            <span className="bg-[#d1fae5] px-2 py-0.5 rounded text-[9px] uppercase tracking-wider text-[#047857] font-bold border border-[#10b981]/10">Smart Filter Active</span>
-          </div>
-        </div>
       </header>
 
       {/* SECTION 2: THE HERO SECTION */}
@@ -727,39 +757,41 @@ export function PortfolioHero() {
             {pgName}
           </h1>
           <p className="text-sm md:text-lg text-slate-200 max-w-lg italic font-medium">"{tagline}"</p>
-          
-          {/* Glassmorphic Stats Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl pt-2">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
-              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">500+</p>
-              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Premium Beds</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
-              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">150+</p>
-              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Reviews</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
-              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">2+</p>
-              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">PG Properties</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 text-center text-white">
-              <p className="text-xl md:text-2xl font-black text-[#14b8a6]">3+</p>
-              <p className="text-[9px] uppercase tracking-wider text-slate-300 font-bold">Cities</p>
-            </div>
-          </div>
+
           
           <div className="flex items-center gap-3 flex-wrap pt-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-white">
               <MapPin className="w-4 h-4 text-[#14b8a6]" /> Koramangala 4th Block, Bengaluru
             </span>
-            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#ecfdf5] border border-[#d1fae5] text-xs text-[#047857] font-bold">
-              <span className="text-slate-400 font-normal">Starting Price:</span>
-              <span>₹{getMinPrice()}/mo</span>
-            </div>
+
             <a href="#map-commute-section" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d1fae5] border border-[#10b981]/20 text-xs text-[#047857] font-bold hover:bg-[#10b981]/15 transition-all">
               <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
               <span>{commuteWalkTime} away from your office ({commuteDestination})</span>
             </a>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2.5: STATS BAR BELOW HERO */}
+      <div className="bg-white border-b border-slate-200 py-6 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
+              <p className="text-3xl font-black text-[#14b8a6]">500+</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Premium Beds</p>
+            </div>
+            <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
+              <p className="text-3xl font-black text-[#14b8a6]">150+</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Resident Reviews</p>
+            </div>
+            <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
+              <p className="text-3xl font-black text-[#14b8a6]">2+</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">PG Properties</p>
+            </div>
+            <div className="text-center py-2">
+              <p className="text-3xl font-black text-[#14b8a6]">3+</p>
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Cities Available</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1327,10 +1359,10 @@ export function PortfolioHero() {
                 </Button>
                 <Button 
                   onClick={() => setShowCallback(true)} 
-                  variant="outline" 
-                  className="flex-1 h-11 border-slate-200 text-slate-700 bg-white hover:bg-slate-50 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm"
+                  style={{ background: '#b8b8b8', color: '#1e293b', border: '1px solid #1e293b' }}
+                  className="flex-1 h-11 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm hover:opacity-90 transition-all"
                 >
-                  <PhoneCall className="w-4 h-4 text-[#14b8a6]" /> Request Callback
+                  <PhoneCall className="w-4 h-4 text-[#14b8a6]" /> REQUEST CALLBACK
                 </Button>
               </div>
             ) : showConfirmVisit ? (
@@ -1502,13 +1534,13 @@ export function PortfolioHero() {
               <div className="relative pt-2">
                 <div className="relative border-2 border-blue-500 rounded-xl bg-white px-3 py-2">
                   <span className="absolute -top-2 left-3 bg-white px-1 text-[10px] font-bold text-slate-500">
-                    Address
+                    Your Office Location
                   </span>
                   <div className="flex items-center justify-between">
                     <input
                       type="text"
                       required
-                      placeholder="Type address..."
+                      placeholder="Type office address..."
                       value={addressSearch}
                       onChange={(e) => {
                         setAddressSearch(e.target.value);
@@ -1531,7 +1563,7 @@ export function PortfolioHero() {
                       <button type="button" onClick={() => setShowSuggestions(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                     </div>
                     <div className="divide-y divide-slate-100 text-xs">
-                      {mockSuggestions.map((item, idx) => (
+                      {dynamicSuggestions.map((item, idx) => (
                         <div 
                           key={idx} 
                           onClick={() => {
@@ -1589,16 +1621,7 @@ export function PortfolioHero() {
         </div>
       )}
 
-      {/* Powered by Rentflo Footer branding */}
-      <footer className="w-full bg-slate-50 border-t border-slate-200 py-6 mt-16 text-center text-xs text-slate-400 font-semibold space-y-2 pb-32">
-        <p>© {new Date().getFullYear()} {pgName}. All rights reserved.</p>
-        <div className="flex items-center justify-center gap-1.5 text-[10px]">
-          <span>Co-living platform powered by</span>
-          <a href="https://rentflo.com" target="_blank" rel="noopener noreferrer" className="text-[#14b8a6] font-bold inline-flex items-center gap-0.5 hover:underline">
-            <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black shadow-sm">R</span> Rentflo.
-          </a>
-        </div>
-      </footer>
+
 
       {/* CUSTOM CONFIRMATION ALERT MODAL */}
       {customAlert.show && (
