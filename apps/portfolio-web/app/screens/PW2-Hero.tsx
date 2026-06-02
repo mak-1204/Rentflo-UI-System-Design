@@ -33,6 +33,13 @@ const getDefaultBedPositions = (bedsCount: number) => {
       { x: 50, y: 10, w: 44, h: 26 },
       { x: 25, y: 62, w: 50, h: 26 }
     ];
+  } else if (bedsCount === 4) {
+    return [
+      { x: 6, y: 10, w: 44, h: 26 },
+      { x: 50, y: 10, w: 44, h: 26 },
+      { x: 6, y: 62, w: 44, h: 26 },
+      { x: 50, y: 62, w: 44, h: 26 }
+    ];
   }
   return [];
 };
@@ -46,6 +53,13 @@ export function PortfolioHero() {
   const [address, setAddress] = useState('No. 14, 5th Cross, Koramangala 4th Block, Bengaluru, 560034');
   const [mapCoords, setMapCoords] = useState({ lat: 12.9345, lng: 77.6269 });
   const [videoUrl, setVideoUrl] = useState('https://www.w3schools.com/html/mov_bbb.mp4');
+  const [heroImages, setHeroImages] = useState<string[]>([]);
+
+  // Stats variables
+  const [statsBeds, setStatsBeds] = useState('500+');
+  const [statsReviews, setStatsReviews] = useState('150+');
+  const [statsProperties, setStatsProperties] = useState('2+');
+  const [statsCities, setStatsCities] = useState('3+');
   const [testimonials, setTestimonials] = useState<any[]>([
     { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
     { name: 'Rohit K.', duration: 'Staying since 1 year', comment: 'Very clean common areas, the WiFi speed is constant at 150Mbps, food menu is varied and fresh.' }
@@ -149,20 +163,6 @@ export function PortfolioHero() {
           color: '#0F6E56'
         },
         {
-          id: 'room-3',
-          x: 1,
-          y: 7,
-          w: 4,
-          h: 4,
-          type: 'Bathroom',
-          customName: 'CB-1',
-          beds: 0,
-          doors: ['top'],
-          windows: [],
-          vacancy: 'Vacant',
-          color: '#0C447C'
-        },
-        {
           id: 'room-4',
           x: 6,
           y: 8,
@@ -203,7 +203,7 @@ export function PortfolioHero() {
           pgId: 'prop-1',
           name: leadForm.name,
           phone: leadForm.phone,
-          preferredSharing: leadForm.type === 'Single' ? 1 : leadForm.type === 'Double' ? 2 : 3,
+          preferredSharing: leadForm.type === 'Single' ? 1 : leadForm.type === 'Double' ? 2 : leadForm.type === 'Quad' ? 4 : 3,
           source: 'portfolio-web'
         })
       });
@@ -239,6 +239,11 @@ export function PortfolioHero() {
         if (parsed.houseRules) setHouseRules(parsed.houseRules);
         if (parsed.depositAmount) setDepositAmount(parsed.depositAmount);
         if (parsed.rentInclusions) setRentInclusions(parsed.rentInclusions);
+        if (parsed.statsBeds) setStatsBeds(parsed.statsBeds);
+        if (parsed.statsReviews) setStatsReviews(parsed.statsReviews);
+        if (parsed.statsProperties) setStatsProperties(parsed.statsProperties);
+        if (parsed.statsCities) setStatsCities(parsed.statsCities);
+        if (parsed.heroImages) setHeroImages(parsed.heroImages);
         if (parsed.floors) {
           setFloors(parsed.floors);
           if (!parsed.floors.includes(activeFloor)) {
@@ -270,7 +275,7 @@ export function PortfolioHero() {
   const [visitTime, setVisitTime] = useState('4 PM');
   const [showConfirmVisit, setShowConfirmVisit] = useState(false);
   const [showCallback, setShowCallback] = useState(false);
-  const [prefSharing, setPrefSharing] = useState<1 | 2 | 3>(1);
+  const [prefSharing, setPrefSharing] = useState<1 | 2 | 3 | 4>(1);
 
   const [customAlert, setCustomAlert] = useState<{ show: boolean; title: string; message: string }>({ show: false, title: '', message: '' });
   const [lightbox, setLightbox] = useState<{ show: boolean; currentIndex: number; mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] }>({ show: false, currentIndex: 0, mediaList: [] });
@@ -591,15 +596,20 @@ export function PortfolioHero() {
     });
   };
 
-  // Extract all photos from categoryMedia for the Hero Carousel
-  const allPhotos: { url: string; category: string }[] = [];
-  Object.keys(categoryMedia).forEach(cat => {
-    if (Array.isArray(categoryMedia[cat])) {
-      categoryMedia[cat].forEach(url => {
-        allPhotos.push({ url, category: cat });
-      });
-    }
-  });
+  // Extract all photos from custom heroImages or categoryMedia for the Hero Carousel
+  const allPhotos: { url: string; category: string }[] = heroImages.length > 0
+    ? heroImages.map(url => ({ url, category: 'Hero' }))
+    : (() => {
+        const list: { url: string; category: string }[] = [];
+        Object.keys(categoryMedia).forEach(cat => {
+          if (Array.isArray(categoryMedia[cat])) {
+            categoryMedia[cat].forEach(url => {
+              list.push({ url, category: cat });
+            });
+          }
+        });
+        return list;
+      })();
 
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -765,19 +775,19 @@ export function PortfolioHero() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
-              <p className="text-3xl font-black text-[#14b8a6]">500+</p>
+              <p className="text-3xl font-black text-[#14b8a6]">{statsBeds}</p>
               <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Premium Beds</p>
             </div>
             <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
-              <p className="text-3xl font-black text-[#14b8a6]">150+</p>
+              <p className="text-3xl font-black text-[#14b8a6]">{statsReviews}</p>
               <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Resident Reviews</p>
             </div>
             <div className="text-center md:border-r md:border-slate-100 last:border-0 py-2">
-              <p className="text-3xl font-black text-[#14b8a6]">2+</p>
+              <p className="text-3xl font-black text-[#14b8a6]">{statsProperties}</p>
               <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">PG Properties</p>
             </div>
             <div className="text-center py-2">
-              <p className="text-3xl font-black text-[#14b8a6]">3+</p>
+              <p className="text-3xl font-black text-[#14b8a6]">{statsCities}</p>
               <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Cities Available</p>
             </div>
           </div>
@@ -830,7 +840,7 @@ export function PortfolioHero() {
             </div>
             
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-              {([1, 2, 3] as const).map(num => (
+              {([1, 2, 3, 4] as const).map(num => (
                 <button
                   key={num}
                   onClick={() => setPrefSharing(num)}
@@ -840,7 +850,7 @@ export function PortfolioHero() {
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  {num === 1 ? 'Single' : num === 2 ? 'Double' : '3 Sharing'}
+                  {num === 1 ? 'Single' : num === 2 ? 'Double' : num === 3 ? '3 Sharing' : '4 Sharing'}
                 </button>
               ))}
             </div>
@@ -856,6 +866,7 @@ export function PortfolioHero() {
                   const photos = categoryMedia[`${prefSharing} Sharing`] || 
                                  (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
                                   prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
+                                  prefSharing === 4 ? ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80'] :
                                   ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
                   
                   return (
@@ -908,12 +919,12 @@ export function PortfolioHero() {
             <div className="lg:col-span-4 flex flex-col justify-between p-6 rounded-xl border border-slate-200 bg-[#f8fafc]">
               <div className="space-y-4">
                 <Badge className="bg-[#14b8a6] text-white border-none py-1 px-3 text-[9px] font-bold uppercase tracking-wider rounded">
-                  {prefSharing === 1 ? 'Private Suite' : prefSharing === 2 ? 'Double Comfort' : 'Triple Shared'}
+                  {prefSharing === 1 ? 'Private Suite' : prefSharing === 2 ? 'Double Comfort' : prefSharing === 3 ? 'Triple Shared' : 'Quad Shared'}
                 </Badge>
                 
                 <div>
                   <h3 className="text-xl font-extrabold text-slate-800">
-                    {prefSharing === 1 ? 'Single Room' : prefSharing === 2 ? 'Double Sharing' : 'Triple Sharing'}
+                    {prefSharing === 1 ? 'Single Room' : prefSharing === 2 ? 'Double Sharing' : prefSharing === 3 ? 'Triple Sharing' : 'Quad Sharing (4 Sharing)'}
                   </h3>
                   <p className="text-xs text-slate-400 mt-1">Fully furnished premium layout style</p>
                 </div>
@@ -922,7 +933,7 @@ export function PortfolioHero() {
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-400 font-medium">Monthly Price:</span>
                     <span className="text-lg font-black text-[#14b8a6]">
-                      ₹{prefSharing === 1 ? '8,500' : prefSharing === 2 ? '6,500' : '5,500'}/mo
+                       ₹{prefSharing === 1 ? '8,500' : prefSharing === 2 ? '6,500' : prefSharing === 3 ? '5,500' : '4,500'}/mo
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
@@ -1037,33 +1048,110 @@ export function PortfolioHero() {
                     const top = room.y * mobileCellSize;
                     const width = room.w * mobileCellSize;
                     const height = room.h * mobileCellSize;
+                    const isTextLabel = room.type === 'Text label';
 
                     return (
                       <div
                         key={room.id}
                         onClick={() => setSelectedCellCoords(isSelected ? null : room.id)}
-                        className="absolute rounded bg-white flex flex-col items-center justify-center cursor-pointer select-none"
+                        className={`absolute rounded flex flex-col items-center justify-center cursor-pointer select-none`}
                         style={{
                           left: `${left}px`,
                           top: `${top}px`,
                           width: `${width}px`,
                           height: `${height}px`,
-                          borderColor: isSelected ? '#14b8a6' : '#475569',
-                          borderWidth: isSelected ? '3px' : '2px',
+                          backgroundColor: room.color,
+                          borderColor: isSelected ? '#14b8a6' : (isTextLabel ? 'transparent' : '#475569'),
+                          borderWidth: isTextLabel ? (isSelected ? '2px' : '0px') : (isSelected ? '3px' : '2px'),
+                          borderStyle: isTextLabel && isSelected ? 'dashed' : 'solid',
                           opacity: matches ? 1.0 : 0.22,
                           boxShadow: isSelected ? '0 0 10px rgba(20, 184, 166, 0.4)' : 'none',
                           zIndex: isSelected ? 30 : 10
                         }}
                       >
                         {/* Vacancy tag overlay */}
-                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded-[3px] text-[6.5px] px-1 py-0.2 leading-none font-bold uppercase whitespace-nowrap z-20 pointer-events-none scale-90">
-                          {room.vacancy === '1/2 Filled' ? '1 Bed Open' : room.vacancy}
-                        </div>
+                        {!isTextLabel && (room.type.includes('room') || room.type.includes('Room')) && room.beds > 0 && (
+                          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded-[3px] text-[6.5px] px-1 py-0.2 leading-none font-bold uppercase whitespace-nowrap z-20 pointer-events-none scale-90">
+                            {room.vacancy === '1/2 Filled' ? '1 Bed Open' : room.vacancy}
+                          </div>
+                        )}
 
                         {/* Room label/number */}
-                        <div className="text-[9.5px] font-extrabold text-slate-800 pointer-events-none z-10">
+                        <div className={`text-[9.5px] font-extrabold pointer-events-none z-10 ${isTextLabel ? 'text-slate-800 font-medium' : 'text-slate-800'}`}>
                           {room.customName}
                         </div>
+
+                        {/* Access Road symbol */}
+                        {room.type === 'Access road' && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1">
+                            {room.w >= room.h ? (
+                              <div className="w-full border-t-[2px] border-dashed border-white opacity-70" />
+                            ) : (
+                              <div className="h-full border-l-[2px] border-dashed border-white opacity-70" />
+                            )}
+                          </div>
+                        )}
+
+                        {/* Staircase symbol */}
+                        {room.type === 'Staircase' && (
+                          <div className="absolute inset-0 flex flex-col justify-around pointer-events-none p-1 opacity-60">
+                            <div className="flex flex-col h-full w-full justify-between border-x border-slate-700/40">
+                              {[...Array(6)].map((_, i) => (
+                                <div key={i} className="border-t border-slate-700/40 w-full h-0" />
+                              ))}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Kitchen symbol */}
+                        {room.type === 'Kitchen' && (
+                          <div className="absolute inset-0 pointer-events-none p-1 flex items-center justify-around opacity-55">
+                            <div className="border border-amber-900/60 rounded p-0.5 flex gap-0.5 bg-amber-50/20 scale-75">
+                              <div className="w-3 h-3 rounded-full border border-amber-955 flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 rounded-full border border-dashed border-amber-955" />
+                              </div>
+                              <div className="w-3 h-3 rounded-full border border-amber-955 flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 rounded-full border border-dashed border-amber-955" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Dining Area symbol */}
+                        {room.type === 'Dining area' && (
+                          <div className="absolute inset-0 pointer-events-none p-1 flex items-center justify-center opacity-50 gap-1.5 scale-75">
+                            <div className="relative border border-amber-900/60 w-8 h-4 rounded flex items-center justify-center bg-amber-50/10">
+                              <div className="absolute -top-0.5 left-1 w-1 h-1 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -top-0.5 right-1 w-1 h-1 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -bottom-0.5 left-1 w-1 h-1 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -bottom-0.5 right-1 w-1 h-1 rounded-full border border-amber-955 bg-amber-100" />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Other Building hatch pattern */}
+                        {room.type === 'Other building' && (
+                          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden" style={{
+                            backgroundImage: 'repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 0, transparent 8px)',
+                            backgroundSize: '12px 12px'
+                          }} />
+                        )}
+
+                        {/* Empty Land grass graphic */}
+                        {room.type === 'Empty land' && (
+                          <div className="absolute inset-0 pointer-events-none p-1 opacity-55 overflow-hidden flex flex-wrap gap-1 justify-around items-center">
+                            {[...Array(2)].map((_, i) => (
+                              <svg key={i} className="w-3 h-3 text-emerald-800/60" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2a1 1 0 0 1 1 1v7.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V3a1 1 0 0 1 1-1z" />
+                              </svg>
+                            ))}
+                          </div>
+                        )}
 
                         {/* Realistic Beds inside */}
                         {renderBeds(room)}
@@ -1215,58 +1303,7 @@ export function PortfolioHero() {
           </div>
         </section>
 
-        {/* SECTION: FOOD & MENU TRANSPARENCY */}
-        <section className="space-y-6 max-w-4xl mx-auto text-center bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="space-y-2">
-            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Structured Weekly Food Menu
-            </h2>
-            <p className="text-sm text-slate-500 max-w-lg mx-auto">We serve fresh, nutritious meals daily. View this week's menu preview below.</p>
-          </div>
 
-          <div className="flex gap-1.5 overflow-x-auto pb-1 md:justify-center scrollbar-none pt-2 justify-start px-2">
-            {days.map((day) => (
-              <button
-                key={day}
-                onClick={() => setSelectedDay(day)}
-                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border shadow-sm ${
-                  selectedDay === day 
-                    ? 'bg-[#14b8a6] text-white border-[#14b8a6]' 
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                }`}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
-
-          {foodMenu[selectedDay] ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto pt-3">
-              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
-                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Breakfast · 8:00 AM</p>
-                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].breakfast}</p>
-              </Card>
-              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
-                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Lunch · 12:30 PM</p>
-                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].lunch}</p>
-              </Card>
-              <Card className="p-4 border border-slate-200 bg-[#f8fafc] shadow-inner text-left space-y-1">
-                <p className="text-[10px] font-extrabold text-teal-600 uppercase tracking-wider">Dinner · 7:30 PM</p>
-                <p className="text-xs font-bold text-slate-800 mt-1">{foodMenu[selectedDay].dinner}</p>
-              </Card>
-            </div>
-          ) : (
-            <p className="text-xs text-slate-400 italic">No food details scheduled for {selectedDay}.</p>
-          )}
-
-          <div className="bg-[#f0fdfa] border border-teal-200 rounded-xl p-4 flex gap-3 text-left max-w-xl mx-auto mt-6 shadow-sm">
-            <span className="text-2xl mt-0.5">🍱</span>
-            <div>
-              <p className="text-xs font-extrabold text-teal-800">RentFlo Food Tech System</p>
-              <p className="text-[10.5px] text-teal-700 leading-relaxed mt-0.5">We minimize food waste to keep your rent affordable. Book/skip meals effortlessly via our tenant app before 6 PM cutoff once you move in!</p>
-            </div>
-          </div>
-        </section>
 
         {/* SECTION: SOCIAL PROOF & HOUSE RULES */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
@@ -1523,6 +1560,7 @@ export function PortfolioHero() {
                   <option value="Single">Single Occupancy</option>
                   <option value="Double">Double Sharing</option>
                   <option value="Triple">Triple Sharing</option>
+                  <option value="Quad">Quad Sharing (4 Sharing)</option>
                 </select>
               </div>
  

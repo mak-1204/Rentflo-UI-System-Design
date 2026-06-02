@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'; import { Share2, Check, X, Calendar, AlertTriangle, Send, ShieldAlert, Sparkles, Clock, HelpCircle } from 'lucide-react'; import { Card } from '@rentflo/ui';
+import { useState, useEffect } from 'react';
+import { Share2, Check, X, Calendar, AlertTriangle, Send, ShieldAlert, Sparkles, Clock, HelpCircle, QrCode, Scan } from 'lucide-react';
+import { Card } from '@rentflo/ui';
 import { Badge } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 
@@ -10,19 +12,25 @@ interface FoodBooking {
   lunch: boolean;
   dinner: boolean;
   status: 'Booked' | 'Not Booked' | 'Missed Cutoff';
+  servedMeals?: { breakfast?: boolean; lunch?: boolean; dinner?: boolean };
 }
 
 export function OwnerWebFood() {
   const [selectedDay, setSelectedDay] = useState('Tomorrow');
   const [notif, setNotif] = useState<string | null>(null);
 
+  // Scanner Simulator States
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedResult, setScannedResult] = useState<any>(null);
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
+
   // Bookings list state
   const [bookings, setBookings] = useState<FoodBooking[]>([
-    { name: 'Amit Kumar', room: 'Room 4', phone: '+91 98765 43210', breakfast: true, lunch: false, dinner: true, status: 'Booked' },
-    { name: 'Sanjay Ramaswamy', room: 'Room 2', phone: '+91 99000 88776', breakfast: true, lunch: true, dinner: true, status: 'Booked' },
-    { name: 'Vijay Nair', room: 'Room 8', phone: '+91 91234 56789', breakfast: true, lunch: true, dinner: false, status: 'Booked' },
-    { name: 'Rahul Verma', room: 'Room 11', phone: '+91 90123 00112', breakfast: false, lunch: false, dinner: false, status: 'Not Booked' },
-    { name: 'Vikram Singh', room: 'Room 9', phone: '+91 99887 76655', breakfast: false, lunch: false, dinner: false, status: 'Not Booked' },
+    { name: 'Amit Kumar', room: 'Room 4', phone: '+91 98765 43210', breakfast: true, lunch: false, dinner: true, status: 'Booked', servedMeals: { breakfast: true } },
+    { name: 'Sanjay Ramaswamy', room: 'Room 2', phone: '+91 99000 88776', breakfast: true, lunch: true, dinner: true, status: 'Booked', servedMeals: {} },
+    { name: 'Vijay Nair', room: 'Room 8', phone: '+91 91234 56789', breakfast: true, lunch: true, dinner: false, status: 'Booked', servedMeals: { breakfast: true, lunch: true } },
+    { name: 'Rahul Verma', room: 'Room 11', phone: '+91 90123 00112', breakfast: false, lunch: false, dinner: false, status: 'Not Booked', servedMeals: {} },
+    { name: 'Vikram Singh', room: 'Room 9', phone: '+91 99887 76655', breakfast: false, lunch: false, dinner: false, status: 'Not Booked', servedMeals: {} },
   ]);
 
   const [currentTime, setCurrentTime] = useState('09:54 PM');
@@ -60,6 +68,59 @@ export function OwnerWebFood() {
     triggerToast(`Sent WhatsApp food cutoff alerts to ${unbookedTenants.length} unbooked residents!`);
   };
 
+  // Simulate scanning of QR code payload
+  const handleSimulateScan = (residentName: string) => {
+    setScanStatus('scanning');
+    setTimeout(() => {
+      const resident = bookings.find(b => b.name === residentName);
+      if (resident) {
+        setScannedResult({
+          name: resident.name,
+          room: resident.room,
+          date: '2026-06-02',
+          meals: {
+            breakfast: resident.breakfast,
+            lunch: resident.lunch,
+            dinner: resident.dinner
+          },
+          servedMeals: resident.servedMeals || {}
+        });
+        setScanStatus('success');
+      } else {
+        setScanStatus('error');
+      }
+    }, 1200);
+  };
+
+  const handleServeMeal = (mealType: 'breakfast' | 'lunch' | 'dinner') => {
+    if (!scannedResult) return;
+    
+    // Update local bookings state
+    setBookings(prev => prev.map(b => {
+      if (b.name === scannedResult.name) {
+        return {
+          ...b,
+          servedMeals: {
+            ...(b.servedMeals || {}),
+            [mealType]: true
+          }
+        };
+      }
+      return b;
+    }));
+
+    // Update scanned result to show checkmark instantly
+    setScannedResult(prev => ({
+      ...prev,
+      servedMeals: {
+        ...(prev.servedMeals || {}),
+        [mealType]: true
+      }
+    }));
+
+    triggerToast(`Marked ${mealType} as served for ${scannedResult.name}!`);
+  };
+
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto relative text-left bg-[#F8F9FA] min-h-screen">
       {/* Toast */}
@@ -76,11 +137,178 @@ export function OwnerWebFood() {
           <p className="text-slate-500 mt-1">Keep track of daily meal bookings, cutoff lists, cook updates, and menus to save money</p>
         </div>
         <div className="flex gap-2">
+          <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} className="hover:opacity-90 flex items-center gap-2" onClick={() => setShowScanner(true)}>
+            <QrCode className="w-4 h-4" /> Scan Food Pass QR
+          </Button>
           <Button style={{ background: '#25D366', color: '#FFFFFF' }} className="hover:opacity-90 flex items-center gap-2" onClick={shareWithCook}>
             <Share2 className="w-4 h-4" /> WhatsApp count to Cook
           </Button>
         </div>
       </div>
+
+      {/* QR Scanner Simulator Modal */}
+      {showScanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }} />
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative z-10 border border-slate-100 shadow-2xl space-y-4">
+            <button 
+              onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="space-y-1">
+              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5"><Scan className="w-5 h-5 text-[#1D9E75]" /> Scanner: Daily Food Pass</h4>
+              <p className="text-xs text-slate-500">Simulate or scan active resident food passes for verification</p>
+            </div>
+
+            {scanStatus === 'idle' && (
+              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#1D9E75] flex items-center justify-center">
+                  <QrCode className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-slate-800">Ready to Scan</p>
+                  <p className="text-xs text-slate-400">Click a resident below to simulate camera scanning their QR pass</p>
+                </div>
+                <div className="w-full space-y-1.5 pt-2">
+                  {bookings.map(b => (
+                    <button
+                      key={b.name}
+                      onClick={() => handleSimulateScan(b.name)}
+                      className="w-full py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-sm transition-all"
+                    >
+                      Scan QR for {b.name} ({b.room})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {scanStatus === 'scanning' && (
+              <div className="bg-slate-900 rounded-xl p-12 flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden h-[240px]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,158,117,0.15),transparent)] animate-pulse" />
+                {/* Laser scan effect */}
+                <div className="absolute left-0 right-0 h-1 bg-[#1D9E75] shadow-[0_0_10px_#1D9E75] top-0 animate-[bounce_2s_infinite]" />
+                <div className="w-16 h-16 rounded-xl border-2 border-white/20 flex items-center justify-center text-white text-xl animate-pulse">
+                  📷
+                </div>
+                <p className="text-sm font-bold text-white relative z-10">Accessing Camera Viewport...</p>
+                <p className="text-xs text-slate-400 relative z-10">Scanning QR pattern...</p>
+              </div>
+            )}
+
+            {scanStatus === 'success' && scannedResult && (
+              <div className="space-y-4">
+                {/* Result header */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between">
+                  <div className="text-left">
+                    <p className="text-sm font-extrabold text-emerald-950">{scannedResult.name}</p>
+                    <p className="text-xs text-emerald-800">{scannedResult.room} · Daily Food Pass</p>
+                  </div>
+                  <Badge className="bg-emerald-500 text-white font-bold border-none">VALID PASS ✓</Badge>
+                </div>
+
+                {/* Meal Checklists */}
+                <div className="border border-slate-200 rounded-xl divide-y text-xs text-slate-700">
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Breakfast Booking</p>
+                      <p className="text-[10px] text-slate-400">8:00 AM - 9:00 AM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.breakfast ? (
+                        scannedResult.servedMeals.breakfast ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('breakfast')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Lunch Booking</p>
+                      <p className="text-[10px] text-slate-400">12:00 PM - 1:00 PM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.lunch ? (
+                        scannedResult.servedMeals.lunch ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('lunch')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Dinner Booking</p>
+                      <p className="text-[10px] text-slate-400">7:00 PM - 8:00 PM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.dinner ? (
+                        scannedResult.servedMeals.dinner ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('dinner')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1"
+                    variant="outline"
+                    onClick={() => { setScannedResult(null); setScanStatus('idle'); }}
+                  >
+                    Scan Another
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    style={{ background: '#1D9E75' }}
+                    onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
+                  >
+                    Done
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Date Toggle & Timer */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
@@ -168,32 +396,39 @@ export function OwnerWebFood() {
                     <td className="px-6 py-4 text-slate-600">{b.room}</td>
                     <td className="px-6 py-4 text-center">
                       {b.breakfast ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600"><Check className="w-4 h-4" /></span>
+                        b.servedMeals?.breakfast ? (
+                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                        )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {b.lunch ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600"><Check className="w-4 h-4" /></span>
+                        b.servedMeals?.lunch ? (
+                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                        )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {b.dinner ? (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600"><Check className="w-4 h-4" /></span>
+                        b.servedMeals?.dinner ? (
+                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                        )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <Badge style={{
-                        background: b.status === 'Booked' ? '#E1F5EE' : '#FCEBEB',
-                        color: b.status === 'Booked' ? '#085041' : '#791F1F'
-                      }} className="border-none font-semibold">
-                        {b.status}
-                      </Badge>
+                    <td className="px-6 py-4 font-semibold text-slate-800">
+                      {b.status}
                     </td>
                   </tr>
                 ))}

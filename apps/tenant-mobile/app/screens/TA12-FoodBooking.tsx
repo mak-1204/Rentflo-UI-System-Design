@@ -3,6 +3,7 @@ import { Badge } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 
 export function TenantFoodBooking() {
+  const [showQrModal, setShowQrModal] = useState(false);
   const [isPostCutoff, setIsPostCutoff] = useState(false);
   const [meals, setMeals] = useState({
     breakfast: true,
@@ -116,9 +117,96 @@ export function TenantFoodBooking() {
               <Button className="w-full h-11 mt-4" style={{ background: '#1D9E75' }} onClick={() => alert('Booking Saved!')}>
                 Confirm Booking
               </Button>
+              
+              <button
+                onClick={() => setShowQrModal(true)}
+                className="w-full mt-2.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-slate-200"
+              >
+                <span>📷</span> Show Daily Food Pass QR
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
+              <Card className="p-5 border-2 border-teal-500 bg-[#E1F5EE]/40 text-center space-y-2">
+                <p className="font-bold text-[#085041] text-base">Tomorrow's Meals Booked</p>
+                <div className="flex justify-center gap-4 py-2">
+                  <span className="text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-full border">
+                    {meals.breakfast ? '✓ Breakfast' : '✗ Breakfast'}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-full border">
+                    {meals.lunch ? '✓ Lunch' : '✗ Lunch'}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-full border">
+                    {meals.dinner ? '✓ Dinner' : '✗ Dinner'}
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#085041]/80">Booking closed at 9:00 PM. Opens again tomorrow at 6:00 AM.</p>
+                
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="w-full mt-2 py-2 bg-[#1D9E75] hover:bg-[#1A8B67] text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow"
+                >
+                  <span>📷</span> View Food Pass QR Code
+                </button>
+              </Card>
+
+              {/* QR Code Modal Popover inside Food Booking */}
+              {showQrModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowQrModal(false)} />
+                  <div className="bg-white rounded-2xl w-full max-w-sm p-6 relative z-10 border border-slate-100 shadow-2xl text-center space-y-4">
+                    <button 
+                      onClick={() => setShowQrModal(false)}
+                      className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="space-y-1">
+                      <h4 className="text-base font-extrabold text-slate-800">Your Daily Food Pass</h4>
+                      <p className="text-xs text-slate-500">Scan this at the counter to claim your meals</p>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center space-y-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-250/70 shadow-sm">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                            JSON.stringify({
+                              tenantName: 'Rajan Kumar',
+                              roomId: 'Room 4',
+                              date: '2026-06-02',
+                              meals: { breakfast: true, lunch: true, dinner: true }
+                            })
+                          )}`} 
+                          alt="Daily Food QR Code"
+                          className="w-40 h-40"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://picsum.photos/180/180";
+                          }}
+                        />
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono tracking-widest font-bold">PASS-ID: RF-20260602-R4</div>
+                    </div>
+
+                    <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 text-left p-3 rounded-xl space-y-1">
+                      <p className="text-xs font-bold">Registered Meals (June 02):</p>
+                      <div className="flex gap-2.5 text-[10.5px] font-semibold text-emerald-700">
+                        <span>✓ Breakfast</span>
+                        <span>✓ Lunch</span>
+                        <span>✓ Dinner</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      className="w-full"
+                      style={{ background: '#1D9E75' }}
+                      onClick={() => setShowQrModal(false)}
+                    >
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              )}
               <Card className="p-5 border-2 border-teal-500 bg-[#E1F5EE]/40 text-center space-y-2">
                 <p className="font-bold text-[#085041] text-base">Tomorrow's Meals Booked</p>
                 <div className="flex justify-center gap-4 py-2">

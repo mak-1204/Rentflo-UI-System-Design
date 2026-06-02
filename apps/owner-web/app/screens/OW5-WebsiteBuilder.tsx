@@ -1,8 +1,8 @@
-import { useState, useEffect, Component, ReactNode } from 'react'; import { Card } from '@rentflo/ui';
+import { useState, useEffect, useRef, Component, ReactNode } from 'react'; import { Card } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 import { Input } from '@rentflo/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@rentflo/ui';
-import { Check, Plus, Trash2, MapPin, X, HelpCircle, Download, Move } from 'lucide-react'; import { Badge } from '@rentflo/ui';
+import { Check, Plus, Trash2, MapPin, X, HelpCircle, Download, Move, Edit } from 'lucide-react'; import { Badge } from '@rentflo/ui';
 
 interface RoomRectangle {
   id: string;
@@ -10,7 +10,7 @@ interface RoomRectangle {
   y: number; // grid y
   w: number; // width in cells
   h: number; // height in cells
-  type: string; // "Single room" | "Double room" | "Triple room" | "Bathroom" | "Common bath" | "Kitchen" | "Dining area" | "Common room" | "Corridor" | "Staircase" | "Garden" | "Parking" | "Access road" | "Terrace"
+  type: string; // "Single room" | "Double room" | "Triple room" | "Bathroom" | "Common bath" | "Kitchen" | "Dining area" | "Common room" | "Corridor" | "Staircase" | "Garden" | "Parking" | "Access road" | "Terrace" | "Other building" | "Empty land" | "Text label"
   customName: string; // e.g. "102"
   beds: number;
   doors: ('left' | 'right' | 'top' | 'bottom')[];
@@ -39,6 +39,13 @@ const getDefaultBedPositions = (bedsCount: number) => {
       { x: 50, y: 10, w: 44, h: 26 },
       { x: 25, y: 62, w: 50, h: 26 }
     ];
+  } else if (bedsCount === 4) {
+    return [
+      { x: 6, y: 10, w: 44, h: 26 },
+      { x: 50, y: 10, w: 44, h: 26 },
+      { x: 6, y: 62, w: 44, h: 26 },
+      { x: 50, y: 62, w: 44, h: 26 }
+    ];
   }
   return [];
 };
@@ -48,8 +55,6 @@ const PALETTE = [
   { name: 'Single room', category: 'ROOMS', color: '#1D9E75', text: '#FFFFFF', initials: 'SR' },
   { name: 'Double room', category: 'ROOMS', color: '#0F6E56', text: '#FFFFFF', initials: 'DR' },
   { name: 'Triple room', category: 'ROOMS', color: '#111827', text: '#FFFFFF', initials: 'TR' },
-  { name: 'Bathroom', category: 'ROOMS', color: '#0C447C', text: '#FFFFFF', initials: 'WR' },
-  { name: 'Common bath', category: 'ROOMS', color: '#534AB7', text: '#FFFFFF', initials: 'CB' },
   // COMMON AREAS
   { name: 'Kitchen', category: 'COMMON', color: '#EF9F27', text: '#FFFFFF', initials: 'KT' },
   { name: 'Dining area', category: 'COMMON', color: '#854F0B', text: '#FFFFFF', initials: 'DA' },
@@ -61,6 +66,9 @@ const PALETTE = [
   { name: 'Parking', category: 'OUTDOOR', color: '#374151', text: '#FFFFFF', initials: 'PK' },
   { name: 'Access road', category: 'OUTDOOR', color: '#111827', text: '#FFFFFF', initials: 'RD' },
   { name: 'Terrace', category: 'OUTDOOR', color: '#0F6E56', text: '#FFFFFF', initials: 'TC' },
+  { name: 'Other building', category: 'OUTDOOR', color: '#475569', text: '#FFFFFF', initials: 'OB' },
+  { name: 'Empty land', category: 'OUTDOOR', color: '#FEF08A', text: '#854F0B', initials: 'EL' },
+  { name: 'Text label', category: 'OUTDOOR', color: 'transparent', text: '#1E293B', initials: 'TX' },
 ];
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -191,6 +199,23 @@ function OwnerWebsiteBuilderComponent() {
   const [depositAmount, setDepositAmount] = useState('₹10,000 (1 Month Rent)');
   const [rentInclusions, setRentInclusions] = useState('Includes 3 Meals, Wi-Fi, Housekeeping');
 
+  // Stats variables
+  const [statsBeds, setStatsBeds] = useState('500+');
+  const [statsReviews, setStatsReviews] = useState('150+');
+  const [statsProperties, setStatsProperties] = useState('2+');
+  const [statsCities, setStatsCities] = useState('3+');
+
+  // Custom amenity input
+  const [newAmenity, setNewAmenity] = useState('');
+
+  // Hero Background Slider Images
+  const [heroImages, setHeroImages] = useState<string[]>(() => [
+    'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=1200&q=80'
+  ]);
+  const [newHeroImageUrl, setNewHeroImageUrl] = useState('');
+
   // Testimonials state and inputs
   const [testimonials, setTestimonials] = useState<any[]>([
     { name: 'Vijay Nair', duration: 'Staying since 8 months', comment: 'Absolutely clean PG with prompt support. The food tastes just like home. Management is helpful and Razorpay bills are transparent.' },
@@ -247,21 +272,6 @@ function OwnerWebsiteBuilderComponent() {
           bedStatuses: ['Vacant', 'Occupied']
         },
         {
-          id: 'room-3',
-          x: 1,
-          y: 7,
-          w: 4,
-          h: 4,
-          type: 'Bathroom',
-          customName: 'CB-1',
-          beds: 0,
-          doors: ['top'],
-          windows: [],
-          vacancy: 'Vacant',
-          color: '#0C447C',
-          bedStatuses: []
-        },
-        {
           id: 'room-4',
           x: 6,
           y: 8,
@@ -304,9 +314,17 @@ function OwnerWebsiteBuilderComponent() {
 
   const [copiedRoom, setCopiedRoom] = useState<{ room: RoomRectangle; sourceFloor: string } | null>(null);
 
-  // Load custom state from localStorage on init with validation check
+  const lastSavedRef = useRef<string | null>(null);
+  const roomsDataRef = useRef(roomsData);
+
   useEffect(() => {
+    roomsDataRef.current = roomsData;
+  }, [roomsData]);
+
+  // Load custom state from localStorage on init with validation check
+  const loadState = () => {
     const saved = localStorage.getItem('rentflo_builder_state');
+    if (saved === lastSavedRef.current) return;
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -350,15 +368,26 @@ function OwnerWebsiteBuilderComponent() {
         if (parsed.houseRules) setHouseRules(parsed.houseRules);
         if (parsed.depositAmount) setDepositAmount(parsed.depositAmount);
         if (parsed.rentInclusions) setRentInclusions(parsed.rentInclusions);
+        if (parsed.statsBeds) setStatsBeds(parsed.statsBeds);
+        if (parsed.statsReviews) setStatsReviews(parsed.statsReviews);
+        if (parsed.statsProperties) setStatsProperties(parsed.statsProperties);
+        if (parsed.statsCities) setStatsCities(parsed.statsCities);
+        if (parsed.heroImages) setHeroImages(parsed.heroImages);
       } catch (e) {
         console.error(e);
       }
     }
+  };
+
+  useEffect(() => {
+    loadState();
+    window.addEventListener('rentflo_website_update', loadState);
+    return () => window.removeEventListener('rentflo_website_update', loadState);
   }, []);
 
   // Central auto-save Effect to ensure zero stale closures
   useEffect(() => {
-    localStorage.setItem('rentflo_builder_state', JSON.stringify({
+    const serialized = JSON.stringify({
       pgName,
       tagline,
       amenities,
@@ -380,7 +409,14 @@ function OwnerWebsiteBuilderComponent() {
       houseRules,
       depositAmount,
       rentInclusions,
-    }));
+      statsBeds,
+      statsReviews,
+      statsProperties,
+      statsCities,
+      heroImages,
+    });
+    lastSavedRef.current = serialized;
+    localStorage.setItem('rentflo_builder_state', serialized);
     window.dispatchEvent(new Event('rentflo_website_update'));
   }, [
     pgName,
@@ -404,6 +440,11 @@ function OwnerWebsiteBuilderComponent() {
     houseRules,
     depositAmount,
     rentInclusions,
+    statsBeds,
+    statsReviews,
+    statsProperties,
+    statsCities,
+    heroImages,
   ]);
 
   // Compatibility saveState helper
@@ -465,7 +506,7 @@ function OwnerWebsiteBuilderComponent() {
         const deltaY = e.clientY - draggedBed.startY;
         
         // Find the room on canvas to get its pixel size
-        const room = (roomsData[activeFloor] || []).find(r => r.id === draggedBed.roomId);
+        const room = (roomsDataRef.current[activeFloor] || []).find(r => r.id === draggedBed.roomId);
         if (room) {
           const roomWidthPx = room.w * gridSize;
           const roomHeightPx = room.h * gridSize;
@@ -516,7 +557,7 @@ function OwnerWebsiteBuilderComponent() {
         const deltaX = e.clientX - draggedLabel.startX;
         const deltaY = e.clientY - draggedLabel.startY;
         
-        const room = (roomsData[activeFloor] || []).find(r => r.id === draggedLabel.roomId);
+        const room = (roomsDataRef.current[activeFloor] || []).find(r => r.id === draggedLabel.roomId);
         if (room) {
           const roomWidthPx = room.w * gridSize;
           const roomHeightPx = room.h * gridSize;
@@ -917,6 +958,46 @@ function OwnerWebsiteBuilderComponent() {
     setActiveFloor(floorName);
   };
 
+  const renameFloor = (oldName: string) => {
+    const newName = prompt('Enter new floor name:', oldName);
+    if (!newName || newName === oldName) return;
+    if (floors.includes(newName)) {
+      alert('A floor with this name already exists.');
+      return;
+    }
+    setFloors(prev => prev.map(f => f === oldName ? newName : f));
+    setRoomsData(prev => {
+      const copy = { ...prev };
+      copy[newName] = copy[oldName] || [];
+      delete copy[oldName];
+      return copy;
+    });
+    if (activeFloor === oldName) {
+      setActiveFloor(newName);
+    }
+  };
+
+  const deleteFloor = (floorName: string) => {
+    if (floors.length <= 1) {
+      alert('You must keep at least one floor.');
+      return;
+    }
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${floorName}"? This will delete all room blocks on this floor.`);
+    if (!confirmDelete) return;
+
+    const nextFloors = floors.filter(f => f !== floorName);
+    setFloors(nextFloors);
+    setRoomsData(prev => {
+      const copy = { ...prev };
+      delete copy[floorName];
+      return copy;
+    });
+    if (activeFloor === floorName) {
+      setActiveFloor(nextFloors[0]);
+    }
+    setActiveRoomId(null);
+  };
+
   const handleCopyFloorLayout = (sourceFloor: string) => {
     const sourceRooms = roomsData[sourceFloor] || [];
     if (sourceRooms.length === 0) {
@@ -1144,7 +1225,6 @@ function OwnerWebsiteBuilderComponent() {
           <TabsList className="bg-white border border-slate-200 rounded-lg p-1 text-slate-500 flex flex-wrap gap-1 shadow-sm">
             <TabsTrigger value="cover" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">General</TabsTrigger>
             <TabsTrigger value="floor_plan" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Architect Blueprint Plan</TabsTrigger>
-            <TabsTrigger value="location" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Office Location & Commute</TabsTrigger>
             <TabsTrigger value="amenities" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Amenities</TabsTrigger>
             <TabsTrigger value="food" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Food Menu</TabsTrigger>
             <TabsTrigger value="rules" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">House Rules</TabsTrigger>
@@ -1173,6 +1253,65 @@ function OwnerWebsiteBuilderComponent() {
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Rent Inclusions Description</label>
                   <Input value={rentInclusions} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setRentInclusions(e.target.value); }} />
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-4 mt-2 space-y-4">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Location & Proximity Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Display Address</label>
+                    <Input value={address} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setAddress(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Commute Destination Office</label>
+                    <Input value={commuteDestination} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteDestination(e.target.value); }} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Walk Time (e.g. 5 mins)</label>
+                    <Input value={commuteWalkTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteWalkTime(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Bike Time (e.g. 2 mins)</label>
+                    <Input value={commuteBikeTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteBikeTime(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Transit distance (e.g. 300m away)</label>
+                    <Input value={commuteTransitTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteTransitTime(e.target.value); }} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Map Latitude</label>
+                    <Input type="number" step="0.0001" value={mapCoords.lat} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setMapCoords(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 })); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Map Longitude</label>
+                    <Input type="number" step="0.0001" value={mapCoords.lng} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setMapCoords(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 })); }} />
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-100 pt-4 mt-2">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Portfolio Website Stats Bar</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Premium Beds</label>
+                    <Input value={statsBeds} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsBeds(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Resident Reviews</label>
+                    <Input value={statsReviews} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsReviews(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">PG Properties</label>
+                    <Input value={statsProperties} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsProperties(e.target.value); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Cities Available</label>
+                    <Input value={statsCities} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsCities(e.target.value); }} />
+                  </div>
                 </div>
               </div>
             </Card>
@@ -1266,16 +1405,39 @@ function OwnerWebsiteBuilderComponent() {
           <TabsContent value="floor_plan" className="space-y-4 mt-4">
             
             {/* Top floor tabs selector */}
-            <div className="flex gap-1.5 border-b border-slate-200 pb-2">
-              {floors.map(fl => (
-                <button
-                  key={fl}
-                  onClick={() => { setActiveFloor(fl); setActiveRoomId(null); }}
-                  className={`px-4 py-1.5 text-xs font-semibold rounded-md border transition-all ${activeFloor === fl ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm'}`}
-                >
-                  {fl}
-                </button>
-              ))}
+            <div className="flex gap-1.5 border-b border-slate-200 pb-2 flex-wrap">
+              {floors.map(fl => {
+                const isActive = activeFloor === fl;
+                return (
+                  <div
+                    key={fl}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${isActive ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm'}`}
+                  >
+                    <button
+                      onClick={() => { setActiveFloor(fl); setActiveRoomId(null); }}
+                      className="cursor-pointer"
+                    >
+                      {fl}
+                    </button>
+                    <button
+                      onClick={() => renameFloor(fl)}
+                      className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity p-0.5 hover:bg-black/10 rounded"
+                      title={`Rename ${fl}`}
+                    >
+                      <Edit className="w-3 h-3" />
+                    </button>
+                    {floors.length > 1 && (
+                      <button
+                        onClick={() => deleteFloor(fl)}
+                        className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity p-0.5 hover:bg-black/10 rounded"
+                        title={`Delete ${fl}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
               <button 
                 onClick={addFloor}
                 className="px-4 py-1.5 text-xs font-semibold rounded-md border border-dashed border-teal-600 text-[#1D9E75] bg-white flex items-center gap-1 hover:bg-slate-50 shadow-sm"
@@ -1319,11 +1481,6 @@ function OwnerWebsiteBuilderComponent() {
                       {g.label}
                     </button>
                   ))}
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-500 font-semibold">SCALE:</span>
-                  <Badge className="bg-[#E1F5EE] text-[#085041] hover:bg-[#E1F5EE] border border-teal-200/50 shadow-none">1 cell = 1m</Badge>
                 </div>
               </div>
 
@@ -1423,7 +1580,7 @@ function OwnerWebsiteBuilderComponent() {
               >
                 {/* SVG/Grid Drawing Board */}
                 <div 
-                  className="relative border border-slate-200 bg-white shadow-md rounded overflow-visible"
+                  className="grid-board relative border border-slate-200 bg-white shadow-md rounded overflow-visible"
                   style={{
                     width: `${canvasCols * gridSize}px`, 
                     height: `${canvasRows * gridSize}px`,
@@ -1439,19 +1596,22 @@ function OwnerWebsiteBuilderComponent() {
                     const width = room.w * gridSize;
                     const height = room.h * gridSize;
 
+                    const isTextLabel = room.type === 'Text label';
                     return (
                       <div
                         key={room.id}
                         onMouseDown={(e) => handleDragStart(room.id, e)}
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute rounded flex flex-col items-center justify-center border-[3px] cursor-grab active:cursor-grabbing select-none"
+                        className={`absolute rounded flex flex-col items-center justify-center select-none ${isTextLabel ? '' : 'border-[3px]'} cursor-grab active:cursor-grabbing`}
                         style={{
                           left: `${left}px`,
                           top: `${top}px`,
                           width: `${width}px`,
                           height: `${height}px`,
                           backgroundColor: room.color,
-                          borderColor: isSelected ? '#EF9F27' : '#111827',
+                          borderColor: isSelected ? '#EF9F27' : (isTextLabel ? 'transparent' : '#111827'),
+                          borderWidth: isTextLabel ? (isSelected ? '2px' : '0px') : '3px',
+                          borderStyle: isTextLabel && isSelected ? 'dashed' : 'solid',
                           boxShadow: isSelected ? '0 0 12px rgba(239, 159, 39, 0.6)' : 'none',
                           zIndex: isSelected ? 30 : 10
                         }}
@@ -1466,7 +1626,11 @@ function OwnerWebsiteBuilderComponent() {
                              <div 
                                onMouseDown={(e) => handleLabelDragStart(room.id, e)}
                                onClick={(e) => e.stopPropagation()}
-                               className="absolute text-xs font-bold font-sans z-10 text-white bg-slate-900/60 px-1.5 py-0.5 rounded shadow cursor-move select-none flex items-center justify-center pointer-events-auto"
+                               className={`absolute text-xs font-bold font-sans z-10 rounded cursor-move select-none flex items-center justify-center pointer-events-auto ${
+                                 isTextLabel 
+                                   ? 'text-slate-800 bg-transparent shadow-none font-medium' 
+                                   : 'text-white bg-slate-900/60 px-1.5 py-0.5 shadow'
+                               }`}
                                style={{
                                  left: `${labelX}%`,
                                  top: `${labelY}%`,
@@ -1479,6 +1643,82 @@ function OwnerWebsiteBuilderComponent() {
                              </div>
                            );
                         })()}
+
+                        {/* Access Road symbol */}
+                        {room.type === 'Access road' && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1">
+                            {room.w >= room.h ? (
+                              <div className="w-full border-t-[3px] border-dashed border-white opacity-70" />
+                            ) : (
+                              <div className="h-full border-l-[3px] border-dashed border-white opacity-70" />
+                            )}
+                          </div>
+                        )}
+
+                        {/* Staircase symbol */}
+                        {room.type === 'Staircase' && (
+                          <div className="absolute inset-0 flex flex-col justify-around pointer-events-none p-1 opacity-60">
+                            <div className="flex flex-col h-full w-full justify-between border-x border-slate-700/40">
+                              {[...Array(6)].map((_, i) => (
+                                <div key={i} className="border-t border-slate-700/40 w-full h-0" />
+                              ))}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-slate-855" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Kitchen symbol */}
+                        {room.type === 'Kitchen' && (
+                          <div className="absolute inset-0 pointer-events-none p-1.5 flex items-center justify-around opacity-55">
+                            <div className="border-2 border-amber-900/60 rounded p-0.5 flex gap-0.5 bg-amber-50/20">
+                              <div className="w-3.5 h-3.5 rounded-full border border-amber-955 flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full border border-dashed border-amber-955" />
+                              </div>
+                              <div className="w-3.5 h-3.5 rounded-full border border-amber-955 flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full border border-dashed border-amber-955" />
+                              </div>
+                            </div>
+                            <div className="border border-dashed border-amber-900/60 w-7 h-7 rounded flex items-center justify-center text-[7px] font-bold text-amber-900">
+                              SINK
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Dining Area symbol */}
+                        {room.type === 'Dining area' && (
+                          <div className="absolute inset-0 pointer-events-none p-1.5 flex items-center justify-center opacity-50 gap-2">
+                            <div className="relative border-2 border-amber-900/60 w-10 h-5 rounded flex items-center justify-center bg-amber-50/10">
+                              <div className="absolute -top-1 left-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -top-1 right-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -bottom-1 left-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
+                              <div className="absolute -bottom-1 right-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
+                              <span className="text-[6px] font-bold text-amber-955">TABLE</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Other Building hatch pattern */}
+                        {room.type === 'Other building' && (
+                          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden" style={{
+                            backgroundImage: 'repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 0, transparent 8px)',
+                            backgroundSize: '12px 12px'
+                          }} />
+                        )}
+
+                        {/* Empty Land grass graphic */}
+                        {room.type === 'Empty land' && (
+                          <div className="absolute inset-0 pointer-events-none p-1 opacity-55 overflow-hidden flex flex-wrap gap-2 justify-around items-center">
+                            {[...Array(Math.max(2, Math.floor((room.w * room.h) / 3)))].map((_, i) => (
+                              <svg key={i} className="w-3.5 h-3.5 text-emerald-800/60" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2a1 1 0 0 1 1 1v7.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V3a1 1 0 0 1 1-1z" />
+                              </svg>
+                            ))}
+                          </div>
+                        )}
 
                         {/* Realistic Beds Layout */}
                         {renderBeds(room)}
@@ -1535,9 +1775,25 @@ function OwnerWebsiteBuilderComponent() {
                     <div className="space-y-4 text-xs">
                       <div>
                         <label className="block text-slate-500 font-bold mb-1">Block Category</label>
-                        <Badge variant="secondary" style={{ background: selectedRoom.color, color: '#FFF' }} className="border-none font-semibold">
-                          {selectedRoom.type}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" style={{ background: selectedRoom.color, color: '#FFF' }} className="border-none font-semibold">
+                            {selectedRoom.type}
+                          </Badge>
+                          <button
+                            onClick={() => {
+                              const nextW = Math.max(2, Math.min(canvasCols - selectedRoom.x, selectedRoom.h));
+                              const nextH = Math.max(2, Math.min(canvasRows - selectedRoom.y, selectedRoom.w));
+                              updateRoomProperties({ w: nextW, h: nextH });
+                            }}
+                            className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold rounded-md bg-[#1D9E75] text-white hover:bg-[#0F6E56] transition-all shadow-sm"
+                            title="Rotate 90° — swaps width and height"
+                          >
+                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
+                            </svg>
+                            Rotate 90°
+                          </button>
+                        </div>
                       </div>
 
                       <div>
@@ -1588,7 +1844,7 @@ function OwnerWebsiteBuilderComponent() {
                           <div>
                             <label className="block text-slate-500 font-bold mb-1">Sharing Type</label>
                             <select
-                              value={selectedRoom.sharingType || (selectedRoom.beds === 1 ? '1 Sharing' : selectedRoom.beds === 2 ? '2 Sharing' : selectedRoom.beds === 3 ? '3 Sharing' : '1 Sharing')}
+                              value={selectedRoom.sharingType || (selectedRoom.beds === 1 ? '1 Sharing' : selectedRoom.beds === 2 ? '2 Sharing' : selectedRoom.beds === 3 ? '3 Sharing' : selectedRoom.beds === 4 ? '4 Sharing' : '1 Sharing')}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 const bedsCount = val.includes('1') ? 1 : val.includes('2') ? 2 : val.includes('3') ? 3 : val.includes('4') ? 4 : selectedRoom.beds;
@@ -1652,46 +1908,6 @@ function OwnerWebsiteBuilderComponent() {
                                   </label>
                                 );
                               })}
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-slate-500 font-bold mb-1">Beds (Realistic Mattresses)</label>
-                            <input 
-                              type="range" 
-                              min="0" 
-                              max="4" 
-                              value={selectedRoom.beds} 
-                              onChange={(e) => {
-                                const count = parseInt(e.target.value);
-                                const nextPositions = getDefaultBedPositions(count);
-                                const currentStatuses = selectedRoom.bedStatuses || [];
-                                let nextStatuses = [...currentStatuses];
-                                if (nextStatuses.length < count) {
-                                  const pad = Array(count - nextStatuses.length).fill('Vacant');
-                                  nextStatuses = [...nextStatuses, ...pad];
-                                } else if (nextStatuses.length > count) {
-                                  nextStatuses = nextStatuses.slice(0, count);
-                                }
-
-                                const allVacant = nextStatuses.every(s => s === 'Vacant');
-                                const allOccupied = nextStatuses.every(s => s === 'Occupied');
-                                const overallVacancy = allVacant ? 'Vacant' : allOccupied ? 'Occupied' : '1/2 Filled';
-                                
-                                updateRoomProperties({
-                                  beds: count,
-                                  bedStatuses: nextStatuses,
-                                  bedPositions: nextPositions,
-                                  vacancy: overallVacancy,
-                                  sharingType: count > 0 ? `${count} Sharing` : 'Common / Non-residential'
-                                });
-                              }}
-                              className="w-full accent-[#1D9E75]"
-                            />
-                            <div className="flex justify-between text-[10px] text-slate-500">
-                              <span>0 Beds</span>
-                              <span>{selectedRoom.beds} Active</span>
-                              <span>4 Beds</span>
                             </div>
                           </div>
 
@@ -1884,74 +2100,6 @@ function OwnerWebsiteBuilderComponent() {
             </div>
           </TabsContent>
 
-          {/* TAB 3: LIVE MAP LOCATOR */}
-          <TabsContent value="location" className="space-y-4 mt-4">
-            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Office Map Location</h3>
-                <p className="text-xs text-slate-500 mt-1">Click anywhere on the map to drop the PG coordinate pin. Sunrise PG location will update instantly.</p>
-              </div>
-
-              <div 
-                className="relative h-64 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden cursor-crosshair flex items-center justify-center"
-                onClick={handleMapClick}
-              >
-                <svg className="absolute inset-0 w-full h-full text-slate-200" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                  <line x1="0" y1="100" x2="600" y2="100" stroke="#e2e8f0" strokeWidth="24" />
-                  <line x1="200" y1="0" x2="200" y2="400" stroke="#e2e8f0" strokeWidth="24" />
-                </svg>
-
-                <div 
-                  className="absolute pointer-events-none flex flex-col items-center -mt-8"
-                  style={{
-                    left: `${((mapCoords.lng - 77.6200) / 0.0150) * 100}%`,
-                    top: `${(1 - (mapCoords.lat - 12.9300) / 0.0100) * 100}%`,
-                  }}
-                >
-                  <MapPin className="w-8 h-8 text-rose-600 fill-current animate-bounce" />
-                  <Badge style={{ background: '#993C1D', color: '#FFFFFF' }} className="text-[9px] -mt-1 shadow-md border-none">
-                    Sunset Office Pin
-                  </Badge>
-                </div>
-
-                <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 text-xs text-slate-700 space-y-1 shadow-md">
-                  <p><strong>Configured Address:</strong> {address}</p>
-                  <p className="text-[10px] text-slate-500">Lat: {mapCoords.lat} · Lng: {mapCoords.lng} (Click map to change)</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Office Proximity & Commute Times</h3>
-                <p className="text-xs text-slate-500 mt-1">Configure approximate commute details shown to prospects working at this target office.</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Target Office Name</label>
-                  <Input value={commuteDestination} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteDestination(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Walking Commute Time</label>
-                  <Input value={commuteWalkTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteWalkTime(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Bike/Auto Commute Time</label>
-                  <Input value={commuteBikeTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteBikeTime(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Nearest Transit Hub Proximity</label>
-                  <Input value={commuteTransitTime} className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" onChange={(e) => setCommuteTransitTime(e.target.value)} />
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
           {/* TAB 4: AMENITIES */}
           <TabsContent value="amenities" className="space-y-4 mt-4">
             <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
@@ -1967,6 +2115,31 @@ function OwnerWebsiteBuilderComponent() {
                     <input type="checkbox" checked={amenities[amName]} onChange={() => {}} className="accent-[#1D9E75] cursor-pointer" />
                   </div>
                 ))}
+              </div>
+              <div className="border-t border-slate-100 pt-4 mt-4 space-y-2">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Add Custom Amenity</h4>
+                <div className="flex gap-2 max-w-md">
+                  <Input 
+                    value={newAmenity}
+                    onChange={(e) => setNewAmenity(e.target.value)}
+                    placeholder="e.g. Swimming Pool, Squash Court..." 
+                    className="bg-white border-slate-200 text-slate-900 text-xs h-9"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (!newAmenity.trim()) return;
+                      setAmenities(prev => ({
+                        ...prev,
+                        [newAmenity.trim()]: true
+                      }));
+                      setNewAmenity('');
+                    }}
+                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                    className="text-xs h-9 px-4 font-semibold rounded-lg shadow-sm"
+                  >
+                    Add Amenity
+                  </Button>
+                </div>
               </div>
             </Card>
           </TabsContent>
@@ -2129,6 +2302,58 @@ function OwnerWebsiteBuilderComponent() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-6">
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Hero Background Slider Images</h3>
+                <p className="text-xs text-slate-500 mt-1">Manage the high-resolution slider images displayed at the very top of your portfolio website.</p>
+                
+                {/* Add Hero Image URL */}
+                <div className="mt-4 flex gap-2 max-w-xl">
+                  <Input 
+                    value={newHeroImageUrl} 
+                    onChange={(e) => setNewHeroImageUrl(e.target.value)} 
+                    placeholder="Paste high-res Hero Image URL (e.g. Unsplash link)" 
+                    className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-9 text-xs"
+                  />
+                  <Button 
+                    onClick={() => {
+                      const url = newHeroImageUrl.trim();
+                      if (!url) return;
+                      setHeroImages(prev => [...prev, url]);
+                      setNewHeroImageUrl('');
+                    }}
+                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                    className="h-9 text-xs font-semibold px-4 rounded-lg shadow-sm"
+                  >
+                    Add Image
+                  </Button>
+                </div>
+
+                {/* Hero Images Grid */}
+                {heroImages.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-4">
+                    {heroImages.map((imgUrl, index) => (
+                      <div key={index} className="flex flex-col border border-slate-200 bg-slate-50 rounded-md p-1.5 shadow-sm space-y-1 group relative">
+                        <div className="relative rounded overflow-hidden h-16 bg-slate-100">
+                          <img src={imgUrl} alt={`Hero slider ${index}`} className="w-full h-full object-cover" />
+                          <button 
+                            onClick={() => {
+                              setHeroImages(prev => prev.filter((_, idx) => idx !== index));
+                            }}
+                            className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
+                            title="Delete Hero Image"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <span className="text-[8px] text-slate-400 font-bold text-center">Slide #{index + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic mt-2">No custom Hero images. Falling back to category gallery photos.</p>
+                )}
               </div>
 
               <div className="border-t border-slate-200 pt-6">

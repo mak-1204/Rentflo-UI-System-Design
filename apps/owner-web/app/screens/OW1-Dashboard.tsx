@@ -1,4 +1,6 @@
-import { useState } from 'react'; import { Bell, TrendingUp, TrendingDown, IndianRupee, Zap, Droplets, Wrench, ShieldAlert, Check, Plus } from 'lucide-react'; import { Avatar, AvatarFallback } from '@rentflo/ui';
+import { useState } from 'react';
+import { Bell, TrendingUp, TrendingDown, IndianRupee, Zap, Droplets, Wrench, ShieldAlert, Check, Plus, QrCode, Scan, X } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@rentflo/ui';
 import { Badge } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 import { Card } from '@rentflo/ui';
@@ -7,9 +9,72 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 export function OwnerWebDashboard() {
   const [notif, setNotif] = useState<string | null>(null);
 
+  // Scanner simulator state
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
+  const [scannedResult, setScannedResult] = useState<any>(null);
+
+  const [bookings, setBookings] = useState([
+    { name: 'Amit Kumar', room: 'Room 4', breakfast: true, lunch: false, dinner: true, servedMeals: { breakfast: true } },
+    { name: 'Sanjay Ramaswamy', room: 'Room 2', breakfast: true, lunch: true, dinner: true, servedMeals: {} },
+    { name: 'Vijay Nair', room: 'Room 8', breakfast: true, lunch: true, dinner: false, servedMeals: { breakfast: true, lunch: true } },
+  ]);
+
   const triggerToast = (msg: string) => {
     setNotif(msg);
     setTimeout(() => setNotif(null), 3000);
+  };
+
+  const handleSimulateScan = (residentName: string) => {
+    setScanStatus('scanning');
+    setTimeout(() => {
+      const resident = bookings.find(b => b.name === residentName);
+      if (resident) {
+        setScannedResult({
+          name: resident.name,
+          room: resident.room,
+          date: '2026-06-02',
+          meals: {
+            breakfast: resident.breakfast,
+            lunch: resident.lunch,
+            dinner: resident.dinner
+          },
+          servedMeals: resident.servedMeals || {}
+        });
+        setScanStatus('success');
+      } else {
+        setScanStatus('error');
+      }
+    }, 1200);
+  };
+
+  const handleServeMeal = (mealType: 'breakfast' | 'lunch' | 'dinner') => {
+    if (!scannedResult) return;
+    
+    // Update local bookings state
+    setBookings(prev => prev.map(b => {
+      if (b.name === scannedResult.name) {
+        return {
+          ...b,
+          servedMeals: {
+            ...(b.servedMeals || {}),
+            [mealType]: true
+          }
+        };
+      }
+      return b;
+    }));
+
+    // Update scanned result to show checkmark instantly
+    setScannedResult(prev => ({
+      ...prev,
+      servedMeals: {
+        ...(prev.servedMeals || {}),
+        [mealType]: true
+      }
+    }));
+
+    triggerToast(`Marked ${mealType} as served for ${scannedResult.name}!`);
   };
 
   const metrics = [
@@ -50,7 +115,7 @@ export function OwnerWebDashboard() {
   ];
   
   return (
-    <div className="h-full overflow-y-auto text-left bg-[#F8F9FA] pb-12">
+    <div className="h-full overflow-y-auto text-left bg-[#F8F9FA] pb-12 relative">
       {/* Toast */}
       {notif && (
         <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
@@ -65,6 +130,13 @@ export function OwnerWebDashboard() {
           <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>Sunrise PG · Koramangala · June 2026</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowScanner(true)}
+            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+            className="hover:opacity-90 flex items-center gap-2 h-9 px-3 text-xs font-semibold rounded-lg shadow-sm"
+          >
+            <QrCode className="w-4 h-4" /> Scan Food Pass
+          </Button>
           <button className="relative p-2" onClick={() => triggerToast('No new notifications!')}>
             <Bell className="w-5 h-5" style={{ color: '#6B7280' }} />
             <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#EF9F27' }}></div>
@@ -74,6 +146,167 @@ export function OwnerWebDashboard() {
           </Avatar>
         </div>
       </div>
+
+      {/* QR Scanner Simulator Modal inside Dashboard */}
+      {showScanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }} />
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative z-10 border border-slate-100 shadow-2xl space-y-4">
+            <button 
+              onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="space-y-1">
+              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5"><Scan className="w-5 h-5 text-[#1D9E75]" /> Scanner: Daily Food Pass</h4>
+              <p className="text-xs text-slate-500">Simulate or scan active resident food passes for verification</p>
+            </div>
+
+            {scanStatus === 'idle' && (
+              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#1D9E75] flex items-center justify-center">
+                  <QrCode className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-slate-800">Ready to Scan</p>
+                  <p className="text-xs text-slate-400">Click a resident below to simulate camera scanning their QR pass</p>
+                </div>
+                <div className="w-full space-y-1.5 pt-2">
+                  {bookings.map(b => (
+                    <button
+                      key={b.name}
+                      onClick={() => handleSimulateScan(b.name)}
+                      className="w-full py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold shadow-sm transition-all"
+                    >
+                      Scan QR for {b.name} ({b.room})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {scanStatus === 'scanning' && (
+              <div className="bg-slate-900 rounded-xl p-12 flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden h-[240px]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,158,117,0.15),transparent)] animate-pulse" />
+                <div className="absolute left-0 right-0 h-1 bg-[#1D9E75] shadow-[0_0_10px_#1D9E75] top-0 animate-[bounce_2s_infinite]" />
+                <div className="w-16 h-16 rounded-xl border-2 border-white/20 flex items-center justify-center text-white text-xl animate-pulse">
+                  📷
+                </div>
+                <p className="text-sm font-bold text-white relative z-10">Accessing Camera Viewport...</p>
+                <p className="text-xs text-slate-400 relative z-10">Scanning QR pattern...</p>
+              </div>
+            )}
+
+            {scanStatus === 'success' && scannedResult && (
+              <div className="space-y-4 text-left">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-extrabold text-emerald-950">{scannedResult.name}</p>
+                    <p className="text-xs text-emerald-800">{scannedResult.room} · Daily Food Pass</p>
+                  </div>
+                  <Badge className="bg-emerald-500 text-white font-bold border-none">VALID PASS ✓</Badge>
+                </div>
+
+                <div className="border border-slate-200 rounded-xl divide-y text-xs text-slate-700">
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Breakfast Booking</p>
+                      <p className="text-[10px] text-slate-400">8:00 AM - 9:00 AM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.breakfast ? (
+                        scannedResult.servedMeals.breakfast ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('breakfast')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Lunch Booking</p>
+                      <p className="text-[10px] text-slate-400">12:00 PM - 1:00 PM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.lunch ? (
+                        scannedResult.servedMeals.lunch ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('lunch')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">Dinner Booking</p>
+                      <p className="text-[10px] text-slate-400">7:00 PM - 8:00 PM</p>
+                    </div>
+                    <div>
+                      {scannedResult.meals.dinner ? (
+                        scannedResult.servedMeals.dinner ? (
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                            className="h-7 text-[10px]"
+                            onClick={() => handleServeMeal('dinner')}
+                          >
+                            Mark Served
+                          </Button>
+                        )
+                      ) : (
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1"
+                    variant="outline"
+                    onClick={() => { setScannedResult(null); setScanStatus('idle'); }}
+                  >
+                    Scan Another
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    style={{ background: '#1D9E75' }}
+                    onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
+                  >
+                    Done
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       <div className="p-8 space-y-6">
         {/* Metrics Grid */}

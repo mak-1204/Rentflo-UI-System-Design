@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; import { Check, AlertTriangle, Megaphone, Trash2, Calendar, Sparkles, Clock, CheckCircle2, User, Image as ImageIcon, Plus } from 'lucide-react'; import { Card } from '@rentflo/ui';
+import { useState, useEffect } from 'react'; import { Check, AlertTriangle, Megaphone, Trash2, Calendar, Sparkles, Clock, CheckCircle2, User, Image as ImageIcon, Plus, MapPin } from 'lucide-react'; import { Card } from '@rentflo/ui';
 import { Badge } from '@rentflo/ui';
 import { Button } from '@rentflo/ui';
 import { Input } from '@rentflo/ui';
@@ -33,7 +33,7 @@ interface CleaningTask {
 }
 
 export function OwnerWebOperations() {
-  const [activeTab, setActiveTab] = useState<'complaints' | 'announcements' | 'cleaning'>('complaints');
+  const [activeTab, setActiveTab] = useState<'complaints' | 'announcements' | 'cleaning' | 'location'>('complaints');
   const [notif, setNotif] = useState<string | null>(null);
 
   // Complaints state
@@ -104,6 +104,58 @@ export function OwnerWebOperations() {
   const [newCategory, setNewCategory] = useState<'Maintenance' | 'Power Cut' | 'Water Shortage' | 'General'>('General');
   const [newMessage, setNewMessage] = useState('');
 
+  // Location Map Coords & Commute state
+  const [mapCoords, setMapCoords] = useState({ lat: 12.9345, lng: 77.6269 });
+  const [address, setAddress] = useState('No. 14, 5th Cross, Koramangala 4th Block, Bengaluru, 560034');
+  const [commuteWalkTime, setCommuteWalkTime] = useState('5 mins');
+  const [commuteBikeTime, setCommuteBikeTime] = useState('2 mins');
+  const [commuteTransitTime, setCommuteTransitTime] = useState('300m away');
+  const [commuteDestination, setCommuteDestination] = useState('Manyata Tech Park');
+
+  // Load custom state from localStorage on init
+  useEffect(() => {
+    const saved = localStorage.getItem('rentflo_builder_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.mapCoords) setMapCoords(parsed.mapCoords);
+        if (parsed.address) setAddress(parsed.address);
+        if (parsed.commuteWalkTime) setCommuteWalkTime(parsed.commuteWalkTime);
+        if (parsed.commuteBikeTime) setCommuteBikeTime(parsed.commuteBikeTime);
+        if (parsed.commuteTransitTime) setCommuteTransitTime(parsed.commuteTransitTime);
+        if (parsed.commuteDestination) setCommuteDestination(parsed.commuteDestination);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const saveStateToLocalStorage = (updates: any) => {
+    const saved = localStorage.getItem('rentflo_builder_state');
+    let currentState = {};
+    if (saved) {
+      try {
+        currentState = JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    const merged = { ...currentState, ...updates };
+    localStorage.setItem('rentflo_builder_state', JSON.stringify(merged));
+    window.dispatchEvent(new Event('rentflo_website_update'));
+  };
+
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const lat = +(12.9300 + (1 - y / rect.height) * 0.0100).toFixed(4);
+    const lng = +(77.6200 + (x / rect.width) * 0.0150).toFixed(4);
+    const newCoords = { lat, lng };
+    setMapCoords(newCoords);
+    saveStateToLocalStorage({ mapCoords: newCoords });
+  };
+
   const triggerToast = (msg: string) => {
     setNotif(msg);
     setTimeout(() => setNotif(null), 3000);
@@ -169,6 +221,12 @@ export function OwnerWebOperations() {
           className={`pb-3 px-6 text-sm font-semibold border-b-2 transition-all ${activeTab === 'cleaning' ? 'border-[#1D9E75] text-[#1D9E75]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
         >
           Cleaning Schedule
+        </button>
+        <button
+          onClick={() => setActiveTab('location')}
+          className={`pb-3 px-6 text-sm font-semibold border-b-2 transition-all ${activeTab === 'location' ? 'border-[#1D9E75] text-[#1D9E75]' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
+        >
+          PG Location & Commute
         </button>
       </div>
 
@@ -408,6 +466,126 @@ export function OwnerWebOperations() {
               </tbody>
             </table>
           </Card>
+        </div>
+      )}
+
+      {/* TAB 4: PG LOCATION */}
+      {activeTab === 'location' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="p-6 lg:col-span-2 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">PG Map Location</h3>
+              <p className="text-xs text-slate-500 mt-1">Click anywhere on the map to drop the PG coordinate pin. Sunrise PG location will update instantly.</p>
+            </div>
+
+            <div 
+              className="relative h-[420px] bg-slate-50 border border-slate-200 rounded-xl overflow-hidden cursor-crosshair flex items-center justify-center"
+              onClick={handleMapClick}
+            >
+              <svg className="absolute inset-0 w-full h-full text-slate-200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                <line x1="0" y1="150" x2="800" y2="150" stroke="#e2e8f0" strokeWidth="24" />
+                <line x1="300" y1="0" x2="300" y2="500" stroke="#e2e8f0" strokeWidth="24" />
+              </svg>
+
+              <div 
+                className="absolute pointer-events-none flex flex-col items-center -mt-8"
+                style={{
+                  left: `${((mapCoords.lng - 77.6200) / 0.0150) * 100}%`,
+                  top: `${(1 - (mapCoords.lat - 12.9300) / 0.0100) * 100}%`,
+                }}
+              >
+                <MapPin className="w-8 h-8 text-rose-600 fill-current animate-bounce" />
+                <Badge style={{ background: '#993C1D', color: '#FFFFFF' }} className="text-[9px] -mt-1 shadow-md border-none">
+                  Sunrise PG Pin
+                </Badge>
+              </div>
+
+              <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-slate-200 text-xs text-slate-700 space-y-1 shadow-md">
+                <p><strong>Configured Address:</strong> {address}</p>
+                <p className="text-[10px] text-slate-500">Lat: {mapCoords.lat} · Lng: {mapCoords.lng} (Click map to change)</p>
+              </div>
+            </div>
+          </Card>
+
+          <div className="space-y-6 lg:col-span-1">
+            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">PG Address Settings</h3>
+                <p className="text-xs text-slate-500 mt-1">Update the physical address of the PG co-living home.</p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">PG Address</label>
+                <textarea 
+                  value={address} 
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white text-sm"
+                  onChange={(e) => { 
+                    setAddress(e.target.value); 
+                    saveStateToLocalStorage({ address: e.target.value }); 
+                  }} 
+                />
+              </div>
+            </Card>
+
+            <Card className="p-6 space-y-4 bg-white border border-[#e2e8f0] text-slate-800 text-left shadow-sm">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Office Proximity Config</h3>
+                <p className="text-xs text-slate-500 mt-1">Configure approximate commute details shown to prospects working at this target office.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Target Office Name</label>
+                  <Input 
+                    value={commuteDestination} 
+                    className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" 
+                    onChange={(e) => { 
+                      setCommuteDestination(e.target.value); 
+                      saveStateToLocalStorage({ commuteDestination: e.target.value });
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Walking Commute Time</label>
+                  <Input 
+                    value={commuteWalkTime} 
+                    className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" 
+                    onChange={(e) => { 
+                      setCommuteWalkTime(e.target.value); 
+                      saveStateToLocalStorage({ commuteWalkTime: e.target.value });
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Bike/Auto Commute Time</label>
+                  <Input 
+                    value={commuteBikeTime} 
+                    className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" 
+                    onChange={(e) => { 
+                      setCommuteBikeTime(e.target.value); 
+                      saveStateToLocalStorage({ commuteBikeTime: e.target.value });
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Nearest Transit Proximity</label>
+                  <Input 
+                    value={commuteTransitTime} 
+                    className="bg-white border-slate-200 text-slate-900 text-xs focus:ring-[#1D9E75]" 
+                    onChange={(e) => { 
+                      setCommuteTransitTime(e.target.value); 
+                      saveStateToLocalStorage({ commuteTransitTime: e.target.value });
+                    }} 
+                  />
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       )}
     </div>
