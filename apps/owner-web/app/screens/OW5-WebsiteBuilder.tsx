@@ -147,6 +147,11 @@ function OwnerWebsiteBuilderComponent() {
     ],
   });
 
+  // Video walkthrough state and uploader temporary fields
+  const [videoUrl, setVideoUrl] = useState('https://www.w3schools.com/html/mov_bbb.mp4');
+  const [newPhotoUrls, setNewPhotoUrls] = useState<Record<string, string>>({});
+  const [newCategoryName, setNewCategoryName] = useState('');
+
   // Floor Selection
   const [activeFloor, setActiveFloor] = useState('Ground floor');
   const [floors, setFloors] = useState(['Ground floor', '1st floor', '2nd floor']);
@@ -261,6 +266,7 @@ function OwnerWebsiteBuilderComponent() {
         if (parsed.tagline) setTagline(parsed.tagline);
         if (parsed.amenities) setAmenities(parsed.amenities);
         if (parsed.categoryMedia) setCategoryMedia(parsed.categoryMedia);
+        if (parsed.videoUrl) setVideoUrl(parsed.videoUrl);
         if (parsed.roomsData) {
           const normalized: Record<string, RoomRectangle[]> = {};
           Object.keys(parsed.roomsData).forEach(floorKey => {
@@ -305,9 +311,10 @@ function OwnerWebsiteBuilderComponent() {
       mapCoords,
       address,
       floors,
+      videoUrl,
     }));
     window.dispatchEvent(new Event('rentflo_website_update'));
-  }, [pgName, tagline, amenities, categoryMedia, roomsData, canvasCols, canvasRows, mapCoords, address, floors]);
+  }, [pgName, tagline, amenities, categoryMedia, roomsData, canvasCols, canvasRows, mapCoords, address, floors, videoUrl]);
 
   // Compatibility saveState helper
   const saveState = (updatedState?: any) => {
@@ -1016,10 +1023,10 @@ function OwnerWebsiteBuilderComponent() {
   };
 
   return (
-    <div className="h-full overflow-hidden flex flex-col md:flex-row w-full bg-[#F8F9FA] text-left">
+    <div className="h-full overflow-hidden w-full bg-[#F8F9FA] text-left">
       
       {/* Editor Panel Left */}
-      <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+      <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6">
         
         {publishStatus && (
           <div className="fixed bottom-6 left-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
@@ -1049,6 +1056,7 @@ function OwnerWebsiteBuilderComponent() {
             <TabsTrigger value="floor_plan" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Architect Blueprint Plan</TabsTrigger>
             <TabsTrigger value="location" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Office Location</TabsTrigger>
             <TabsTrigger value="amenities" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Amenities</TabsTrigger>
+            <TabsTrigger value="media" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Photos & Videos</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: COVER INFO */}
@@ -1731,7 +1739,6 @@ function OwnerWebsiteBuilderComponent() {
               </div>
             </Card>
           </TabsContent>
-
           {/* TAB 4: AMENITIES */}
           <TabsContent value="amenities" className="space-y-4 mt-4">
             <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
@@ -1750,102 +1757,142 @@ function OwnerWebsiteBuilderComponent() {
               </div>
             </Card>
           </TabsContent>
-        </Tabs>
-      </div>
 
-      {/* Live Preview Panel Right */}
-      <div className="w-full md:w-[420px] border-t md:border-t-0 md:border-l border-slate-200 bg-white flex flex-col text-slate-650">
-        <div className="p-4 border-b border-slate-200 bg-slate-50">
-          <p className="text-xs font-bold text-center text-slate-800 uppercase tracking-wider">Live Explorer Preview</p>
-          <p className="text-[10px] text-center text-slate-400 mt-0.5">Real-time mobile portfolio synchronisation</p>
-        </div>
-        
-        <div className="flex-1 p-6 bg-slate-50/50 flex items-center justify-center overflow-y-auto">
-          {/* Virtual Mobile phone shell */}
-          <div className="w-[310px] h-[550px] rounded-[2rem] shadow-2xl border-[8px] border-slate-900 bg-[#0D0D0D] overflow-y-auto scrollbar-none flex flex-col text-neutral-300 text-xs text-left">
-            {/* Virtual Hero */}
-            <div className="relative h-40 bg-neutral-850 flex-shrink-0">
-              <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80" className="w-full h-full object-cover brightness-75" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">{pgName}</h4>
-                <p className="text-[10px] text-neutral-400 block mt-0.5 truncate">{tagline}</p>
-              </div>
-            </div>
-
-            {/* Virtual Location Map preview */}
-            <div className="p-3 space-y-2 border-b border-neutral-900">
-              <p className="text-[10px] font-bold text-[#EF9F27] uppercase tracking-wider">Locate Office Map</p>
-              <div className="h-20 bg-neutral-900 border border-neutral-800 rounded-lg flex items-center justify-center relative overflow-hidden">
-                <MapPin className="w-6 h-6 text-rose-500 animate-bounce" />
-                <span className="text-[8px] absolute bottom-1 right-2 text-slate-500">Lat: {mapCoords.lat}</span>
-              </div>
-            </div>
-
-            {/* Virtual Floor Plan blueprint preview */}
-            <div className="p-3 space-y-2">
-              <p className="text-[10px] font-bold text-[#EF9F27] uppercase tracking-wider">Blueprint Layout ({activeFloor})</p>
-              
-              <div 
-                className="relative bg-neutral-950 p-2 rounded-lg border border-neutral-900" 
-                style={{ height: '140px', width: '100%' }}
-              >
-                {activeRooms.map(room => {
-                  const scale = 14; // mobile preview scale factor
-                  return (
-                    <div
-                      key={room.id}
-                      className="absolute rounded border border-neutral-750 flex flex-col items-center justify-center overflow-hidden"
-                      style={{
-                        left: `${room.x * scale}px`,
-                        top: `${room.y * scale}px`,
-                        width: `${room.w * scale}px`,
-                        height: `${room.h * scale}px`,
-                        backgroundColor: room.color,
-                      }}
-                    >
-                      <span className="text-[6px] font-bold font-sans text-white bg-slate-950/70 px-1 py-0.5 rounded leading-none">{room.customName}</span>
-                      {room.beds > 0 && (
-                        <div className="absolute inset-0 pointer-events-none">
-                          {(() => {
-                            const bedsCount = room.beds;
-                            const vacancy = room.vacancy;
-                            const bedStatuses = room.bedStatuses || Array(bedsCount).fill(vacancy === 'Vacant' ? 'Vacant' : 'Occupied');
-                            const positions = room.bedPositions && room.bedPositions.length === bedsCount
-                              ? room.bedPositions
-                              : getDefaultBedPositions(bedsCount);
-                            
-                            return positions.map((pos, idx) => {
-                              const vacant = bedStatuses[idx] === 'Vacant';
-                              const isRotated = pos.rotated;
-                              const bedW = isRotated ? (pos.h || 26) : (pos.w || 70);
-                              const bedH = isRotated ? (pos.w || 70) : (pos.h || 26);
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`absolute rounded-[1px] ${vacant ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                                  style={{
-                                    left: `${pos.x}%`,
-                                    top: `${pos.y}%`,
-                                    width: `${bedW}%`,
-                                    height: `${bedH}%`,
-                                    opacity: 0.8
-                                  }}
-                                />
-                              );
-                            });
-                          })()}
-                        </div>
-                      )}
+          {/* TAB 5: PHOTOS & VIDEOS GALLERY */}
+          <TabsContent value="media" className="space-y-4 mt-4">
+            <Card className="p-6 space-y-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Walkthrough Video</h3>
+                <p className="text-xs text-slate-500 mt-1">Add a video link to give potential tenants a virtual tour of your property.</p>
+                <div className="mt-3 space-y-3">
+                  <div className="flex gap-2">
+                    <Input 
+                      value={videoUrl} 
+                      onChange={(e) => setVideoUrl(e.target.value)} 
+                      placeholder="Enter Walkthrough Video URL (mp4 or Youtube link)" 
+                      className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]"
+                    />
+                  </div>
+                  {videoUrl && (
+                    <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Video Preview</p>
+                      <video src={videoUrl} controls className="w-full max-w-sm h-48 rounded bg-black shadow-inner" onError={(e) => console.log('Video preview not available')} />
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
 
-          </div>
-        </div>
+              <div className="border-t border-slate-200 pt-6">
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">PG Photo Gallery</h3>
+                <p className="text-xs text-slate-500 mt-1">Organize photos by categories (e.g. 1 Sharing, 2 Sharing, Dining Room) to show on the portfolio website.</p>
 
+                {/* Add Category Form */}
+                <div className="mt-4 flex gap-2 max-w-md">
+                  <Input 
+                    value={newCategoryName} 
+                    onChange={(e) => setNewCategoryName(e.target.value)} 
+                    placeholder="New category name (e.g. Dining Hall)" 
+                    className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-9 text-xs"
+                  />
+                  <Button 
+                    onClick={() => {
+                      if (!newCategoryName.trim()) return;
+                      const cat = newCategoryName.trim();
+                      if (categoryMedia[cat]) {
+                        alert('Category already exists!');
+                        return;
+                      }
+                      setCategoryMedia(prev => ({ ...prev, [cat]: [] }));
+                      setNewCategoryName('');
+                    }}
+                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
+                    className="h-9 text-xs font-semibold px-4 rounded-lg shadow-sm"
+                  >
+                    Add Category
+                  </Button>
+                </div>
+
+                {/* Categories and Photos list */}
+                <div className="mt-6 space-y-6">
+                  {Object.keys(categoryMedia).map(catName => (
+                    <Card key={catName} className="p-4 border border-slate-200 bg-slate-50/50 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider bg-slate-200 px-2 py-1 rounded">
+                          {catName}
+                        </span>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] font-semibold"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete the "${catName}" category and all its photos?`)) {
+                              setCategoryMedia(prev => {
+                                const next = { ...prev };
+                                delete next[catName];
+                                return next;
+                              });
+                            }
+                          }}
+                        >
+                          Delete Category
+                        </Button>
+                      </div>
+
+                      {/* Add Image URL for this category */}
+                      <div className="flex gap-2 items-center">
+                        <Input 
+                          value={newPhotoUrls[catName] || ''} 
+                          onChange={(e) => setNewPhotoUrls(prev => ({ ...prev, [catName]: e.target.value }))}
+                          placeholder="Paste photo URL" 
+                          className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-8 text-xs"
+                        />
+                        <Button 
+                          onClick={() => {
+                            const url = (newPhotoUrls[catName] || '').trim();
+                            if (!url) return;
+                            setCategoryMedia(prev => ({
+                              ...prev,
+                              [catName]: [...(prev[catName] || []), url]
+                            }));
+                            setNewPhotoUrls(prev => ({ ...prev, [catName]: '' }));
+                          }}
+                          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-8 text-xs font-semibold px-3 rounded-lg shadow-sm"
+                        >
+                          Add Photo URL
+                        </Button>
+                      </div>
+
+                      {/* Images Grid */}
+                      {categoryMedia[catName]?.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-2">
+                          {categoryMedia[catName].map((photoUrl, index) => (
+                            <div key={index} className="relative group rounded-md border border-slate-200 bg-white overflow-hidden h-20 shadow-sm">
+                              <img src={photoUrl} alt={`${catName} - ${index}`} className="w-full h-full object-cover" />
+                              <button 
+                                onClick={() => {
+                                  setCategoryMedia(prev => ({
+                                    ...prev,
+                                    [catName]: (prev[catName] || []).filter((_, idx) => idx !== index)
+                                  }));
+                                }}
+                                className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
+                                title="Delete Photo"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400 italic">No photos added yet in this category. Add a photo URL above.</p>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
