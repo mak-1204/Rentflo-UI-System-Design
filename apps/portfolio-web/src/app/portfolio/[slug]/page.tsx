@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LeadCaptureClient } from '@/components/modules/LeadCaptureClient';
+import { PortfolioClient } from '@/components/modules/PortfolioClient';
 
 export const metadata: Metadata = {
   title: 'Explore Sunrise PG',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function LeadCapturePage() {
-  return <LeadCaptureClient />;
+  return <PortfolioClient />;
 }
