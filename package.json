@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
+    "dev": "npx concurrently -k -p \"[{name}]\" -n \"selector,owner,portfolio,admin,backend\" -c \"blue,green,magenta,yellow,cyan\" \"npm run dev:selector\" \"npm run dev:owner-web\" \"npm run dev:portfolio-web\" \"npm run dev:admin-web\" \"npm run dev:backend\"",
     "build": "npm run build --workspaces --if-present",
     "dev:selector": "npm run dev -w apps/product-selector",
     "dev:owner-web": "npm run dev -w apps/owner-web",

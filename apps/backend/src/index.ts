@@ -131,7 +131,10 @@ app.post('/api/complaints', (req, res) => {
   res.status(201).json(newComplaint);
 });
 
-// Lead Routes
+app.get('/api/leads', (req, res) => {
+  res.json(leads);
+});
+
 app.post('/api/leads', (req, res) => {
   const newLead: Lead = {
     id: `l-${leads.length + 1}`,
