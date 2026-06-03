@@ -7,7 +7,7 @@
 
 import type { Metadata } from 'next';
 import { DashboardClient } from '@/components/modules/DashboardClient';
-import { ownerApiClient } from '@/services/api-client';
+import { supabase } from '@rentflo/utils';
 import React from 'react';
 
 export const metadata: Metadata = {
@@ -19,20 +19,26 @@ export const metadata: Metadata = {
 export const revalidate = 30;
 
 export default async function DashboardPage() {
-  // Fetch in parallel — if backend is offline, fall back gracefully
+  // Fetch directly from Supabase in parallel
   let tenants: NonNullable<React.ComponentProps<typeof DashboardClient>>['initialTenants'] = [];
   let complaints: NonNullable<React.ComponentProps<typeof DashboardClient>>['initialComplaints'] = [];
 
   try {
-    const [tenantsData, complaintsData] = await Promise.all([
-      ownerApiClient.getTenants(),
-      ownerApiClient.getComplaints(),
+    const [
+      { data: tenantsData, error: tenantsError },
+      { data: complaintsData, error: complaintsError }
+    ] = await Promise.all([
+      supabase.from('tenants').select('*').limit(50),
+      supabase.from('complaints').select('*').limit(50)
     ]);
-    tenants = tenantsData as unknown as NonNullable<React.ComponentProps<typeof DashboardClient>>['initialTenants'];
-    complaints = complaintsData as unknown as NonNullable<React.ComponentProps<typeof DashboardClient>>['initialComplaints'];
+
+    if (tenantsError) console.error('[DashboardPage] Supabase tenants fetch error:', tenantsError);
+    if (complaintsError) console.error('[DashboardPage] Supabase complaints fetch error:', complaintsError);
+
+    if (tenantsData) tenants = tenantsData as unknown as NonNullable<React.ComponentProps<typeof DashboardClient>>['initialTenants'];
+    if (complaintsData) complaints = complaintsData as unknown as NonNullable<React.ComponentProps<typeof DashboardClient>>['initialComplaints'];
   } catch (err) {
-    // Backend may not be running in dev; client falls back to localStorage
-    console.warn('[DashboardPage] API fetch failed, using client fallback:', err);
+    console.error('[DashboardPage] Unexpected Supabase fetch error:', err);
   }
 
   return (

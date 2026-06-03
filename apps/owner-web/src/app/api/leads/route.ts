@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { env } from '@/lib/env';
+import { supabase } from '@rentflo/utils';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -36,47 +36,37 @@ type CreateLeadInput = z.infer<typeof CreateLeadSchema>;
 // ─── POST /api/leads ──────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  // 1. Parse & validate input
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON body' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
   const result = CreateLeadSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(
-      {
-        error: 'Validation failed',
-        details: result.error.flatten().fieldErrors,
-      },
+      { error: 'Validation failed', details: result.error.flatten().fieldErrors },
       { status: 422 }
     );
   }
 
   const validated: CreateLeadInput = result.data;
 
-  // 2. Forward to backend
   try {
-    const res = await fetch(`${env.BACKEND_API_URL}/leads`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(validated),
-    });
+    const { data, error } = await supabase
+      .from('leads')
+      .insert([validated])
+      .select();
 
-    const data = await res.json();
-
-    return NextResponse.json(data, { status: res.status });
+    if (error) {
+      console.error('[POST /api/leads] Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data?.[0] || {}, { status: 201 });
   } catch (err) {
-    console.error('[POST /api/leads] Backend error:', err);
-    return NextResponse.json(
-      { error: 'Backend service unavailable. Please try again later.' },
-      { status: 503 }
-    );
+    console.error('[POST /api/leads] Unexpected error:', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
 }
 
@@ -84,16 +74,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const res = await fetch(`${env.BACKEND_API_URL}/leads`, {
-      next: { revalidate: 30 },
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[GET /api/leads] Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data || [], { status: 200 });
   } catch (err) {
-    console.error('[GET /api/leads] Backend error:', err);
-    return NextResponse.json(
-      { error: 'Backend service unavailable.' },
-      { status: 503 }
-    );
+    console.error('[GET /api/leads] Unexpected error:', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
 }

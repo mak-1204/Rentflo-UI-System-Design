@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { env } from '@/lib/env';
+import { supabase } from '@rentflo/utils';
 
 const TenantPaymentStatusSchema = z.enum(['Paid', 'Overdue']);
 
@@ -26,13 +26,18 @@ const CreateTenantSchema = z.object({
 // GET /api/tenants
 export async function GET(): Promise<NextResponse> {
   try {
-    const res = await fetch(`${env.BACKEND_API_URL}/tenants`, {
-      next: { revalidate: 30 },
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error('[GET /api/tenants] Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data || [], { status: 200 });
   } catch (err) {
-    console.error('[GET /api/tenants]', err);
+    console.error('[GET /api/tenants] Unexpected error:', err);
     return NextResponse.json({ error: 'Backend unavailable.' }, { status: 503 });
   }
 }
@@ -55,15 +60,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const res = await fetch(`${env.BACKEND_API_URL}/tenants`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result.data),
-    });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const { data, error } = await supabase
+      .from('tenants')
+      .insert([result.data])
+      .select();
+
+    if (error) {
+      console.error('[POST /api/tenants] Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data?.[0] || {}, { status: 201 });
   } catch (err) {
-    console.error('[POST /api/tenants]', err);
+    console.error('[POST /api/tenants] Unexpected error:', err);
     return NextResponse.json({ error: 'Backend unavailable.' }, { status: 503 });
   }
 }
