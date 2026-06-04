@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, Image as ImageIcon, CheckCircle, X, CreditCard, DollarSign, RefreshCw } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, CheckCircle, X, CreditCard, DollarSign, RefreshCw } from 'lucide-react'; import { Card } from '@stayflo/ui';
 import { Badge } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Input } from '@stayflo/ui';
@@ -41,8 +41,9 @@ export function OwnerWebRentCollection() {
   const [prevReading, setPrevReading] = useState(1240);
   const [currReading, setCurrReading] = useState(1325);
   const [unitRate, setUnitRate] = useState(8); // BESCOM rate per unit
+  const [waterLiters, setWaterLiters] = useState(100);
+  const [waterRatePerLiter, setWaterRatePerLiter] = useState(2);
   const [calculatedCharges, setCalculatedCharges] = useState(0);
-  const [uploadedMeterPhoto, setUploadedMeterPhoto] = useState('https://images.unsplash.com/photo-1590133322246-7f8a3ecf5cca?auto=format&fit=crop&w=300&q=80');
 
   // Payment Collector state
   const [activeCollectTenant, setActiveCollectTenant] = useState<RentRecord | null>(null);
@@ -55,10 +56,9 @@ export function OwnerWebRentCollection() {
       const units = Math.max(0, currReading - prevReading);
       setCalculatedCharges(units * unitRate);
     } else {
-      // water flat tanker fee or flat charges
-      setCalculatedCharges(unitRate); // water flat charge or input value
+      setCalculatedCharges(waterLiters * waterRatePerLiter);
     }
-  }, [prevReading, currReading, unitRate, calcType]);
+  }, [prevReading, currReading, unitRate, waterLiters, waterRatePerLiter, calcType]);
 
   const triggerToast = (msg: string) => {
     setNotif(msg);
@@ -284,16 +284,16 @@ export function OwnerWebRentCollection() {
             
             <div className="flex border border-slate-150 rounded-xl overflow-hidden p-0.5 bg-slate-50">
               <button 
-                onClick={() => { setCalcType('electricity'); setUnitRate(8); }}
+                onClick={() => setCalcType('electricity')}
                 className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all ${calcType === 'electricity' ? 'bg-white text-slate-900 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 Electricity
               </button>
               <button 
-                onClick={() => { setCalcType('water'); setUnitRate(450); }}
+                onClick={() => setCalcType('water')}
                 className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all ${calcType === 'water' ? 'bg-white text-slate-900 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
               >
-                Water Tanker
+                Water Bill
               </button>
             </div>
 
@@ -329,36 +329,27 @@ export function OwnerWebRentCollection() {
                   </div>
                 </>
               ) : (
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Water tanker / Flat charge (₹)</label>
-                  <Input type="number" value={unitRate} onChange={(e) => setUnitRate(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Water Consumed (Liters)</label>
+                    <Input type="number" value={waterLiters} onChange={(e) => setWaterLiters(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Rate per Liter (₹)</label>
+                    <Input type="number" value={waterRatePerLiter} onChange={(e) => setWaterRatePerLiter(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
+                  </div>
                 </div>
               )}
-
-              {/* Meter Photo preview */}
-              <div className="pt-2">
-                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
-                  <span>Meter Reading Reference Photo</span>
-                  <span className="text-[10px] text-teal-600 font-bold lowercase">Simulated Upload ✓</span>
-                </label>
-                <div className="h-28 border border-slate-100 rounded-xl overflow-hidden relative group bg-slate-50 flex items-center justify-center shadow-inner">
-                  <img src={uploadedMeterPhoto} className="w-full h-full object-cover brightness-90" alt="Meter reading reference" />
-                  <button 
-                    onClick={() => triggerToast('Photo upload simulation started! Select a file...')}
-                    className="absolute inset-0 bg-slate-950/40 text-white flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold uppercase tracking-wider cursor-pointer"
-                  >
-                    <ImageIcon className="w-4 h-4" /> Change Photo
-                  </button>
-                </div>
-              </div>
 
               <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                 <div className="flex justify-between font-bold text-slate-800 text-sm">
                   <span>Calculated Due:</span>
                   <span className="text-[#14b8a6] text-base">₹{calculatedCharges}</span>
                 </div>
-                {calcType === 'electricity' && (
+                {calcType === 'electricity' ? (
                   <p className="text-[10px] text-slate-400 mt-1.5 font-medium">({currReading - prevReading} units consumed at ₹{unitRate}/unit)</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 mt-1.5 font-medium">({waterLiters} Liters consumed at ₹{waterRatePerLiter}/Liter)</p>
                 )}
               </div>
 

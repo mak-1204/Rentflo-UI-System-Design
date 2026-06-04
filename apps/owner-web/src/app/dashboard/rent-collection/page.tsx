@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { RentCollectionClient } from '@/components/modules/RentCollectionClient';
+import { RentCollectionPageClient } from './RentCollectionPageClient';
+import { fetchRentRecords } from './actions';
 
 export const metadata: Metadata = {
   title: 'Rent & Utility Bills',
@@ -8,8 +9,9 @@ export const metadata: Metadata = {
 
 export const revalidate = 30;
 
-export default function RentCollectionPage() {
-  // OW3-RentCollection is fully localStorage-driven; no server fetch needed.
-  // When the backend gains a /invoices endpoint, add ownerApiClient.getInvoices() here.
-  return <RentCollectionClient />;
+export default async function RentCollectionPage() {
+  const defaultMonth = '2026-06';
+  const rentData = await fetchRentRecords(defaultMonth);
+
+  return <RentCollectionPageClient initialRentData={rentData} initialMonth={defaultMonth} />;
 }
