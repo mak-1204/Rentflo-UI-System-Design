@@ -1,8 +1,8 @@
-import { Search, Plus } from 'lucide-react'; import { Link } from 'react-router'; import { Avatar, AvatarFallback } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
+import { Search, Plus } from 'lucide-react'; import { Link } from 'react-router'; import { Avatar, AvatarFallback } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
 
 export function OwnerTenantsList() {
   const tenants = [

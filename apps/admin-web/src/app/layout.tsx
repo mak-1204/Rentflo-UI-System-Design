@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Rentflo Super Admin',
+  title: 'Stayflo Super Admin',
   description: 'Manage platforms, PG listings, subscription packages, and support tickets.',
 };
 

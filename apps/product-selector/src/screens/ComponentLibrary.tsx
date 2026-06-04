@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft, Bell, MessageSquare, ShieldAlert, Plus, Check } from 'lucide-react';
-import { Button, Card, Badge, Avatar, AvatarFallback } from '@rentflo/ui';
+import { Button, Card, Badge, Avatar, AvatarFallback } from '@stayflo/ui';
 
 export function ComponentLibrary() {
   const [toast, setToast] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export function ComponentLibrary() {
             <ArrowLeft className="w-6 h-6 text-slate-700" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Rentflo Component Library</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Stayflo Component Library</h1>
             <p className="text-slate-500 mt-1">Design System, Color Tokens, and Reusable UI Components</p>
           </div>
         </div>

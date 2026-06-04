@@ -1,5 +1,5 @@
 {
-  "name": "@rentflo/tenant-mobile",
+  "name": "@stayflo/tenant-mobile",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,9 +10,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@rentflo/types": "*",
-    "@rentflo/ui": "*",
-    "@rentflo/utils": "*",
+    "@stayflo/types": "*",
+    "@stayflo/ui": "*",
+    "@stayflo/utils": "*",
     "input-otp": "1.4.2",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",

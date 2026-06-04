@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { useState } from 'react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function AdminLeads() {
   const [selectedLead, setSelectedLead] = useState<string | null>(null);
@@ -95,9 +95,9 @@ export function AdminLeads() {
       {selectedLead && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
           <Card className="p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Suggest Nearby Rentflo PGs</h3>
+            <h3 className="text-lg font-bold text-slate-900">Suggest Nearby Stayflo PGs</h3>
             <p className="text-sm text-slate-500">
-              Recommend sister PGs on Rentflo network to <strong>{selectedLead}</strong> via WhatsApp automation since they rejected this PG.
+              Recommend sister PGs on Stayflo network to <strong>{selectedLead}</strong> via WhatsApp automation since they rejected this PG.
             </p>
             <div className="space-y-2 p-3 bg-teal-50 border border-teal-100 rounded-lg">
               <p className="text-xs font-semibold text-[#085041]">Matching nearby properties:</p>

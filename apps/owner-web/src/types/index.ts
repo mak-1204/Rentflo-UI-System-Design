@@ -2,7 +2,7 @@
  * src/types/index.ts
  *
  * Application-level strict type definitions for owner-web.
- * Re-exports shared types from @rentflo/types and adds UI-specific view models.
+ * Re-exports shared types from @stayflo/types and adds UI-specific view models.
  * No use of `any` — use `unknown` and narrow explicitly where needed.
  */
 
@@ -34,7 +34,7 @@ export type {
   Subscription,
   OwnerSubscription,
   OwnerSubscriptionStatus,
-} from '@rentflo/types';
+} from '@stayflo/types';
 
 // ─── UI View Models ───────────────────────────────────────────────────────────
 

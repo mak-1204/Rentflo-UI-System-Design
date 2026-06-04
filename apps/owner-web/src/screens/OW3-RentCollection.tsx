@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, Image as ImageIcon, CheckCircle, X, CreditCard, DollarSign, RefreshCw } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
+import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, Image as ImageIcon, CheckCircle, X, CreditCard, DollarSign, RefreshCw } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
 
 interface RentRecord {
   name: string;
@@ -16,7 +16,7 @@ interface RentRecord {
 
 export function OwnerWebRentCollection() {
   const [rentData, setRentData] = useState<RentRecord[]>(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('rentflo_rent_records') : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('stayflo_rent_records') : null;
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -32,7 +32,7 @@ export function OwnerWebRentCollection() {
 
   // Save rent records
   useEffect(() => {
-    localStorage.setItem('rentflo_rent_records', JSON.stringify(rentData));
+    localStorage.setItem('stayflo_rent_records', JSON.stringify(rentData));
   }, [rentData]);
 
   // Utility calculator states
@@ -83,7 +83,7 @@ export function OwnerWebRentCollection() {
   };
 
   const triggerReminder = (name: string, phone: string = '+919876543210') => {
-    const msg = `Hi ${name}, this is a gentle reminder that your PG rent & utilities due is pending. Please pay using UPI/Stripe inside the Rentflo app. Thanks!`;
+    const msg = `Hi ${name}, this is a gentle reminder that your PG rent & utilities due is pending. Please pay using UPI/Stripe inside the Stayflo app. Thanks!`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
     window.open(whatsappUrl, '_blank');
     triggerToast(`Sent WhatsApp Rent reminder to ${name}!`);
@@ -122,66 +122,70 @@ export function OwnerWebRentCollection() {
   const totalDues = (r: RentRecord) => r.rent + r.utilities + r.lateFee;
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto relative text-left bg-[#F8F9FA] min-h-screen">
+    <div className="p-8 space-y-8 max-w-7xl mx-auto relative text-left min-h-screen" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Toast */}
       {notif && (
-        <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
-          <Check className="w-4 h-4 text-[#1D9E75]" /> {notif}
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 animate-in fade-in duration-300">
+          <Check className="w-4 h-4 text-[#14b8a6]" /> {notif}
         </div>
       )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Rent & Utility Bills</h1>
-          <p className="text-slate-500 mt-1">Track monthly rent collections, calculate utility bills, and authorize payment delay waivers</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Rent & Utility Bills</h1>
+          <p className="text-xs text-slate-400 mt-1.5 font-medium">Track monthly rent collections, calculate utility bills, and authorize payment delay waivers</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2 whitespace-nowrap" onClick={() => triggerToast('CSV exported!')}>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 text-slate-700 h-10 px-4 transition-all shadow-sm" 
+            onClick={() => triggerToast('CSV exported!')}
+          >
             <Download className="w-4 h-4" /> Export CSV
           </Button>
         </div>
       </div>
 
       {/* Grid: Main metrics, Utility calculator */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Rent Collection & Dues */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           
           {/* Collection Status strip */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-5 bg-teal-50 border-teal-200">
-              <p className="text-xs font-bold text-teal-800 uppercase tracking-wider">Collected Dues</p>
-              <p className="text-2xl font-bold text-teal-900 mt-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Collected Dues</p>
+              <p className="text-2xl font-extrabold text-teal-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
                 ₹{rentData.filter(r => r.status === 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
               </p>
-              <span className="text-[10px] text-teal-600 font-semibold">{rentData.filter(r => r.status === 'Paid').length} tenants cleared</span>
+              <span className="text-[10px] text-slate-400 font-semibold block mt-1">{rentData.filter(r => r.status === 'Paid').length} tenants cleared</span>
             </Card>
 
-            <Card className="p-5 bg-orange-50 border-orange-200">
-              <p className="text-xs font-bold text-orange-800 uppercase tracking-wider">Pending Dues</p>
-              <p className="text-2xl font-bold text-orange-950 mt-1 font-mono">
+            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Pending Dues</p>
+              <p className="text-2xl font-extrabold text-amber-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
                 ₹{rentData.filter(r => r.status !== 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
               </p>
-              <span className="text-[10px] text-orange-600 font-semibold">{rentData.filter(r => r.status !== 'Paid').length} pending collection</span>
+              <span className="text-[10px] text-slate-400 font-semibold block mt-1">{rentData.filter(r => r.status !== 'Paid').length} pending collection</span>
             </Card>
 
-            <Card className="p-5 bg-rose-50 border-rose-200">
-              <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">Accumulated Late Fees</p>
-              <p className="text-2xl font-bold text-rose-950 mt-1 font-mono">
+            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Accumulated Late Fees</p>
+              <p className="text-2xl font-extrabold text-rose-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
                 ₹{rentData.reduce((acc, r) => acc + r.lateFee, 0).toLocaleString()}
               </p>
-              <span className="text-[10px] text-rose-600 font-semibold">₹250 default applied past due date</span>
+              <span className="text-[10px] text-slate-400 font-semibold block mt-1">₹250 default applied past due date</span>
             </Card>
           </div>
 
           {/* Dues Tracking Table */}
-          <Card className="overflow-hidden border border-slate-200">
+          <Card className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-500">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-slate-50 border-b text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                     <th className="px-6 py-4">Resident</th>
                     <th className="px-6 py-4 text-center">Room</th>
                     <th className="px-6 py-4">Rent</th>
@@ -192,33 +196,33 @@ export function OwnerWebRentCollection() {
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white text-sm">
+                <tbody className="divide-y divide-slate-50 bg-white text-sm">
                   {rentData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50">
-                      <td className="px-6 py-4 font-semibold text-slate-800">
-                        {row.name}
+                    <tr key={idx} className="hover:bg-slate-50/40 transition-colors duration-200">
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-slate-900">{row.name}</span>
                         {row.status === 'Paid' && (
-                          <span className="block text-[10px] font-normal text-slate-400">via {row.method}</span>
+                          <span className="block text-[10px] font-medium text-slate-400 mt-0.5">via {row.method}</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <Badge variant="outline">{row.room}</Badge>
+                        <Badge variant="outline" className="text-[10px] font-bold border-slate-200/80 text-slate-650 rounded-md bg-white px-2 py-0.5">{row.room}</Badge>
                       </td>
-                      <td className="px-6 py-4">₹{row.rent.toLocaleString()}</td>
-                      <td className="px-6 py-4">₹{row.utilities}</td>
-                      <td className="px-6 py-4 text-rose-600 font-medium">₹{row.lateFee}</td>
+                      <td className="px-6 py-4 text-xs font-semibold text-slate-700">₹{row.rent.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-xs font-semibold text-slate-700">₹{row.utilities}</td>
+                      <td className="px-6 py-4 text-rose-600 font-semibold text-xs">₹{row.lateFee}</td>
                       <td className="px-6 py-4 font-bold text-slate-900">₹{totalDues(row).toLocaleString()}</td>
                       <td className="px-6 py-4">
                         <Badge style={{
                           background:
-                            row.status === 'Paid' ? '#E1F5EE' :
+                            row.status === 'Paid' ? '#f0fdfa' :
                             row.status === 'Overdue' ? '#FCEBEB' :
                             row.status === 'Delay Approved' ? '#E6F1FB' : '#FAEEDA',
                           color:
-                            row.status === 'Paid' ? '#085041' :
+                            row.status === 'Paid' ? '#0f766e' :
                             row.status === 'Overdue' ? '#791F1F' :
-                            row.status === 'Delay Approved' ? '#0C447C' : '#633806'
-                        }} className="border-none font-semibold">
+                            row.status === 'Delay Approved' ? '#0c447c' : '#633806'
+                        }} className="border-none font-bold text-[10px] px-2 py-0.5 rounded-md">
                           {row.status === 'Delay Requested' ? 'Delay Request ⚡' : row.status}
                         </Badge>
                       </td>
@@ -227,8 +231,8 @@ export function OwnerWebRentCollection() {
                           {row.status === 'Delay Requested' && (
                             <Button 
                               size="sm" 
-                              style={{ background: '#0C447C', color: '#FFFFFF' }}
-                              className="text-xs hover:bg-[#08335C]"
+                              style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                              className="text-xs font-bold rounded-lg h-8 px-3 border-none cursor-pointer"
                               onClick={() => handleApproveDelay(row.name)}
                             >
                               Approve Delay
@@ -238,8 +242,8 @@ export function OwnerWebRentCollection() {
                             <>
                               <Button 
                                 size="sm" 
-                                variant="outline"
-                                className="text-xs"
+                                variant="ghost"
+                                className="text-teal-600 hover:bg-teal-50/50 text-xs font-bold rounded-xl transition-all px-3 h-8 border border-transparent hover:border-teal-100"
                                 onClick={() => setActiveCollectTenant(row)}
                               >
                                 Collect
@@ -247,14 +251,14 @@ export function OwnerWebRentCollection() {
                               <Button 
                                 size="sm" 
                                 variant="ghost" 
-                                className="text-orange-600 hover:bg-orange-50 text-xs"
+                                className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all px-2.5 h-8 border border-transparent hover:border-slate-100"
                                 onClick={() => triggerReminder(row.name)}
                               >
                                 <Bell className="w-3.5 h-3.5" />
                               </Button>
                             </>
                           ) : (
-                            <span className="text-xs text-teal-600 font-semibold flex items-center gap-0.5">
+                            <span className="text-xs text-teal-600 font-bold flex items-center gap-0.5">
                               <Check className="w-3.5 h-3.5" /> Cleared
                             </span>
                           )}
@@ -272,34 +276,34 @@ export function OwnerWebRentCollection() {
         {/* Right Column: Utility calculator tool */}
         <div className="space-y-6">
           
-          <Card className="p-6 space-y-4 border border-slate-200">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+          <Card className="p-8 space-y-5 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
               <Zap className="w-5 h-5 text-amber-500" /> Utility Bill Calculator
             </h3>
-            <p className="text-xs text-slate-500">Calculate electricity and water charges floor-wise and apply directly to resident ledgers</p>
+            <p className="text-xs text-slate-400 leading-relaxed font-medium">Calculate electricity and water charges floor-wise and apply directly to resident ledgers</p>
             
-            <div className="flex border rounded-lg overflow-hidden p-0.5 bg-slate-100">
+            <div className="flex border border-slate-150 rounded-xl overflow-hidden p-0.5 bg-slate-50">
               <button 
                 onClick={() => { setCalcType('electricity'); setUnitRate(8); }}
-                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${calcType === 'electricity' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all ${calcType === 'electricity' ? 'bg-white text-slate-900 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 Electricity
               </button>
               <button 
                 onClick={() => { setCalcType('water'); setUnitRate(450); }}
-                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${calcType === 'water' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all ${calcType === 'water' ? 'bg-white text-slate-900 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 Water Tanker
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-500 font-bold mb-1">Target Resident Room</label>
+                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Target Resident Room</label>
                 <select 
                   value={calcRoom}
                   onChange={(e) => setCalcRoom(e.target.value)}
-                  className="w-full p-2 border rounded-lg bg-white"
+                  className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner cursor-pointer"
                 >
                   {rentData.map(r => (
                     <option key={r.room} value={r.room}>{r.room} - {r.name}</option>
@@ -309,58 +313,58 @@ export function OwnerWebRentCollection() {
 
               {calcType === 'electricity' ? (
                 <>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">Previous Unit</label>
-                      <Input type="number" value={prevReading} onChange={(e) => setPrevReading(+e.target.value)} />
+                      <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Previous Unit</label>
+                      <Input type="number" value={prevReading} onChange={(e) => setPrevReading(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                     </div>
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">Current Unit</label>
-                      <Input type="number" value={currReading} onChange={(e) => setCurrReading(+e.target.value)} />
+                      <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Current Unit</label>
+                      <Input type="number" value={currReading} onChange={(e) => setCurrReading(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Unit Rate (BESCOM ₹)</label>
-                    <Input type="number" value={unitRate} onChange={(e) => setUnitRate(+e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Unit Rate (BESCOM ₹)</label>
+                    <Input type="number" value={unitRate} onChange={(e) => setUnitRate(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Water tanker / Flat charge (₹)</label>
-                  <Input type="number" value={unitRate} onChange={(e) => setUnitRate(+e.target.value)} />
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Water tanker / Flat charge (₹)</label>
+                  <Input type="number" value={unitRate} onChange={(e) => setUnitRate(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                 </div>
               )}
 
               {/* Meter Photo preview */}
               <div className="pt-2">
-                <label className="block text-slate-500 font-bold mb-1 flex items-center justify-between">
+                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider flex items-center justify-between">
                   <span>Meter Reading Reference Photo</span>
-                  <span className="text-[10px] text-teal-600">Simulated Upload ✓</span>
+                  <span className="text-[10px] text-teal-600 font-bold lowercase">Simulated Upload ✓</span>
                 </label>
-                <div className="h-28 border rounded-lg overflow-hidden relative group bg-slate-50 flex items-center justify-center">
+                <div className="h-28 border border-slate-100 rounded-xl overflow-hidden relative group bg-slate-50 flex items-center justify-center shadow-inner">
                   <img src={uploadedMeterPhoto} className="w-full h-full object-cover brightness-90" alt="Meter reading reference" />
                   <button 
                     onClick={() => triggerToast('Photo upload simulation started! Select a file...')}
-                    className="absolute inset-0 bg-black/40 text-white flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                    className="absolute inset-0 bg-slate-950/40 text-white flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold uppercase tracking-wider cursor-pointer"
                   >
                     <ImageIcon className="w-4 h-4" /> Change Photo
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                 <div className="flex justify-between font-bold text-slate-800 text-sm">
                   <span>Calculated Due:</span>
-                  <span className="text-[#1D9E75]">₹{calculatedCharges}</span>
+                  <span className="text-[#14b8a6] text-base">₹{calculatedCharges}</span>
                 </div>
                 {calcType === 'electricity' && (
-                  <p className="text-[10px] text-slate-400 mt-1">({currReading - prevReading} units consumed at ₹{unitRate}/unit)</p>
+                  <p className="text-[10px] text-slate-400 mt-1.5 font-medium">({currReading - prevReading} units consumed at ₹{unitRate}/unit)</p>
                 )}
               </div>
 
               <Button 
-                style={{ background: '#1D9E75', color: '#FFFFFF' }} 
-                className="w-full font-bold uppercase tracking-wider text-xs h-10 hover:bg-[#0F6E56]"
+                style={{ background: '#14b8a6', color: '#FFFFFF' }} 
+                className="w-full font-bold uppercase tracking-wider text-xs h-11 hover:opacity-95 rounded-xl border-none shadow-md shadow-teal-500/10 cursor-pointer"
                 onClick={handleApplyCalculatedUtilities}
               >
                 Apply Utility Charges
@@ -375,94 +379,94 @@ export function OwnerWebRentCollection() {
       {/* Virtual Razorpay/Stripe Collect Payment Drawer Modal */}
       {activeCollectTenant && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center">
-          <Card className="w-[420px] p-6 space-y-4 bg-white relative">
+          <Card className="w-[420px] p-6 space-y-4 bg-white relative rounded-2xl border border-slate-100 shadow-2xl">
             <button 
               onClick={() => setActiveCollectTenant(null)}
-              className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded"
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
             >
-              <X className="w-5 h-5 text-slate-500" />
+              <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Collect Dues Simulation</h3>
+              <h3 className="text-base font-bold text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Collect Dues Simulation</h3>
               <p className="text-xs text-slate-500">Log transactions or request Razorpay/UPI payments for {activeCollectTenant.name}</p>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-2">
+            <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-xs space-y-2.5 font-medium">
               <div className="flex justify-between text-slate-600">
                 <span>Room Number</span>
-                <span className="font-semibold text-slate-900">{activeCollectTenant.room}</span>
+                <span className="font-bold text-slate-900">{activeCollectTenant.room}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Monthly Rent</span>
-                <span className="font-semibold text-slate-900">₹{activeCollectTenant.rent}</span>
+                <span className="font-bold text-slate-900">₹{activeCollectTenant.rent}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Utilities Dues</span>
-                <span className="font-semibold text-slate-900">₹{activeCollectTenant.utilities}</span>
+                <span className="font-bold text-slate-900">₹{activeCollectTenant.utilities}</span>
               </div>
               {activeCollectTenant.lateFee > 0 && (
-                <div className="flex justify-between text-rose-600">
+                <div className="flex justify-between text-rose-600 font-bold">
                   <span>Late Fee Applied</span>
-                  <span className="font-semibold">₹{activeCollectTenant.lateFee}</span>
+                  <span>₹{activeCollectTenant.lateFee}</span>
                 </div>
               )}
-              <hr />
-              <div className="flex justify-between text-sm font-bold text-slate-900">
+              <hr className="border-slate-100" />
+              <div className="flex justify-between text-sm font-extrabold text-slate-900">
                 <span>Total Charge Amount:</span>
-                <span className="text-[#1D9E75]">₹{totalDues(activeCollectTenant).toLocaleString()}</span>
+                <span className="text-[#14b8a6]">₹{totalDues(activeCollectTenant).toLocaleString()}</span>
               </div>
             </div>
 
             <div className="space-y-2.5">
-              <label className="block text-xs font-semibold text-slate-500">Select Sourcing Gateway</label>
+              <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Select Sourcing Gateway</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setCollectMethod('upi')}
-                  className={`p-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 text-xs transition-all ${collectMethod === 'upi' ? 'border-[#1D9E75] bg-teal-50 text-[#1D9E75] font-semibold' : 'bg-white'}`}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 text-[10px] transition-all cursor-pointer ${collectMethod === 'upi' ? 'border-[#14b8a6] bg-teal-50/50 text-[#14b8a6] font-bold' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                  <CheckCircle className={`w-4 h-4 ${collectMethod === 'upi' ? 'text-[#1D9E75]' : 'text-slate-300'}`} />
+                  <CheckCircle className={`w-4 h-4 ${collectMethod === 'upi' ? 'text-[#14b8a6]' : 'text-slate-300'}`} />
                   <span>Razorpay UPI</span>
                 </button>
                 <button
                   onClick={() => setCollectMethod('card')}
-                  className={`p-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 text-xs transition-all ${collectMethod === 'card' ? 'border-[#1D9E75] bg-teal-50 text-[#1D9E75] font-semibold' : 'bg-white'}`}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 text-[10px] transition-all cursor-pointer ${collectMethod === 'card' ? 'border-[#14b8a6] bg-teal-50/50 text-[#14b8a6] font-bold' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                  <CreditCard className={`w-4 h-4 ${collectMethod === 'card' ? 'text-[#1D9E75]' : 'text-slate-300'}`} />
+                  <CreditCard className={`w-4 h-4 ${collectMethod === 'card' ? 'text-[#14b8a6]' : 'text-slate-300'}`} />
                   <span>Stripe Card</span>
                 </button>
                 <button
                   onClick={() => setCollectMethod('cash')}
-                  className={`p-2.5 rounded-lg border flex flex-col items-center justify-center gap-1.5 text-xs transition-all ${collectMethod === 'cash' ? 'border-[#1D9E75] bg-teal-50 text-[#1D9E75] font-semibold' : 'bg-white'}`}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 text-[10px] transition-all cursor-pointer ${collectMethod === 'cash' ? 'border-[#14b8a6] bg-teal-50/50 text-[#14b8a6] font-bold' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                 >
-                  <DollarSign className={`w-4 h-4 ${collectMethod === 'cash' ? 'text-[#1D9E75]' : 'text-slate-300'}`} />
+                  <DollarSign className={`w-4 h-4 ${collectMethod === 'cash' ? 'text-[#14b8a6]' : 'text-slate-300'}`} />
                   <span>Cash Payment</span>
                 </button>
               </div>
             </div>
 
             {collectMethod === 'upi' && (
-              <div className="p-3 bg-neutral-900 text-white rounded-lg flex items-center justify-center gap-3">
+              <div className="p-3.5 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-3.5">
                 {/* Simulated QR Code box */}
-                <div className="w-16 h-16 bg-white rounded border flex items-center justify-center text-[10px] text-slate-800 font-bold select-none p-1">
+                <div className="w-16 h-16 bg-white rounded-lg border flex items-center justify-center text-[10px] text-slate-800 font-bold select-none p-1">
                   {/* Mock QR */}
-                  <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <svg className="w-full h-full text-slate-900" viewBox="0 0 100 100">
                     <rect width="25" height="25" fill="currentColor"/>
                     <rect x="75" width="25" height="25" fill="currentColor"/>
                     <rect y="75" width="25" height="25" fill="currentColor"/>
                     <rect x="35" y="35" width="30" height="30" fill="currentColor"/>
                   </svg>
                 </div>
-                <div className="text-left text-xs">
-                  <p className="font-bold">Scan to pay UPI</p>
-                  <p className="text-slate-400 mt-0.5 text-[10px]">Merchant: rentflo.sunrise@razorpay</p>
+                <div className="text-left text-xs space-y-0.5">
+                  <p className="font-bold text-slate-100">Scan to pay UPI</p>
+                  <p className="text-slate-450 mt-0.5 text-[10px]">Merchant: stayflo.sunrise@razorpay</p>
                 </div>
               </div>
             )}
 
             <Button
-              style={{ background: '#1D9E75', color: '#FFFFFF' }}
-              className="w-full font-bold uppercase tracking-wider text-xs h-11 flex items-center justify-center gap-2 hover:bg-[#0F6E56]"
+              style={{ background: '#14b8a6', color: '#FFFFFF' }}
+              className="w-full font-bold uppercase tracking-wider text-xs h-11 flex items-center justify-center gap-2 hover:opacity-95 rounded-xl border-none shadow-md shadow-teal-500/10 cursor-pointer"
               onClick={handleCollectPayment}
               disabled={isProcessingPayment}
             >

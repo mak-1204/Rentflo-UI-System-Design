@@ -1,6 +1,6 @@
-import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function AdminPayments() {
   const platformPayments = [

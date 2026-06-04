@@ -1,5 +1,5 @@
 /* =============================================================================
-   Rentflo Owner Web — Global Styles
+   Stayflo Owner Web — Global Styles
    Tailwind CSS v4 (via @tailwindcss/postcss)
    ============================================================================= */
 
@@ -9,10 +9,10 @@
 
 :root {
   /* Brand palette */
-  --color-brand-primary:    #1D9E75;
-  --color-brand-dark:       #0F6E56;
-  --color-brand-light:      #E1F5EE;
-  --color-brand-text-dark:  #085041;
+  --color-brand-primary:    #14b8a6;
+  --color-brand-dark:       #0f766e;
+  --color-brand-light:      #f0fdfa;
+  --color-brand-text-dark:  #0f766e;
 
   /* Semantic surface colours */
   --color-bg-default:       #F8F9FA;
@@ -21,6 +21,7 @@
 
   /* Typography */
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-outfit), sans-serif;
 }
 
 /* ─── Base Reset ──────────────────────────────────────────────────────────── */

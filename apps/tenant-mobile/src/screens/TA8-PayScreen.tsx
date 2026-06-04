@@ -1,6 +1,6 @@
-import { ChevronLeft } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
+import { ChevronLeft } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
 
 export function TenantPayScreen() {
   const navigate = useNavigate();

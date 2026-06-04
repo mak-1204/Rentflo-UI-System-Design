@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { Send, MessageSquare, Loader2, Link2 } from 'lucide-react';
-import { Button, Input, Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@rentflo/ui';
+import { Button, Input, Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@stayflo/ui';
 import { createLeadAction } from '../actions';
 
 export function WhatsAppForm() {
@@ -41,21 +41,21 @@ export function WhatsAppForm() {
   };
 
   return (
-    <Card className="p-6 md:p-8 border-none bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/40 rounded-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shadow-inner border border-teal-100">
+    <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center border border-teal-100/30">
           <Send className="w-5 h-5 text-teal-600" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Generate Portfolio Link</h2>
-          <p className="text-xs text-slate-500 font-medium">Send a beautifully formatted WhatsApp invite to your prospect.</p>
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Generate Portfolio Link</h2>
+          <p className="text-xs text-slate-400 mt-1 font-medium">Send a beautifully formatted WhatsApp invite to your prospect.</p>
         </div>
       </div>
       
       <form action={handleAction} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="space-y-5 lg:col-span-5">
           <div className="group">
-            <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Lead Phone Number</label>
+            <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Lead Phone Number</label>
             <Input
               name="phone"
               type="text"
@@ -64,12 +64,12 @@ export function WhatsAppForm() {
               onChange={(e) => setInputPhone(e.target.value)}
               required
               disabled={isPending}
-              className="w-full bg-white shadow-sm border-slate-200 focus:border-teal-500 focus:ring-teal-500/20 transition-all rounded-xl"
+              className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
             />
           </div>
 
           <div className="group">
-            <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Lead Name (Optional)</label>
+            <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Lead Name (Optional)</label>
             <Input
               name="name"
               type="text"
@@ -77,31 +77,31 @@ export function WhatsAppForm() {
               value={inputName}
               onChange={(e) => setInputName(e.target.value)}
               disabled={isPending}
-              className="w-full bg-white shadow-sm border-slate-200 focus:border-teal-500 focus:ring-teal-500/20 transition-all rounded-xl"
+              className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
             />
           </div>
 
           <div className="group">
-            <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Room Interest(Optional)</label>
+            <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Room Interest (Optional)</label>
             <Select
               name="room"
               value={selectedRoomInterest}
               onValueChange={setSelectedRoomInterest}
               disabled={isPending}
             >
-              <SelectTrigger className="w-full bg-white h-11 border-slate-200 focus:ring-teal-500/20 focus:border-teal-500 rounded-xl shadow-sm hover:border-slate-300 transition-all">
+              <SelectTrigger className="w-full bg-[#f8fafc] border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 h-11 px-4 rounded-xl text-xs text-slate-800 font-semibold transition-all shadow-inner cursor-pointer hover:border-slate-350">
                 <SelectValue placeholder="Select Room" />
               </SelectTrigger>
               <SelectContent className="bg-white rounded-xl shadow-xl border-slate-100">
-                <SelectItem value="Single Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-sm font-medium">Single Occupancy</SelectItem>
-                <SelectItem value="Double Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-sm font-medium">Double Sharing</SelectItem>
-                <SelectItem value="Triple Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-sm font-medium">Triple Sharing</SelectItem>
+                <SelectItem value="Single Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-xs font-semibold">Single Occupancy</SelectItem>
+                <SelectItem value="Double Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-xs font-semibold">Double Sharing</SelectItem>
+                <SelectItem value="Triple Occupancy" className="focus:bg-teal-50 focus:text-teal-900 cursor-pointer text-xs font-semibold">Triple Sharing</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="group">
-            <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">PG Nearby Landmark</label>
+            <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">PG Nearby Landmark</label>
             <Input
               name="landmark"
               type="text"
@@ -109,22 +109,26 @@ export function WhatsAppForm() {
               onChange={(e) => setLandmark(e.target.value)}
               placeholder="e.g. Koramangala, near Sony World Signal"
               disabled={isPending}
-              className="w-full bg-white shadow-sm border-slate-200 focus:border-teal-500 focus:ring-teal-500/20 transition-all rounded-xl"
+              className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
             />
           </div>
         </div>
 
         <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
-          <div className="flex-1 bg-slate-800 rounded-2xl p-1 shadow-inner relative overflow-hidden">
-            {/* Minimalist Phone Mockup Vibe */}
-            <div className="bg-slate-900 px-4 py-3 flex items-center justify-between rounded-t-xl border-b border-slate-700/50">
-              <span className="text-xs font-bold text-slate-300 flex items-center gap-2"><MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> Live Message Preview</span>
-              <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700 font-medium tracking-wide flex items-center gap-1"><Link2 className="w-3 h-3" /> Auto-generates Portfolio Link</span>
+          <div className="flex-1 bg-slate-900 rounded-2xl p-1 shadow-inner relative overflow-hidden flex flex-col min-h-[220px]">
+            {/* Phone Mockup Header */}
+            <div className="bg-slate-950 px-4 py-3 flex items-center justify-between rounded-t-xl border-b border-slate-800/80">
+              <span className="text-[10px] uppercase font-extrabold text-slate-400 flex items-center gap-2">
+                <MessageSquare className="w-3.5 h-3.5 text-teal-400" /> Live Message Preview
+              </span>
+              <span className="text-[9px] bg-slate-850 text-slate-400 px-2 py-0.5 rounded-full border border-slate-800 font-bold tracking-wider flex items-center gap-1">
+                <Link2 className="w-3 h-3 text-teal-500" /> Auto-generates Portfolio Link
+              </span>
             </div>
             <textarea
               readOnly
               value={messageText}
-              className="w-full h-[calc(100%-45px)] p-5 bg-transparent text-slate-300 font-mono text-xs focus:outline-none leading-relaxed resize-none selection:bg-teal-500/30 custom-scrollbar"
+              className="w-full flex-1 p-5 bg-transparent text-slate-300 font-mono text-xs focus:outline-none leading-relaxed resize-none selection:bg-teal-500/30 custom-scrollbar"
             />
           </div>
 
@@ -132,10 +136,10 @@ export function WhatsAppForm() {
             type="submit"
             disabled={isPending || !inputPhone}
             style={{ backgroundColor: '#25D366' }}
-            className={`w-full hover:bg-[#20bd5a] text-white font-bold uppercase tracking-widest text-xs h-14 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 transition-all duration-300 ${isPending ? 'opacity-80 scale-[0.98]' : 'hover:-translate-y-0.5 hover:shadow-emerald-500/40 disabled:opacity-50 disabled:hover:translate-y-0'}`}
+            className={`w-full hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs h-12 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/10 transition-all duration-200 disabled:opacity-50 border-none cursor-pointer hover:-translate-y-0.5 active:translate-y-0`}
           >
             {isPending ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> SAVING LEAD...</>
+              <><Loader2 className="w-5 h-5 animate-spin" /> Saving Lead...</>
             ) : (
               <><MessageSquare className="w-5 h-5" /> Generate Link & Send WhatsApp</>
             )}

@@ -1,7 +1,7 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@rentflo/ui';
-import { ChevronLeft, Copy, CheckCircle2 } from 'lucide-react'; import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
-import { Progress } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@stayflo/ui';
+import { ChevronLeft, Copy, CheckCircle2 } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
+import { Progress } from '@stayflo/ui';
 
 export function OwnerSetupStep3() {
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ export function OwnerSetupStep3() {
               </button>
             </div>
             <p className="text-xs mt-3" style={{ color: '#085041' }}>
-              Share this code with your tenants so they can join your PG on the Rentflo app
+              Share this code with your tenants so they can join your PG on the Stayflo app
             </p>
           </div>
           

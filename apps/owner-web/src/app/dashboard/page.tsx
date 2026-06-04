@@ -7,7 +7,7 @@
 
 import type { Metadata } from 'next';
 import { DashboardClient } from '@/components/modules/DashboardClient';
-import { supabase } from '@rentflo/utils';
+import { supabase } from '@stayflo/utils';
 import React from 'react';
 
 export const metadata: Metadata = {

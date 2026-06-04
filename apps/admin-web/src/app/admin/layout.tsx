@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { AdminSidebar } from '@/components/modules/AdminSidebar';
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard | Rentflo',
+  title: 'Admin Dashboard | Stayflo',
 };
 
 export default function AdminLayout({

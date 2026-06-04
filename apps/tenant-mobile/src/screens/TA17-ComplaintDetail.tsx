@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from 'react-router'; import { ChevronLeft, Clock, CheckCircle2 } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
+import { useNavigate, useParams } from 'react-router'; import { ChevronLeft, Clock, CheckCircle2 } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
 
 export function TenantComplaintDetail() {
   const { id } = useParams();

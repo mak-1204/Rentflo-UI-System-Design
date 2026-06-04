@@ -1,9 +1,9 @@
-import { ChevronLeft, Zap } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Avatar, AvatarFallback } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
-import { Textarea } from '@rentflo/ui';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@rentflo/ui';
+import { ChevronLeft, Zap } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Avatar, AvatarFallback } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
+import { Textarea } from '@stayflo/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@stayflo/ui';
 
 export function OwnerComplaintDetail() {
   const navigate = useNavigate();

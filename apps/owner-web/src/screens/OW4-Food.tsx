@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Share2, Check, X, Calendar, AlertTriangle, Send, ShieldAlert, Sparkles, Clock, HelpCircle, QrCode, Scan } from 'lucide-react';
-import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 interface FoodBooking {
   name: string;
@@ -51,14 +51,14 @@ export function OwnerWebFood() {
   };
 
   const shareWithCook = () => {
-    const summaryMsg = `Sunrise PG Meal Counts for ${selectedDay}:\n- Breakfast: ${mealCounts.breakfast}\n- Lunch: ${mealCounts.lunch}\n- Dinner: ${mealCounts.dinner}\nTotal active plates: ${mealCounts.breakfast + mealCounts.lunch + mealCounts.dinner}\n\nGenerated via Rentflo Food Waste Control Panel.`;
+    const summaryMsg = `Sunrise PG Meal Counts for ${selectedDay}:\n- Breakfast: ${mealCounts.breakfast}\n- Lunch: ${mealCounts.lunch}\n- Dinner: ${mealCounts.dinner}\nTotal active plates: ${mealCounts.breakfast + mealCounts.lunch + mealCounts.dinner}\n\nGenerated via Stayflo Food Waste Control Panel.`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=+919012345678&text=${encodeURIComponent(summaryMsg)}`;
     window.open(whatsappUrl, '_blank');
     triggerToast('Shared meal counts with Cook via WhatsApp API!');
   };
 
   const handleSendReminder = (name: string, phone: string) => {
-    const msg = `Hi ${name}, this is Sunrise PG. Please book your Breakfast, Lunch, and Dinner for tomorrow on the Rentflo app before the 6:00 PM cutoff to ensure your meals are cooked. Thank you!`;
+    const msg = `Hi ${name}, this is Sunrise PG. Please book your Breakfast, Lunch, and Dinner for tomorrow on the Stayflo app before the 6:00 PM cutoff to ensure your meals are cooked. Thank you!`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`;
     window.open(whatsappUrl, '_blank');
     triggerToast(`Sent unbooked meal alert to ${name}!`);
@@ -122,25 +122,33 @@ export function OwnerWebFood() {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto relative text-left bg-[#F8F9FA] min-h-screen">
+    <div className="p-8 space-y-8 max-w-7xl mx-auto relative text-left min-h-screen" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Toast */}
       {notif && (
-        <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
-          <Check className="w-4 h-4 text-[#1D9E75]" /> {notif}
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 animate-in fade-in duration-300">
+          <Check className="w-4 h-4 text-[#14b8a6]" /> {notif}
         </div>
       )}
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Food Waste Reduction Panel</h1>
-          <p className="text-slate-500 mt-1">Keep track of daily meal bookings, cutoff lists, cook updates, and menus to save money</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Food Waste Reduction</h1>
+          <p className="text-xs text-slate-400 mt-1.5 font-medium">Keep track of daily meal bookings, cutoff lists, cook updates, and menus to save money</p>
         </div>
         <div className="flex gap-2">
-          <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} className="hover:opacity-90 flex items-center gap-2" onClick={() => setShowScanner(true)}>
+          <Button 
+            style={{ background: '#14b8a6', color: '#FFFFFF' }} 
+            className="hover:opacity-95 active:scale-98 flex items-center gap-2 rounded-xl text-xs font-bold h-10 px-4 border-none shadow-md shadow-teal-500/10 cursor-pointer" 
+            onClick={() => setShowScanner(true)}
+          >
             <QrCode className="w-4 h-4" /> Scan Food Pass QR
           </Button>
-          <Button style={{ background: '#25D366', color: '#FFFFFF' }} className="hover:opacity-90 flex items-center gap-2" onClick={shareWithCook}>
+          <Button 
+            style={{ background: '#25D366', color: '#FFFFFF' }} 
+            className="hover:opacity-95 active:scale-98 flex items-center gap-2 rounded-xl text-xs font-bold h-10 px-4 border-none shadow-md shadow-emerald-500/10 cursor-pointer" 
+            onClick={shareWithCook}
+          >
             <Share2 className="w-4 h-4" /> WhatsApp count to Cook
           </Button>
         </div>
@@ -159,13 +167,15 @@ export function OwnerWebFood() {
             </button>
             
             <div className="space-y-1">
-              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5"><Scan className="w-5 h-5 text-[#1D9E75]" /> Scanner: Daily Food Pass</h4>
+              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-heading)' }}>
+                <Scan className="w-5 h-5 text-[#14b8a6]" /> Scanner: Daily Food Pass
+              </h4>
               <p className="text-xs text-slate-500">Simulate or scan active resident food passes for verification</p>
             </div>
 
             {scanStatus === 'idle' && (
-              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#1D9E75] flex items-center justify-center">
+              <div className="bg-slate-50 border border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#14b8a6] flex items-center justify-center">
                   <QrCode className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
@@ -188,9 +198,8 @@ export function OwnerWebFood() {
 
             {scanStatus === 'scanning' && (
               <div className="bg-slate-900 rounded-xl p-12 flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden h-[240px]">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,158,117,0.15),transparent)] animate-pulse" />
-                {/* Laser scan effect */}
-                <div className="absolute left-0 right-0 h-1 bg-[#1D9E75] shadow-[0_0_10px_#1D9E75] top-0 animate-[bounce_2s_infinite]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.15),transparent)] animate-pulse" />
+                <div className="absolute left-0 right-0 h-1 bg-[#14b8a6] shadow-[0_0_10px_#14b8a6] top-0 animate-[bounce_2s_infinite]" />
                 <div className="w-16 h-16 rounded-xl border-2 border-white/20 flex items-center justify-center text-white text-xl animate-pulse">
                   📷
                 </div>
@@ -201,104 +210,102 @@ export function OwnerWebFood() {
 
             {scanStatus === 'success' && scannedResult && (
               <div className="space-y-4">
-                {/* Result header */}
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between">
+                <div className="bg-teal-50 border border-teal-100 rounded-xl p-4 flex items-center justify-between">
                   <div className="text-left">
-                    <p className="text-sm font-extrabold text-emerald-950">{scannedResult.name}</p>
-                    <p className="text-xs text-emerald-800">{scannedResult.room} · Daily Food Pass</p>
+                    <p className="text-sm font-bold text-slate-900">{scannedResult.name}</p>
+                    <p className="text-xs text-slate-500">{scannedResult.room} · Daily Food Pass</p>
                   </div>
-                  <Badge className="bg-emerald-500 text-white font-bold border-none">VALID PASS ✓</Badge>
+                  <Badge className="bg-[#14b8a6] text-white font-bold border-none text-[10px] px-2.5 py-0.5 rounded-md">VALID PASS ✓</Badge>
                 </div>
 
-                {/* Meal Checklists */}
-                <div className="border border-slate-200 rounded-xl divide-y text-xs text-slate-700">
-                  <div className="p-3 flex justify-between items-center">
+                <div className="border border-slate-100 rounded-xl divide-y divide-slate-100 text-xs text-slate-700 bg-slate-50/50">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Breakfast Booking</p>
-                      <p className="text-[10px] text-slate-400">8:00 AM - 9:00 AM</p>
+                      <p className="font-bold text-slate-800">Breakfast Booking</p>
+                      <p className="text-[10px] text-slate-450 mt-0.5">8:00 AM - 9:00 AM</p>
                     </div>
                     <div>
                       {scannedResult.meals.breakfast ? (
                         scannedResult.servedMeals.breakfast ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('breakfast')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3 flex justify-between items-center">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Lunch Booking</p>
-                      <p className="text-[10px] text-slate-400">12:00 PM - 1:00 PM</p>
+                      <p className="font-bold text-slate-800">Lunch Booking</p>
+                      <p className="text-[10px] text-slate-450 mt-0.5">12:00 PM - 1:00 PM</p>
                     </div>
                     <div>
                       {scannedResult.meals.lunch ? (
                         scannedResult.servedMeals.lunch ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('lunch')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3 flex justify-between items-center">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Dinner Booking</p>
-                      <p className="text-[10px] text-slate-400">7:00 PM - 8:00 PM</p>
+                      <p className="font-bold text-slate-800">Dinner Booking</p>
+                      <p className="text-[10px] text-slate-455 mt-0.5">7:00 PM - 8:00 PM</p>
                     </div>
                     <div>
                       {scannedResult.meals.dinner ? (
                         scannedResult.servedMeals.dinner ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('dinner')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3 pt-2">
                   <Button 
-                    className="flex-1"
+                    className="flex-1 rounded-xl h-11 border-slate-200 text-slate-650 hover:bg-slate-50 font-bold"
                     variant="outline"
                     onClick={() => { setScannedResult(null); setScanStatus('idle'); }}
                   >
                     Scan Another
                   </Button>
                   <Button 
-                    className="flex-1"
-                    style={{ background: '#1D9E75' }}
+                    className="flex-1 rounded-xl h-11 border-none font-bold text-white"
+                    style={{ background: '#14b8a6' }}
                     onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
                   >
                     Done
@@ -317,11 +324,11 @@ export function OwnerWebFood() {
             <button
               key={day}
               onClick={() => setSelectedDay(day)}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+              className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer border-slate-250"
               style={{
-                background: selectedDay === day ? '#E1F5EE' : '#FFFFFF',
-                color: selectedDay === day ? '#085041' : '#6B7280',
-                borderColor: selectedDay === day ? '#E1F5EE' : '#E5E7EB'
+                background: selectedDay === day ? '#f0fdfa' : '#FFFFFF',
+                color: selectedDay === day ? '#14b8a6' : '#6B7280',
+                borderColor: selectedDay === day ? 'rgba(20,184,166,0.2)' : '#E5E7EB'
               }}
             >
               {day}
@@ -330,76 +337,76 @@ export function OwnerWebFood() {
         </div>
 
         {/* 6 PM Cutoff Status Card */}
-        <Badge variant="outline" className="px-4 py-2 border-orange-200 bg-orange-50 text-orange-800 flex items-center gap-2">
-          <Clock className="w-4 h-4 animate-pulse" />
-          <span className="font-semibold text-xs">
+        <span className="px-4 py-2 border border-orange-200/50 bg-orange-50 text-orange-800 flex items-center gap-2 rounded-xl text-xs font-semibold">
+          <Clock className="w-4 h-4" />
+          <span>
             6:00 PM Booking Cutoff Status: <span className="font-bold text-orange-950">CLOSED</span>
           </span>
-        </Badge>
+        </span>
       </div>
 
       {/* Counts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 border-l-4 border-l-[#1D9E75] flex justify-between items-center">
+        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Breakfast plates</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{mealCounts.breakfast} booked</p>
-            <p className="text-xs text-slate-400 mt-1">8:00 - 9:00 AM · Cutoff passed</p>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Breakfast plates</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>{mealCounts.breakfast} booked</p>
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">8:00 - 9:00 AM · Cutoff passed</p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-[#E1F5EE] text-[#085041] flex items-center justify-center text-xl font-bold">B</div>
+          <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100/30 text-[#14b8a6] flex items-center justify-center text-lg font-bold">B</div>
         </Card>
 
-        <Card className="p-6 border-l-4 border-l-[#EF9F27] flex justify-between items-center">
+        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lunch plates</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{mealCounts.lunch} booked</p>
-            <p className="text-xs text-slate-400 mt-1">12:00 - 1:00 PM · Cutoff passed</p>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Lunch plates</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>{mealCounts.lunch} booked</p>
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">12:00 - 1:00 PM · Cutoff passed</p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center text-xl font-bold">L</div>
+          <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100/30 text-amber-700 flex items-center justify-center text-lg font-bold">L</div>
         </Card>
 
-        <Card className="p-6 border-l-4 border-l-[#1D9E75] flex justify-between items-center">
+        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex justify-between items-center">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dinner plates</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{mealCounts.dinner} booked</p>
-            <p className="text-xs text-slate-400 mt-1">7:00 - 8:00 PM · Cutoff passed</p>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Dinner plates</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>{mealCounts.dinner} booked</p>
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">7:00 - 8:00 PM · Cutoff passed</p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-[#E1F5EE] text-[#085041] flex items-center justify-center text-xl font-bold">D</div>
+          <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100/30 text-[#14b8a6] flex items-center justify-center text-lg font-bold">D</div>
         </Card>
       </div>
 
       {/* Main Panel Content split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Bookings details table */}
         <div className="lg:col-span-2 space-y-4">
-          <Card className="overflow-hidden border border-slate-200">
-            <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
-              <h3 className="font-bold text-slate-800 text-sm">Meal Bookings Log ({selectedDay})</h3>
-              <Badge style={{ background: '#FCEBEB', color: '#791F1F' }} className="border-none">Cutoff Passed</Badge>
+          <Card className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-500">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+              <h3 className="font-bold text-slate-900 text-sm" style={{ fontFamily: 'var(--font-heading)' }}>Meal Bookings Log ({selectedDay})</h3>
+              <span className="bg-rose-50 text-rose-700 border border-rose-100/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-none whitespace-nowrap">Cutoff Passed</span>
             </div>
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="px-6 py-3">Resident</th>
-                  <th className="px-6 py-3">Room</th>
-                  <th className="px-6 py-3 text-center">Breakfast</th>
-                  <th className="px-6 py-3 text-center">Lunch</th>
-                  <th className="px-6 py-3 text-center">Dinner</th>
-                  <th className="px-6 py-3">Status</th>
+                <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  <th className="px-6 py-4">Resident</th>
+                  <th className="px-6 py-4">Room</th>
+                  <th className="px-6 py-4 text-center">Breakfast</th>
+                  <th className="px-6 py-4 text-center">Lunch</th>
+                  <th className="px-6 py-4 text-center">Dinner</th>
+                  <th className="px-6 py-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white text-sm">
+              <tbody className="divide-y divide-slate-50 bg-white text-sm">
                 {bookings.map((b, i) => (
-                  <tr key={i} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 font-semibold text-slate-800">{b.name}</td>
-                    <td className="px-6 py-4 text-slate-600">{b.room}</td>
+                  <tr key={i} className="hover:bg-slate-50/40 transition-colors duration-200">
+                    <td className="px-6 py-4 font-bold text-slate-900">{b.name}</td>
+                    <td className="px-6 py-4 text-xs font-semibold text-slate-600">{b.room}</td>
                     <td className="px-6 py-4 text-center">
                       {b.breakfast ? (
                         b.servedMeals?.breakfast ? (
-                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none text-[10px] font-bold rounded-md px-2 py-0.5">Served ✓</Badge>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-[#14b8a6]" title="Booked but not served"><Check className="w-4 h-4" /></span>
                         )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
@@ -408,9 +415,9 @@ export function OwnerWebFood() {
                     <td className="px-6 py-4 text-center">
                       {b.lunch ? (
                         b.servedMeals?.lunch ? (
-                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none text-[10px] font-bold rounded-md px-2 py-0.5">Served ✓</Badge>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-[#14b8a6]" title="Booked but not served"><Check className="w-4 h-4" /></span>
                         )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
@@ -419,16 +426,22 @@ export function OwnerWebFood() {
                     <td className="px-6 py-4 text-center">
                       {b.dinner ? (
                         b.servedMeals?.dinner ? (
-                          <Badge className="bg-[#E1F5EE] text-[#085041] border-none text-[10px] font-bold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none text-[10px] font-bold rounded-md px-2 py-0.5">Served ✓</Badge>
                         ) : (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-teal-600" title="Booked but not served"><Check className="w-4 h-4" /></span>
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-50 text-[#14b8a6]" title="Booked but not served"><Check className="w-4 h-4" /></span>
                         )
                       ) : (
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300"><X className="w-4 h-4" /></span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-semibold text-slate-800">
-                      {b.status}
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-transparent shadow-none" style={{
+                        background: b.status === 'Booked' ? '#f0fdfa' : '#FCEBEB',
+                        color: b.status === 'Booked' ? '#0f766e' : '#791F1F',
+                        borderColor: b.status === 'Booked' ? 'rgba(20,184,166,0.1)' : 'rgba(239,68,68,0.1)'
+                      }}>
+                        {b.status}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -441,53 +454,53 @@ export function OwnerWebFood() {
         <div className="space-y-6">
           
           {/* Food waste savings metrics */}
-          <Card className="p-6 space-y-4 border border-slate-200 bg-white">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-teal-600" /> Food Sourcing Savings
+          <Card className="p-8 space-y-5 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
+              <Sparkles className="w-4 h-4 text-teal-650" /> Food Sourcing Savings
             </h3>
             <div className="space-y-4">
-              <div className="p-4 bg-teal-50 rounded-lg">
+              <div className="p-5 bg-teal-50/50 rounded-xl border border-teal-100/50">
                 <p className="text-xs text-teal-800 font-semibold">Estimated Monthly Savings</p>
-                <p className="text-3xl font-bold text-teal-900 mt-1">₹14,500</p>
-                <p className="text-[10px] text-teal-700 mt-1">~38% reduction in daily food waste</p>
+                <p className="text-3xl font-extrabold text-teal-900 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>₹14,500</p>
+                <p className="text-[10px] text-teal-700 mt-1 font-bold">~38% reduction in daily food waste</p>
               </div>
 
-              <div className="space-y-2 text-xs text-slate-600">
-                <div className="flex justify-between border-b pb-1.5">
+              <div className="space-y-3 text-xs text-slate-500 font-semibold">
+                <div className="flex justify-between border-b border-slate-100 pb-2">
                   <span>Total PG Strength</span>
-                  <span className="font-semibold text-slate-900">{totalTenants} Residents</span>
+                  <span className="font-bold text-slate-900">{totalTenants} Residents</span>
                 </div>
-                <div className="flex justify-between border-b pb-1.5">
+                <div className="flex justify-between border-b border-slate-100 pb-2">
                   <span>Unbooked (Missed)</span>
-                  <span className="font-semibold text-slate-900">{unbookedTenants.length} Residents</span>
+                  <span className="font-bold text-slate-900">{unbookedTenants.length} Residents</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Estimated Sourcing Saved Today</span>
-                  <span className="font-semibold text-[#1D9E75]">₹480</span>
+                  <span className="font-extrabold text-[#14b8a6]">₹480</span>
                 </div>
               </div>
             </div>
           </Card>
 
           {/* Unbooked residents reminder panel */}
-          <Card className="p-6 space-y-4 border border-slate-200 bg-white">
+          <Card className="p-8 space-y-5 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Unbooked Residents</h3>
-              <Badge style={{ background: '#FCEBEB', color: '#791F1F' }} className="border-none">{unbookedTenants.length} left</Badge>
+              <h3 className="text-base font-bold text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Unbooked Residents</h3>
+              <Badge className="bg-rose-50 text-rose-700 border-none text-[10px] font-bold rounded-md px-2 py-0.5">{unbookedTenants.length} left</Badge>
             </div>
 
             {unbookedTenants.length > 0 ? (
               <div className="space-y-3">
                 {unbookedTenants.map(ub => (
-                  <div key={ub.name} className="flex justify-between items-center text-xs p-2.5 rounded border bg-slate-50">
+                  <div key={ub.name} className="flex justify-between items-center text-xs p-3.5 rounded-xl border border-slate-100 bg-slate-50/50">
                     <div>
-                      <p className="font-semibold text-slate-800">{ub.name}</p>
-                      <p className="text-slate-400">{ub.room}</p>
+                      <p className="font-bold text-slate-800">{ub.name}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{ub.room}</p>
                     </div>
                     <Button 
                       size="sm"
-                      variant="outline"
-                      className="text-orange-600 border-orange-200 hover:bg-orange-50 text-[10px] h-7 px-2 font-bold"
+                      variant="ghost"
+                      className="text-orange-600 hover:bg-orange-50 text-[10px] font-bold rounded-lg px-2.5 h-8 border border-slate-100 hover:border-orange-200"
                       onClick={() => handleSendReminder(ub.name, ub.phone)}
                     >
                       <Send className="w-3 h-3 mr-1" /> Alert
@@ -498,7 +511,7 @@ export function OwnerWebFood() {
                 <Button 
                   onClick={handleSendAllReminders}
                   style={{ background: '#EF9F27', color: '#FFFFFF' }} 
-                  className="w-full text-xs font-bold uppercase tracking-wider h-10 mt-2 hover:opacity-90"
+                  className="w-full text-xs font-bold uppercase tracking-wider h-11 mt-2 hover:opacity-95 rounded-xl border-none shadow-md shadow-amber-500/10 cursor-pointer"
                 >
                   Alert All Unbooked
                 </Button>
@@ -507,9 +520,7 @@ export function OwnerWebFood() {
               <p className="text-xs text-slate-400">All residents have booked tomorrow's meals! No food wastage projected. 🎉</p>
             )}
           </Card>
-
         </div>
-
       </div>
     </div>
   );

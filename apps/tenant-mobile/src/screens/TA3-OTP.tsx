@@ -1,5 +1,5 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { ChevronLeft } from 'lucide-react'; import { Button } from '@rentflo/ui';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { ChevronLeft } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@stayflo/ui';
 
 export function TenantOTP() {
   const navigate = useNavigate();

@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Building, Users, CreditCard, IndianRupee, UserCheck, MessageSquareText } from 'lucide-react';
-import { RentfloLogo } from '@rentflo/ui';
-import { Avatar, AvatarFallback } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
+import { StayfloLogo } from '@stayflo/ui';
+import { Avatar, AvatarFallback } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -26,7 +26,7 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="p-6 border-b" style={{ borderColor: '#E5E7EB' }}>
         <div className="flex items-center gap-2">
-          <RentfloLogo className="text-2xl" />
+          <StayfloLogo className="text-2xl" />
           <Badge style={{ background: '#FAECE7', color: '#993C1D', fontSize: '11px', padding: '2px 8px' }}>
             Admin
           </Badge>

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, Component, ReactNode } from 'react'; import { Card } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@rentflo/ui';
-import { Check, Plus, Trash2, MapPin, X, HelpCircle, Download, Move, Edit } from 'lucide-react'; import { Badge } from '@rentflo/ui';
+import { useState, useEffect, useRef, Component, ReactNode } from 'react'; import { Card } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@stayflo/ui';
+import { Check, Plus, Trash2, MapPin, X, HelpCircle, Download, Move, Edit } from 'lucide-react'; import { Badge } from '@stayflo/ui';
 
 interface RoomRectangle {
   id: string;
@@ -52,8 +52,8 @@ const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: 
 
 const PALETTE = [
   // ROOMS
-  { name: 'Single room', category: 'ROOMS', color: '#1D9E75', text: '#FFFFFF', initials: 'SR' },
-  { name: 'Double room', category: 'ROOMS', color: '#0F6E56', text: '#FFFFFF', initials: 'DR' },
+  { name: 'Single room', category: 'ROOMS', color: '#14b8a6', text: '#FFFFFF', initials: 'SR' },
+  { name: 'Double room', category: 'ROOMS', color: '#0f766e', text: '#FFFFFF', initials: 'DR' },
   { name: 'Triple room', category: 'ROOMS', color: '#111827', text: '#FFFFFF', initials: 'TR' },
   { name: '4 sharing room', category: 'ROOMS', color: '#0b4c3c', text: '#FFFFFF', initials: 'FR' },
   // COMMON AREAS
@@ -66,7 +66,7 @@ const PALETTE = [
   { name: 'Garden', category: 'OUTDOOR', color: '#3B6D11', text: '#FFFFFF', initials: 'GD' },
   { name: 'Parking', category: 'OUTDOOR', color: '#374151', text: '#FFFFFF', initials: 'PK' },
   { name: 'Access road', category: 'OUTDOOR', color: '#111827', text: '#FFFFFF', initials: 'RD' },
-  { name: 'Terrace', category: 'OUTDOOR', color: '#0F6E56', text: '#FFFFFF', initials: 'TC' },
+  { name: 'Terrace', category: 'OUTDOOR', color: '#0f766e', text: '#FFFFFF', initials: 'TC' },
   { name: 'Other building', category: 'OUTDOOR', color: '#475569', text: '#FFFFFF', initials: 'OB' },
   { name: 'Empty land', category: 'OUTDOOR', color: '#FEF08A', text: '#854F0B', initials: 'EL' },
   { name: 'Text label', category: 'OUTDOOR', color: 'transparent', text: '#1E293B', initials: 'TX' },
@@ -99,7 +99,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
           <div className="pt-2">
             <button 
               onClick={() => {
-                localStorage.removeItem('rentflo_builder_state');
+                localStorage.removeItem('stayflo_builder_state');
                 window.location.reload();
               }}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-sm text-xs transition-all cursor-pointer"
@@ -254,7 +254,7 @@ function OwnerWebsiteBuilderComponent() {
           doors: ['left'],
           windows: ['top'],
           vacancy: 'Vacant',
-          color: '#1D9E75',
+          color: '#14b8a6',
           bedStatuses: ['Vacant']
         },
         {
@@ -269,7 +269,7 @@ function OwnerWebsiteBuilderComponent() {
           doors: ['left'],
           windows: ['right'],
           vacancy: '1/2 Filled',
-          color: '#0F6E56',
+          color: '#0f766e',
           bedStatuses: ['Vacant', 'Occupied']
         },
         {
@@ -324,7 +324,7 @@ function OwnerWebsiteBuilderComponent() {
 
   // Load custom state from localStorage on init with validation check
   const loadState = () => {
-    const saved = localStorage.getItem('rentflo_builder_state');
+    const saved = localStorage.getItem('stayflo_builder_state');
     if (saved === lastSavedRef.current) return;
     if (saved) {
       try {
@@ -382,8 +382,8 @@ function OwnerWebsiteBuilderComponent() {
 
   useEffect(() => {
     loadState();
-    window.addEventListener('rentflo_website_update', loadState);
-    return () => window.removeEventListener('rentflo_website_update', loadState);
+    window.addEventListener('stayflo_website_update', loadState);
+    return () => window.removeEventListener('stayflo_website_update', loadState);
   }, []);
 
   // Central auto-save Effect to ensure zero stale closures (debounced to avoid main thread blockage during room dragging)
@@ -418,8 +418,8 @@ function OwnerWebsiteBuilderComponent() {
         heroImages,
       });
       lastSavedRef.current = serialized;
-      localStorage.setItem('rentflo_builder_state', serialized);
-      window.dispatchEvent(new Event('rentflo_website_update'));
+      localStorage.setItem('stayflo_builder_state', serialized);
+      window.dispatchEvent(new Event('stayflo_website_update'));
     }, 500); // 500ms debounce is perfect for snappy drag-and-drop and smooth dragging
 
     return () => clearTimeout(handler);
@@ -1199,25 +1199,25 @@ function OwnerWebsiteBuilderComponent() {
   };
 
   return (
-    <div className="h-full overflow-hidden w-full bg-[#F8F9FA] text-left">
+    <div className="h-full overflow-hidden w-full bg-transparent text-left">
       
       {/* Editor Panel Left */}
-      <div className="h-full overflow-y-auto p-6 md:p-8 space-y-6">
+      <div className="h-full overflow-y-auto p-8 space-y-8">
         
         {publishStatus && (
-          <div className="fixed bottom-6 left-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
-            <Check className="w-4 h-4 text-[#1D9E75]" /> {publishStatus}
+          <div className="fixed bottom-6 left-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 border border-slate-800 animate-bounce">
+            <Check className="w-4 h-4 text-[#14b8a6]" /> {publishStatus}
           </div>
         )}
 
         <div className="flex items-center justify-between text-slate-900">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Custom PG Website Builder</h1>
-            <p className="text-slate-500 mt-1">Design customizable architectural floor blueprints and map coordinates</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-heading animate-fade-in" style={{ fontFamily: 'var(--font-heading)' }}>Custom PG Website Builder</h1>
+            <p className="text-slate-500 text-sm mt-1">Design customizable architectural floor blueprints and map coordinates</p>
           </div>
-          <div className="flex gap-2">
-            <Button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer h-9 px-4 text-xs font-semibold rounded-lg shadow-sm transition-all" onClick={() => saveState({})}>Save Draft</Button>
-            <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} onClick={() => {
+          <div className="flex gap-2.5">
+            <Button className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer h-10 px-4 text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-all" onClick={() => saveState({})}>Save Draft</Button>
+            <Button className="bg-teal-500 hover:bg-teal-600 text-white font-bold h-10 px-5 text-xs uppercase tracking-wider rounded-xl border-none shadow-sm transition-all duration-200" onClick={() => {
               setPublishStatus('Website Published Successfully!');
               setTimeout(() => setPublishStatus(null), 3000);
             }}>
@@ -1226,138 +1226,205 @@ function OwnerWebsiteBuilderComponent() {
           </div>
         </div>
 
-        <Tabs defaultValue="floor_plan">
-          <TabsList className="bg-white border border-slate-200 rounded-lg p-1 text-slate-500 flex flex-wrap gap-1 shadow-sm">
-            <TabsTrigger value="cover" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">General</TabsTrigger>
-            <TabsTrigger value="floor_plan" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Architect Blueprint Plan</TabsTrigger>
-            <TabsTrigger value="amenities" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Amenities</TabsTrigger>
-            <TabsTrigger value="food" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Food Menu</TabsTrigger>
-            <TabsTrigger value="rules" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">House Rules</TabsTrigger>
-            <TabsTrigger value="media" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold rounded-md data-[state=active]:bg-[#1D9E75]! data-[state=active]:text-white! transition-all">Photos & Videos</TabsTrigger>
+        <Tabs defaultValue="floor_plan" className="w-full">
+          <TabsList className="bg-white border border-[#E5E7EB] rounded-xl p-1 text-slate-500 flex flex-wrap gap-1 shadow-sm">
+            <TabsTrigger value="cover" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">General</TabsTrigger>
+            <TabsTrigger value="floor_plan" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">Architect Blueprint Plan</TabsTrigger>
+            <TabsTrigger value="amenities" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">Amenities</TabsTrigger>
+            <TabsTrigger value="food" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">Food Menu</TabsTrigger>
+            <TabsTrigger value="rules" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">House Rules</TabsTrigger>
+            <TabsTrigger value="media" className="text-slate-650 hover:text-slate-900 hover:bg-slate-50/50 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg data-[state=active]:bg-[#14b8a6]! data-[state=active]:text-white! transition-all">Photos & Videos</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: COVER INFO */}
-          <TabsContent value="cover" className="space-y-4 mt-4">
-            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-855 uppercase tracking-wider">General Branding</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">PG Name</label>
-                  <Input value={pgName} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setPgName(e.target.value); }} />
+          <TabsContent value="cover" className="space-y-6 mt-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>General Branding</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">PG Name</label>
+                  <Input 
+                    value={pgName} 
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                    onChange={(e) => { setPgName(e.target.value); }} 
+                  />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Branding Tagline</label>
-                  <Input value={tagline} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setTagline(e.target.value); }} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Refundable Deposit Details</label>
-                  <Input value={depositAmount} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setDepositAmount(e.target.value); }} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Rent Inclusions Description</label>
-                  <Input value={rentInclusions} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setRentInclusions(e.target.value); }} />
+                <div className="group">
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Branding Tagline</label>
+                  <Input 
+                    value={tagline} 
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                    onChange={(e) => { setTagline(e.target.value); }} 
+                  />
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 mt-2 space-y-4">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Location & Proximity Details</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Display Address</label>
-                    <Input value={address} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setAddress(e.target.value); }} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                <div className="group">
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Refundable Deposit Details</label>
+                  <Input 
+                    value={depositAmount} 
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                    onChange={(e) => { setDepositAmount(e.target.value); }} 
+                  />
+                </div>
+                <div className="group">
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Rent Inclusions Description</label>
+                  <Input 
+                    value={rentInclusions} 
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                    onChange={(e) => { setRentInclusions(e.target.value); }} 
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6 mt-4 space-y-5">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Location & Proximity Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Display Address</label>
+                    <Input 
+                      value={address} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setAddress(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Commute Destination Office</label>
-                    <Input value={commuteDestination} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteDestination(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Commute Destination Office</label>
+                    <Input 
+                      value={commuteDestination} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setCommuteDestination(e.target.value); }} 
+                    />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Walk Time (e.g. 5 mins)</label>
-                    <Input value={commuteWalkTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteWalkTime(e.target.value); }} />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Walk Time (e.g. 5 mins)</label>
+                    <Input 
+                      value={commuteWalkTime} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setCommuteWalkTime(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Bike Time (e.g. 2 mins)</label>
-                    <Input value={commuteBikeTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteBikeTime(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Bike Time (e.g. 2 mins)</label>
+                    <Input 
+                      value={commuteBikeTime} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setCommuteBikeTime(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Transit distance (e.g. 300m away)</label>
-                    <Input value={commuteTransitTime} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setCommuteTransitTime(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Transit distance (e.g. 300m away)</label>
+                    <Input 
+                      value={commuteTransitTime} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setCommuteTransitTime(e.target.value); }} 
+                    />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Map Latitude</label>
-                    <Input type="number" step="0.0001" value={mapCoords.lat} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setMapCoords(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 })); }} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Map Latitude</label>
+                    <Input 
+                      type="number" 
+                      step="0.0001" 
+                      value={mapCoords.lat} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setMapCoords(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 })); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Map Longitude</label>
-                    <Input type="number" step="0.0001" value={mapCoords.lng} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setMapCoords(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 })); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Map Longitude</label>
+                    <Input 
+                      type="number" 
+                      step="0.0001" 
+                      value={mapCoords.lng} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setMapCoords(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 })); }} 
+                    />
                   </div>
                 </div>
               </div>
-              <div className="border-t border-slate-100 pt-4 mt-2">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Portfolio Website Stats Bar</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Premium Beds</label>
-                    <Input value={statsBeds} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsBeds(e.target.value); }} />
+
+              <div className="border-t border-slate-100 pt-6 mt-4">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4 font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Portfolio Website Stats Bar</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Premium Beds</label>
+                    <Input 
+                      value={statsBeds} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setStatsBeds(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Resident Reviews</label>
-                    <Input value={statsReviews} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsReviews(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Resident Reviews</label>
+                    <Input 
+                      value={statsReviews} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setStatsReviews(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">PG Properties</label>
-                    <Input value={statsProperties} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsProperties(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">PG Properties</label>
+                    <Input 
+                      value={statsProperties} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setStatsProperties(e.target.value); }} 
+                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Cities Available</label>
-                    <Input value={statsCities} className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]" onChange={(e) => { setStatsCities(e.target.value); }} />
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Cities Available</label>
+                    <Input 
+                      value={statsCities} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" 
+                      onChange={(e) => { setStatsCities(e.target.value); }} 
+                    />
                   </div>
                 </div>
               </div>
             </Card>
 
             {/* Resident Testimonials Card */}
-            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-slate-855 uppercase tracking-wider">Resident Testimonials</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Manage the reviews displayed on the portfolio website.</p>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Resident Testimonials</h3>
+                <p className="text-xs text-slate-450 mt-1 font-medium">Manage the reviews displayed on the portfolio website.</p>
               </div>
 
               {/* Add Testimonial Form */}
-              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-                <p className="text-xs font-bold text-slate-700">Add New Testimonial</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-medium text-slate-500 mb-1">Resident Name</label>
+              <div className="bg-[#f8fafc] p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Add New Testimonial</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Resident Name</label>
                     <Input 
                       value={newTestimonialName} 
                       onChange={(e) => setNewTestimonialName(e.target.value)} 
                       placeholder="e.g. Vijay Nair" 
-                      className="bg-white border-slate-200 text-slate-900 text-xs h-8"
+                      className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-10 px-3 rounded-xl transition-all"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-medium text-slate-500 mb-1">Duration / Subtitle</label>
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Duration / Subtitle</label>
                     <Input 
                       value={newTestimonialDuration} 
                       onChange={(e) => setNewTestimonialDuration(e.target.value)} 
                       placeholder="e.g. Staying since 8 months" 
-                      className="bg-white border-slate-200 text-slate-900 text-xs h-8"
+                      className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-550/20 focus:outline-none text-xs text-slate-800 font-semibold h-10 px-3 rounded-xl transition-all"
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-slate-500 mb-1">Comment / Review</label>
+                <div className="group">
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Comment / Review</label>
                   <textarea 
                     value={newTestimonialComment} 
                     onChange={(e) => setNewTestimonialComment(e.target.value)} 
                     placeholder="Enter review comment..." 
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-md text-slate-900 text-xs focus:ring-[#1D9E75] focus:outline-none min-h-[60px]"
+                    className="w-full p-4 bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-550/20 focus:outline-none text-xs text-slate-850 font-semibold rounded-xl transition-all min-h-[80px] resize-none leading-relaxed"
                   />
                 </div>
                 <Button 
@@ -1375,8 +1442,7 @@ function OwnerWebsiteBuilderComponent() {
                     setNewTestimonialDuration('');
                     setNewTestimonialComment('');
                   }}
-                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                  className="text-xs h-8 px-4 font-semibold rounded-md shadow-sm"
+                  className="bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold uppercase tracking-widest h-10 px-5 rounded-xl border-none cursor-pointer shadow-md transition-all duration-200"
                 >
                   Add Testimonial
                 </Button>
@@ -1385,15 +1451,15 @@ function OwnerWebsiteBuilderComponent() {
               {/* List of current testimonials */}
               <div className="space-y-3 mt-4">
                 {testimonials.map((t, idx) => (
-                  <div key={idx} className="p-3 border border-slate-200 rounded-lg bg-white flex justify-between items-start gap-4">
+                  <div key={idx} className="p-4 border border-slate-200/80 rounded-2xl bg-white flex justify-between items-start gap-4 hover:shadow-md transition-all">
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-800">{t.name} <span className="text-[10px] text-slate-400 font-medium font-sans">({t.duration})</span></p>
-                      <p className="text-xs text-slate-600 italic">"{t.comment}"</p>
+                      <p className="text-xs font-bold text-slate-800 font-heading">{t.name} <span className="text-[10px] text-slate-400 font-semibold">({t.duration})</span></p>
+                      <p className="text-xs text-slate-505 italic leading-relaxed">"{t.comment}"</p>
                     </div>
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] px-2"
+                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-8 text-[10px] px-3 font-semibold rounded-xl"
                       onClick={() => {
                         setTestimonials(prev => prev.filter((_, i) => i !== idx));
                       }}
@@ -1416,7 +1482,7 @@ function OwnerWebsiteBuilderComponent() {
                 return (
                   <div
                     key={fl}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${isActive ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${isActive ? 'bg-[#14b8a6] text-white border-[#14b8a6]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm'}`}
                   >
                     <button
                       onClick={() => { setActiveFloor(fl); setActiveRoomId(null); }}
@@ -1447,7 +1513,7 @@ function OwnerWebsiteBuilderComponent() {
               })}
               <button 
                 onClick={addFloor}
-                className="px-4 py-1.5 text-xs font-semibold rounded-md border border-dashed border-teal-600 text-[#1D9E75] bg-white flex items-center gap-1 hover:bg-slate-50 shadow-sm"
+                className="px-4 py-1.5 text-xs font-semibold rounded-md border border-dashed border-teal-600 text-[#14b8a6] bg-white flex items-center gap-1 hover:bg-slate-50 shadow-sm"
               >
                 + Add floor
               </button>
@@ -1460,7 +1526,7 @@ function OwnerWebsiteBuilderComponent() {
                     handleCopyFloorLayout(sourceFloor);
                     e.target.value = "";
                   }}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 shadow-sm cursor-pointer outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75]"
+                  className="px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 shadow-sm cursor-pointer outline-none focus:border-[#14b8a6] focus:ring-1 focus:ring-[#14b8a6]"
                 >
                   <option value="" disabled>Copy layout from...</option>
                   {floors.filter(f => f !== activeFloor).map(f => (
@@ -1471,10 +1537,10 @@ function OwnerWebsiteBuilderComponent() {
             </div>
 
             {/* Grid Controls Panel */}
-            <Card className="p-4 bg-white text-slate-800 flex flex-wrap gap-4 items-center justify-between border border-slate-200 shadow-sm">
+            <Card className="p-6 bg-white text-slate-800 flex flex-wrap gap-4 items-center justify-between border border-[#E5E7EB] rounded-2xl shadow-sm">
               <div className="flex gap-4 items-center text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-500 font-semibold">GRID:</span>
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">GRID:</span>
                   {[
                     { label: 'Standard (40px)', val: 40 },
                     { label: 'Fine (20px)', val: 20 },
@@ -1483,7 +1549,7 @@ function OwnerWebsiteBuilderComponent() {
                     <button
                       key={g.val}
                       onClick={() => setGridSize(g.val)}
-                      className={`px-2.5 py-1.5 rounded transition-all border ${gridSize === g.val ? 'bg-[#1D9E75] border-[#1D9E75] text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${gridSize === g.val ? 'bg-[#14b8a6] border-[#14b8a6] text-white shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                     >
                       {g.label}
                     </button>
@@ -1492,23 +1558,23 @@ function OwnerWebsiteBuilderComponent() {
               </div>
 
               {/* Canvas Resize Controls */}
-              <div className="flex gap-2 text-xs items-center">
-                <span className="text-slate-500 font-semibold">CANVAS:</span>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50" onClick={() => { setCanvasCols(Math.max(4, canvasCols - 1)); saveState({ canvasCols: canvasCols - 1 }); }}>- Width</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50" onClick={() => { setCanvasCols(canvasCols + 1); saveState({ canvasCols: canvasCols + 1 }); }}>+ Width</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50" onClick={() => { setCanvasRows(Math.max(4, canvasRows - 1)); saveState({ canvasRows: canvasRows - 1 }); }}>- Height</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50" onClick={() => { setCanvasRows(canvasRows + 1); saveState({ canvasRows: canvasRows + 1 }); }}>+ Height</Button>
-                <div className="border-l border-slate-200 pl-2 flex gap-1">
-                  <Button size="sm" variant="destructive" className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200" onClick={clearFloor}>Clear floor</Button>
+              <div className="flex gap-2.5 text-xs items-center">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CANVAS:</span>
+                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasCols(Math.max(4, canvasCols - 1)); saveState({ canvasCols: canvasCols - 1 }); }}>- Width</Button>
+                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasCols(canvasCols + 1); saveState({ canvasCols: canvasCols + 1 }); }}>+ Width</Button>
+                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasRows(Math.max(4, canvasRows - 1)); saveState({ canvasRows: canvasRows - 1 }); }}>- Height</Button>
+                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasRows(canvasRows + 1); saveState({ canvasRows: canvasRows + 1 }); }}>+ Height</Button>
+                <div className="border-l border-slate-200 pl-2.5 flex gap-1">
+                  <Button size="sm" variant="destructive" className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg shadow-sm" onClick={clearFloor}>Clear floor</Button>
                 </div>
               </div>
             </Card>
 
             {/* Vector Layout Canvas */}
-            <div className="flex flex-col lg:flex-row gap-4 lg:h-[550px] lg:overflow-hidden h-auto overflow-visible">
+            <div className="flex flex-col lg:flex-row gap-6 lg:h-[550px] lg:overflow-hidden h-auto overflow-visible">
               
               {/* Palette Column Left */}
-              <div className="w-full lg:w-56 bg-white border border-slate-200 p-4 rounded-xl overflow-y-auto space-y-4 text-left shadow-sm">
+              <div className="w-full lg:w-56 bg-white border border-[#E5E7EB] p-6 rounded-2xl overflow-y-auto space-y-5 text-left shadow-sm">
                 
                 {/* Rooms selection */}
                 <div>
@@ -1526,7 +1592,7 @@ function OwnerWebsiteBuilderComponent() {
                           <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
                           <span className="font-semibold">{p.name}</span>
                         </div>
-                        <span className="text-[9px] text-[#1D9E75] font-bold">+ ADD</span>
+                        <span className="text-[9px] text-[#14b8a6] font-bold">+ ADD</span>
                       </button>
                     ))}
                   </div>
@@ -1548,7 +1614,7 @@ function OwnerWebsiteBuilderComponent() {
                           <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
                           <span className="font-semibold">{p.name}</span>
                         </div>
-                        <span className="text-[9px] text-[#1D9E75] font-bold">+ ADD</span>
+                        <span className="text-[9px] text-[#14b8a6] font-bold">+ ADD</span>
                       </button>
                     ))}
                   </div>
@@ -1570,7 +1636,7 @@ function OwnerWebsiteBuilderComponent() {
                           <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
                           <span className="font-semibold">{p.name}</span>
                         </div>
-                        <span className="text-[9px] text-[#1D9E75] font-bold">+ ADD</span>
+                        <span className="text-[9px] text-[#14b8a6] font-bold">+ ADD</span>
                       </button>
                     ))}
                   </div>
@@ -1792,7 +1858,7 @@ function OwnerWebsiteBuilderComponent() {
                               const nextH = Math.max(2, Math.min(canvasRows - selectedRoom.y, selectedRoom.w));
                               updateRoomProperties({ w: nextW, h: nextH });
                             }}
-                            className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold rounded-md bg-[#1D9E75] text-white hover:bg-[#0F6E56] transition-all shadow-sm"
+                            className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold rounded-md bg-[#14b8a6] text-white hover:bg-[#0f766e] transition-all shadow-sm"
                             title="Rotate 90° — swaps width and height"
                           >
                             <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1808,7 +1874,7 @@ function OwnerWebsiteBuilderComponent() {
                         <Input 
                           value={selectedRoom.customName} 
                           onChange={(e) => updateRoomProperty('customName', e.target.value)} 
-                          className="h-8 text-xs bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]"
+                          className="h-8 text-xs bg-white border-slate-200 text-slate-900 focus:ring-[#14b8a6]"
                         />
                       </div>
 
@@ -1836,7 +1902,7 @@ function OwnerWebsiteBuilderComponent() {
                               updateRoomProperty('bedStatuses', nextStatuses);
                             }
                           }}
-                          className="w-full h-8 text-xs bg-white border border-slate-200 rounded px-2 text-slate-900 focus:ring-[#1D9E75]"
+                          className="w-full h-8 text-xs bg-white border border-slate-200 rounded px-2 text-slate-900 focus:ring-[#14b8a6]"
                         >
                           <option value="Vacant">Vacant</option>
                           <option value="Occupied">Occupied</option>
@@ -1865,7 +1931,7 @@ function OwnerWebsiteBuilderComponent() {
                                   vacancy: 'Vacant'
                                 });
                               }}
-                              className="w-full h-8 text-xs bg-white border border-slate-200 rounded px-2 text-slate-900 focus:ring-[#1D9E75]"
+                              className="w-full h-8 text-xs bg-white border border-slate-200 rounded px-2 text-slate-900 focus:ring-[#14b8a6]"
                             >
                               <option value="1 Sharing">1 Sharing (Single)</option>
                               <option value="2 Sharing">2 Sharing (Double)</option>
@@ -1885,7 +1951,7 @@ function OwnerWebsiteBuilderComponent() {
                                 type="number"
                                 value={selectedRoom.pricePerBed !== undefined ? selectedRoom.pricePerBed : 8500}
                                 onChange={(e) => updateRoomProperty('pricePerBed', parseFloat(e.target.value) || 0)}
-                                className="pl-6 h-8 text-xs bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]"
+                                className="pl-6 h-8 text-xs bg-white border-slate-200 text-slate-900 focus:ring-[#14b8a6]"
                                 placeholder="e.g. 8500"
                               />
                             </div>
@@ -1909,7 +1975,7 @@ function OwnerWebsiteBuilderComponent() {
                                           : [...currentAmenities, amenity];
                                         updateRoomProperty('roomAmenities', nextAmenities);
                                       }}
-                                      className="accent-[#1D9E75] w-3 h-3 cursor-pointer"
+                                      className="accent-[#14b8a6] w-3 h-3 cursor-pointer"
                                     />
                                     <span>{amenity}</span>
                                   </label>
@@ -2020,7 +2086,7 @@ function OwnerWebsiteBuilderComponent() {
                             {/* Top Wall Button */}
                             <button 
                               onClick={() => handleWallClick('top')}
-                              className={`absolute -top-1.5 left-2 right-2 h-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
+                              className={`absolute -top-1.5 left-2 right-2 h-3 rounded hover:bg-[#14b8a6]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
                                 (selectedRoom.doors || []).includes('top') ? 'bg-rose-500 border border-rose-600' :
                                 (selectedRoom.windows || []).includes('top') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
@@ -2034,7 +2100,7 @@ function OwnerWebsiteBuilderComponent() {
                             {/* Bottom Wall Button */}
                             <button 
                               onClick={() => handleWallClick('bottom')}
-                              className={`absolute -bottom-1.5 left-2 right-2 h-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
+                              className={`absolute -bottom-1.5 left-2 right-2 h-3 rounded hover:bg-[#14b8a6]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
                                 (selectedRoom.doors || []).includes('bottom') ? 'bg-rose-500 border border-rose-600' :
                                 (selectedRoom.windows || []).includes('bottom') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
@@ -2048,7 +2114,7 @@ function OwnerWebsiteBuilderComponent() {
                             {/* Left Wall Button */}
                             <button 
                               onClick={() => handleWallClick('left')}
-                              className={`absolute top-2 bottom-2 -left-1.5 w-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
+                              className={`absolute top-2 bottom-2 -left-1.5 w-3 rounded hover:bg-[#14b8a6]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
                                 (selectedRoom.doors || []).includes('left') ? 'bg-rose-500 border border-rose-600' :
                                 (selectedRoom.windows || []).includes('left') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
@@ -2062,7 +2128,7 @@ function OwnerWebsiteBuilderComponent() {
                             {/* Right Wall Button */}
                             <button 
                               onClick={() => handleWallClick('right')}
-                              className={`absolute top-2 bottom-2 -right-1.5 w-3 rounded hover:bg-[#1D9E75]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
+                              className={`absolute top-2 bottom-2 -right-1.5 w-3 rounded hover:bg-[#14b8a6]/30 cursor-pointer flex items-center justify-center transition-all z-10 ${
                                 (selectedRoom.doors || []).includes('right') ? 'bg-rose-500 border border-rose-600' :
                                 (selectedRoom.windows || []).includes('right') ? 'bg-amber-500 border border-amber-600' : 'bg-slate-200 hover:bg-slate-300'
                               }`}
@@ -2108,29 +2174,34 @@ function OwnerWebsiteBuilderComponent() {
           </TabsContent>
 
           {/* TAB 4: AMENITIES */}
-          <TabsContent value="amenities" className="space-y-4 mt-4">
-            <Card className="p-6 space-y-4 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Toggle Live Amenities</h3>
-              <div className="grid grid-cols-2 gap-3">
+          <TabsContent value="amenities" className="space-y-6 mt-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Toggle Live Amenities</h3>
+              <div className="grid grid-cols-2 gap-4">
                 {Object.keys(amenities).map(amName => (
                   <div 
                     key={amName}
                     onClick={() => toggleAmenity(amName)}
-                    className={`p-3 rounded-lg border flex items-center justify-between cursor-pointer transition-all ${amenities[amName] ? 'border-[#1D9E75] bg-teal-50/30' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+                    className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      amenities[amName] 
+                        ? 'border-[#14b8a6] bg-teal-50/40 text-teal-900 shadow-sm' 
+                        : 'border-slate-200 bg-white hover:bg-slate-50/50 text-slate-705'
+                    }`}
                   >
-                    <span className="text-xs font-semibold text-slate-700">{amName}</span>
-                    <input type="checkbox" checked={amenities[amName]} onChange={() => {}} className="accent-[#1D9E75] cursor-pointer" />
+                    <span className="text-xs font-bold font-heading">{amName}</span>
+                    <input type="checkbox" checked={amenities[amName]} onChange={() => {}} className="accent-[#14b8a6] cursor-pointer h-4 w-4" />
                   </div>
                 ))}
               </div>
-              <div className="border-t border-slate-100 pt-4 mt-4 space-y-2">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Add Custom Amenity</h4>
-                <div className="flex gap-2 max-w-md">
+              
+              <div className="border-t border-slate-100 pt-6 mt-6 space-y-3">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Add Custom Amenity</h4>
+                <div className="flex gap-3 max-w-md group">
                   <Input 
                     value={newAmenity}
                     onChange={(e) => setNewAmenity(e.target.value)}
                     placeholder="e.g. Swimming Pool, Squash Court..." 
-                    className="bg-white border-slate-200 text-slate-900 text-xs h-9"
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                   />
                   <Button
                     onClick={() => {
@@ -2141,10 +2212,9 @@ function OwnerWebsiteBuilderComponent() {
                       }));
                       setNewAmenity('');
                     }}
-                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                    className="text-xs h-9 px-4 font-semibold rounded-lg shadow-sm"
+                    className="bg-teal-500 hover:bg-teal-600 text-white font-bold uppercase tracking-widest text-xs h-11 px-5 rounded-xl border-none shadow-md transition-all duration-200"
                   >
-                    Add Amenity
+                    Add
                   </Button>
                 </div>
               </div>
@@ -2152,23 +2222,23 @@ function OwnerWebsiteBuilderComponent() {
           </TabsContent>
 
           {/* TAB 5: WEEKLY FOOD MENU */}
-          <TabsContent value="food" className="space-y-4 mt-4">
-            <Card className="p-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm space-y-4">
+          <TabsContent value="food" className="space-y-6 mt-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Weekly Food Menu Editor</h3>
-                <p className="text-xs text-slate-500 mt-1">Configure what meals are served to residents each day of the week.</p>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Weekly Food Menu Editor</h3>
+                <p className="text-xs text-slate-450 mt-1 font-medium">Configure what meals are served to residents each day of the week.</p>
               </div>
 
               {/* Day selector tabs inside editor */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1">
+              <div className="flex gap-2 overflow-x-auto pb-1">
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
                   <button
                     key={day}
                     onClick={() => setSelectedFoodDay(day)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${
+                    className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all ${
                       selectedFoodDay === day 
-                        ? 'bg-[#1D9E75] text-white border-[#1D9E75] shadow-sm' 
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-[#14b8a6] text-white border-[#14b8a6] shadow-md' 
+                        : 'bg-white text-slate-650 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
                     {day}
@@ -2176,12 +2246,12 @@ function OwnerWebsiteBuilderComponent() {
                 ))}
               </div>
 
-              <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Editing Meals for {selectedFoodDay}</p>
+              <div className="space-y-5 bg-[#f8fafc] p-6 rounded-2xl border border-slate-200/80">
+                <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Editing Meals for {selectedFoodDay}</p>
                 
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Breakfast (8:00 AM - 9:00 AM)</label>
+                <div className="space-y-4">
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Breakfast (8:00 AM - 9:00 AM)</label>
                     <Input 
                       value={foodMenu[selectedFoodDay]?.breakfast || ''} 
                       onChange={(e) => {
@@ -2191,13 +2261,13 @@ function OwnerWebsiteBuilderComponent() {
                           [selectedFoodDay]: { ...prev[selectedFoodDay], breakfast: val }
                         }));
                       }}
-                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                       placeholder="e.g. Idli, Vada, Chutney"
                     />
                   </div>
                   
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Lunch (12:00 PM - 1:00 PM)</label>
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Lunch (12:00 PM - 1:00 PM)</label>
                     <Input 
                       value={foodMenu[selectedFoodDay]?.lunch || ''} 
                       onChange={(e) => {
@@ -2207,13 +2277,13 @@ function OwnerWebsiteBuilderComponent() {
                           [selectedFoodDay]: { ...prev[selectedFoodDay], lunch: val }
                         }));
                       }}
-                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                       placeholder="e.g. Rice, Sambar, Veg Curry, Curd"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dinner (7:00 PM - 8:00 PM)</label>
+                  <div className="group">
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider group-focus-within:text-teal-600 transition-colors">Dinner (7:00 PM - 8:00 PM)</label>
                     <Input 
                       value={foodMenu[selectedFoodDay]?.dinner || ''} 
                       onChange={(e) => {
@@ -2223,35 +2293,35 @@ function OwnerWebsiteBuilderComponent() {
                           [selectedFoodDay]: { ...prev[selectedFoodDay], dinner: val }
                         }));
                       }}
-                      className="bg-white border-slate-200 text-slate-950 text-xs focus:ring-[#1D9E75]"
+                      className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                       placeholder="e.g. Chapati, Paneer Masala, Rice, Dal"
                     />
                   </div>
                 </div>
               </div>
               
-              <div className="p-4 bg-teal-50 border border-teal-200 rounded-lg text-teal-850 space-y-1">
-                <p className="text-xs font-bold">💡 RentFlo Food Tech Feature</p>
-                <p className="text-[10px] leading-relaxed text-teal-700">Tenants can skip/confirm meals before the 6 PM cutoff. Skipping meals awards them cashback or keeps their rent pricing affordable!</p>
+              <div className="p-4 bg-teal-50/50 border border-teal-100 rounded-xl text-teal-900 space-y-1">
+                <p className="text-xs font-bold font-heading">💡 StayFlo Food Tech Feature</p>
+                <p className="text-[10px] leading-relaxed text-teal-600 font-medium">Tenants can skip/confirm meals before the 6 PM cutoff. Skipping meals awards them cashback or keeps their rent pricing affordable!</p>
               </div>
             </Card>
           </TabsContent>
 
           {/* TAB 6: HOUSE RULES */}
-          <TabsContent value="rules" className="space-y-4 mt-4">
-            <Card className="p-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm space-y-4">
+          <TabsContent value="rules" className="space-y-6 mt-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">House Rules Manager</h3>
-                <p className="text-xs text-slate-500 mt-1">Specify curfew, visitor rules, and other policies displayed on the portfolio website.</p>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>House Rules Manager</h3>
+                <p className="text-xs text-slate-455 mt-1 font-medium">Specify curfew, visitor rules, and other policies displayed on the portfolio website.</p>
               </div>
 
               {/* Add rule form */}
-              <div className="flex gap-2">
+              <div className="flex gap-3 group">
                 <Input 
                   value={newRuleText}
                   onChange={(e) => setNewRuleText(e.target.value)}
                   placeholder="Add a new rule (e.g. Main gate closes at 11:30 PM)"
-                  className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] text-xs h-9"
+                  className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                 />
                 <Button
                   onClick={() => {
@@ -2259,22 +2329,21 @@ function OwnerWebsiteBuilderComponent() {
                     setHouseRules(prev => [...prev, newRuleText.trim()]);
                     setNewRuleText('');
                   }}
-                  style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                  className="h-9 px-4 text-xs font-semibold rounded-lg shadow-sm"
+                  className="bg-teal-500 hover:bg-teal-600 text-white font-bold uppercase tracking-widest text-xs h-11 px-5 rounded-xl border-none shadow-md transition-all duration-200"
                 >
-                  Add Rule
+                  Add
                 </Button>
               </div>
 
               {/* Rules list */}
-              <div className="space-y-2 mt-4">
+              <div className="space-y-3 mt-4">
                 {houseRules.map((rule, idx) => (
-                  <div key={idx} className="p-3 border border-slate-200 rounded-lg bg-slate-50/50 flex justify-between items-center text-xs">
-                    <span className="text-slate-700 font-medium">{rule}</span>
+                  <div key={idx} className="p-4 border border-slate-200/80 rounded-2xl bg-[#f8fafc] flex justify-between items-center text-xs shadow-inner">
+                    <span className="text-slate-700 font-semibold">{rule}</span>
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] px-2 font-semibold"
+                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-8 text-[10px] px-3 font-semibold rounded-xl"
                       onClick={() => {
                         setHouseRules(prev => prev.filter((_, i) => i !== idx));
                       }}
@@ -2288,40 +2357,40 @@ function OwnerWebsiteBuilderComponent() {
           </TabsContent>
 
           {/* TAB 7: PHOTOS & VIDEOS GALLERY */}
-          <TabsContent value="media" className="space-y-4 mt-4">
-            <Card className="p-6 space-y-6 bg-white border border-slate-200 text-slate-800 text-left shadow-sm">
+          <TabsContent value="media" className="space-y-6 mt-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] shadow-sm rounded-2xl space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Walkthrough Video</h3>
-                <p className="text-xs text-slate-500 mt-1">Add a video link to give potential tenants a virtual tour of your property.</p>
-                <div className="mt-3 space-y-3">
-                  <div className="flex gap-2">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Walkthrough Video</h3>
+                <p className="text-xs text-slate-455 mt-1 font-medium">Add a video link to give potential tenants a virtual tour of your property.</p>
+                <div className="mt-4 space-y-4">
+                  <div className="group">
                     <Input 
                       value={videoUrl} 
                       onChange={(e) => setVideoUrl(e.target.value)} 
                       placeholder="Enter Walkthrough Video URL (mp4 or Youtube link)" 
-                      className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75]"
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                     />
                   </div>
                   {videoUrl && (
-                    <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Video Preview</p>
-                      <video src={videoUrl} controls className="w-full max-w-sm h-48 rounded bg-black shadow-inner" onError={(e) => console.log('Video preview not available')} />
+                    <div className="mt-2 p-4 bg-[#f8fafc] border border-slate-200 rounded-2xl flex flex-col items-center justify-center shadow-inner">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-3">Video Preview</p>
+                      <video src={videoUrl} controls className="w-full max-w-md h-52 rounded-xl bg-black shadow-lg" onError={(e) => console.log('Video preview not available')} />
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="border-t border-slate-200 pt-6">
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Hero Background Slider Images</h3>
-                <p className="text-xs text-slate-500 mt-1">Manage the high-resolution slider images displayed at the very top of your portfolio website.</p>
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>Hero Background Slider Images</h3>
+                <p className="text-xs text-slate-455 mt-1 font-medium">Manage the high-resolution slider images displayed at the very top of your portfolio website.</p>
                 
                 {/* Add Hero Image URL */}
-                <div className="mt-4 flex gap-2 max-w-xl">
+                <div className="mt-4 flex gap-3 max-w-xl group">
                   <Input 
                     value={newHeroImageUrl} 
                     onChange={(e) => setNewHeroImageUrl(e.target.value)} 
                     placeholder="Paste high-res Hero Image URL (e.g. Unsplash link)" 
-                    className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-9 text-xs"
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                   />
                   <Button 
                     onClick={() => {
@@ -2330,50 +2399,49 @@ function OwnerWebsiteBuilderComponent() {
                       setHeroImages(prev => [...prev, url]);
                       setNewHeroImageUrl('');
                     }}
-                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                    className="h-9 text-xs font-semibold px-4 rounded-lg shadow-sm"
+                    className="bg-teal-500 hover:bg-teal-600 text-white font-bold uppercase tracking-widest text-xs h-11 px-5 rounded-xl border-none shadow-md transition-all duration-200"
                   >
-                    Add Image
+                    Add
                   </Button>
                 </div>
 
                 {/* Hero Images Grid */}
                 {heroImages.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 pt-4">
                     {heroImages.map((imgUrl, index) => (
-                      <div key={index} className="flex flex-col border border-slate-200 bg-slate-50 rounded-md p-1.5 shadow-sm space-y-1 group relative">
-                        <div className="relative rounded overflow-hidden h-16 bg-slate-100">
-                          <img src={imgUrl} alt={`Hero slider ${index}`} className="w-full h-full object-cover" />
+                      <div key={index} className="flex flex-col border border-slate-200 bg-[#f8fafc] rounded-2xl p-2 shadow-sm space-y-2 group relative">
+                        <div className="relative rounded-xl overflow-hidden h-20 bg-slate-100">
+                          <img src={imgUrl} alt={`Hero slider ${index}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                           <button 
                             onClick={() => {
                               setHeroImages(prev => prev.filter((_, idx) => idx !== index));
                             }}
-                            className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
+                            className="absolute top-1.5 right-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow"
                             title="Delete Hero Image"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <span className="text-[8px] text-slate-400 font-bold text-center">Slide #{index + 1}</span>
+                        <span className="text-[9px] text-slate-400 font-extrabold text-center uppercase tracking-wide">Slide #{index + 1}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-slate-400 italic mt-2">No custom Hero images. Falling back to category gallery photos.</p>
+                  <p className="text-[11px] text-slate-405 italic mt-3 font-semibold">No custom Hero images. Falling back to category gallery photos.</p>
                 )}
               </div>
 
-              <div className="border-t border-slate-200 pt-6">
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">PG Photo Gallery</h3>
-                <p className="text-xs text-slate-500 mt-1">Organize photos by categories (e.g. 1 Sharing, 2 Sharing, Dining Room) to show on the portfolio website.</p>
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-heading" style={{ fontFamily: 'var(--font-heading)' }}>PG Photo Gallery</h3>
+                <p className="text-xs text-slate-455 mt-1 font-medium">Organize photos by categories (e.g. 1 Sharing, 2 Sharing, Dining Room) to show on the portfolio website.</p>
 
                 {/* Add Category Form */}
-                <div className="mt-4 flex gap-2 max-w-md">
+                <div className="mt-4 flex gap-3 max-w-md group">
                   <Input 
                     value={newCategoryName} 
                     onChange={(e) => setNewCategoryName(e.target.value)} 
                     placeholder="New category name (e.g. Dining Hall)" 
-                    className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-9 text-xs"
+                    className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
                   />
                   <Button 
                     onClick={() => {
@@ -2386,25 +2454,24 @@ function OwnerWebsiteBuilderComponent() {
                       setCategoryMedia(prev => ({ ...prev, [cat]: [] }));
                       setNewCategoryName('');
                     }}
-                    style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                    className="h-9 text-xs font-semibold px-4 rounded-lg shadow-sm"
+                    className="bg-teal-500 hover:bg-teal-600 text-white font-bold uppercase tracking-widest text-xs h-11 px-5 rounded-xl border-none shadow-md transition-all duration-200"
                   >
-                    Add Category
+                    Add
                   </Button>
                 </div>
 
                 {/* Categories and Photos list */}
                 <div className="mt-6 space-y-6">
                   {Object.keys(categoryMedia).map(catName => (
-                    <Card key={catName} className="p-4 border border-slate-200 bg-slate-50/50 space-y-4">
+                    <Card key={catName} className="p-6 border border-slate-200 bg-[#f8fafc] rounded-2xl space-y-5">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider bg-slate-200 px-2 py-1 rounded">
+                        <span className="text-[10px] font-extrabold text-teal-700 bg-teal-55 border border-teal-150 px-3 py-1 rounded-full uppercase tracking-wider">
                           {catName}
                         </span>
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-7 text-[10px] font-semibold"
+                          className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 h-8 text-[10px] font-bold uppercase tracking-wider px-3 rounded-xl shadow-sm"
                           onClick={() => {
                             if (confirm(`Are you sure you want to delete the "${catName}" category and all its photos?`)) {
                               setCategoryMedia(prev => {
@@ -2420,12 +2487,12 @@ function OwnerWebsiteBuilderComponent() {
                       </div>
 
                       {/* Add Image URL for this category */}
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-3 items-center group">
                         <Input 
                           value={newPhotoUrls[catName] || ''} 
                           onChange={(e) => setNewPhotoUrls(prev => ({ ...prev, [catName]: e.target.value }))}
                           placeholder="Paste photo URL" 
-                          className="bg-white border-slate-200 text-slate-900 focus:ring-[#1D9E75] h-8 text-xs"
+                          className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-855 font-semibold h-10 px-4 rounded-xl transition-all shadow-inner"
                         />
                         <Button 
                           onClick={() => {
@@ -2437,19 +2504,19 @@ function OwnerWebsiteBuilderComponent() {
                             }));
                             setNewPhotoUrls(prev => ({ ...prev, [catName]: '' }));
                           }}
-                          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-8 text-xs font-semibold px-3 rounded-lg shadow-sm"
+                          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10 text-xs font-bold uppercase tracking-wider px-4 rounded-xl shadow-sm"
                         >
-                          Add Photo URL
+                          Add
                         </Button>
                       </div>
 
                       {/* Images Grid */}
                       {categoryMedia[catName]?.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 pt-2">
                           {categoryMedia[catName].map((photoUrl, index) => (
-                            <div key={index} className="flex flex-col border border-slate-200 bg-white rounded-md p-1.5 shadow-sm space-y-1">
-                              <div className="relative group rounded overflow-hidden h-16 bg-slate-100">
-                                <img src={photoUrl} alt={`${catName} - ${index}`} className="w-full h-full object-cover" />
+                            <div key={index} className="flex flex-col border border-slate-200 bg-white rounded-2xl p-2 shadow-sm space-y-2 group relative">
+                              <div className="relative rounded-xl overflow-hidden h-16 bg-slate-100">
+                                <img src={photoUrl} alt={`${catName} - ${index}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                                 <button 
                                   onClick={() => {
                                     setCategoryMedia(prev => ({
@@ -2470,7 +2537,7 @@ function OwnerWebsiteBuilderComponent() {
                                   setPhotoTags(prev => ({ ...prev, [photoUrl]: val }));
                                 }}
                                 placeholder="Tag (e.g. Equipped Gym)"
-                                className="h-6 text-[9px] bg-slate-50 border-slate-250 focus:ring-[#1D9E75] px-1 text-slate-800"
+                                className="h-7 text-[9px] bg-slate-50 border-slate-200 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 focus:outline-none px-2 rounded-lg text-slate-800 font-semibold"
                               />
                             </div>
                           ))}

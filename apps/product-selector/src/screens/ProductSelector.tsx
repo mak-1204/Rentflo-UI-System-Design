@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { Monitor, Shield, Building, Layout, Users } from "lucide-react";
-import { Button, Card } from "@rentflo/ui";
+import { Button, Card } from "@stayflo/ui";
 
 export function ProductSelector() {
   return (
@@ -132,7 +132,7 @@ export function ProductSelector() {
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-slate-600">
-                Complete unified token guidelines displaying Rentflo UI building blocks: buttons, inputs, badge variants, bottoms sheets, avatars, and alert layouts.
+                Complete unified token guidelines displaying Stayflo UI building blocks: buttons, inputs, badge variants, bottoms sheets, avatars, and alert layouts.
               </p>
             </div>
             <Link to="/components" className="mt-6 block">
@@ -146,7 +146,7 @@ export function ProductSelector() {
 
         {/* Footer */}
         <div className="text-center mt-12 text-sm" style={{ color: '#9CA3AF' }}>
-          <p>Rentflo Web UI System · Responsive Web Applications</p>
+          <p>Stayflo Web UI System · Responsive Web Applications</p>
           <p className="mt-1">Built with React, TypeScript, Tailwind CSS v4, and Radix UI</p>
         </div>
       </div>

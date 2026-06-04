@@ -1,5 +1,5 @@
 {
-  "name": "@rentflo/backend",
+  "name": "@stayflo/backend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "dev": "node --loader ts-node/esm src/index.ts"
   },
   "dependencies": {
-    "@rentflo/types": "*",
+    "@stayflo/types": "*",
     "cors": "^2.8.5",
     "express": "^4.19.2"
   },

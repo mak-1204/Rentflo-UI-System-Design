@@ -1,15 +1,15 @@
 # Tech Stack and Features Implementation Guide
 
-This document outlines the technology stack and feature implementation details for the `@rentflo/owner-web` and `@rentflo/portfolio-web` applications within the Rentflo monorepo.
+This document outlines the technology stack and feature implementation details for the `@stayflo/owner-web` and `@stayflo/portfolio-web` applications within the Stayflo monorepo.
 
 ## 1. Global Architecture
 
 The project is structured as a Monorepo using **npm workspaces**. It is separated into `apps` (front-end web applications) and `packages` (shared resources).
 
 ### Packages
-- `@rentflo/ui`: Shared UI components (e.g., `Avatar`, `Badge`, `Button`, `Card`).
-- `@rentflo/utils`: Shared utility functions.
-- `@rentflo/types`: Shared TypeScript definitions.
+- `@stayflo/ui`: Shared UI components (e.g., `Avatar`, `Badge`, `Button`, `Card`).
+- `@stayflo/utils`: Shared utility functions.
+- `@stayflo/types`: Shared TypeScript definitions.
 
 ---
 
@@ -29,7 +29,7 @@ Both the `owner-web` and `portfolio-web` apps have recently been migrated to a m
 
 ## 3. App-Specific Implementation Details
 
-### A. Owner Web (`@rentflo/owner-web`)
+### A. Owner Web (`@stayflo/owner-web`)
 
 **Purpose**: The administrative dashboard for PG/Hostel owners to manage their properties, tenants, rent collections, and operations.
 
@@ -39,7 +39,7 @@ Both the `owner-web` and `portfolio-web` apps have recently been migrated to a m
 **Feature Breakdowns**:
 1. **Website Builder (`src/screens/OW5-WebsiteBuilder.tsx`)**:
    - **Interactive 2D Canvas**: Implements a complex drag-and-drop floor plan builder using native mouse event listeners (`mousemove`, `mouseup`) and CSS Grid mathematics. Allows owners to place rooms, beds, doors, and windows (rendered dynamically via SVG).
-   - **State Synchronization**: Uses a debounced `useEffect` hook to serialize the entire builder state (rooms, amenities, menus, pricing) to `localStorage` under the key `'rentflo_builder_state'`. It emits a custom window event (`rentflo_website_update`) to allow real-time cross-tab synchronization.
+   - **State Synchronization**: Uses a debounced `useEffect` hook to serialize the entire builder state (rooms, amenities, menus, pricing) to `localStorage` under the key `'stayflo_builder_state'`. It emits a custom window event (`stayflo_website_update`) to allow real-time cross-tab synchronization.
    - **Error Handling**: Implements a custom class-based `ErrorBoundary` to catch rendering crashes in the complex canvas and provides a "Clear Storage & Reset App" fallback.
 
 2. **Dashboard (`src/screens/OW1-Dashboard.tsx`)**:
@@ -54,7 +54,7 @@ Both the `owner-web` and `portfolio-web` apps have recently been migrated to a m
 
 ---
 
-### B. Portfolio Web (`@rentflo/portfolio-web`)
+### B. Portfolio Web (`@stayflo/portfolio-web`)
 
 **Purpose**: The public-facing promotional website for individual PG/Hostel properties. It acts as a marketing funnel to attract and capture tenant leads.
 
@@ -63,7 +63,7 @@ Both the `owner-web` and `portfolio-web` apps have recently been migrated to a m
 
 **Feature Breakdowns**:
 1. **Hero & Dynamic Real-time Preview (`src/screens/PW2-Hero.tsx`)**:
-   - **Live Syncing**: The component continuously listens to the `'rentflo_builder_state'` in `localStorage`. As the owner edits the Website Builder in `owner-web`, the portfolio site updates instantly (e.g., pricing, amenities, room layouts).
+   - **Live Syncing**: The component continuously listens to the `'stayflo_builder_state'` in `localStorage`. As the owner edits the Website Builder in `owner-web`, the portfolio site updates instantly (e.g., pricing, amenities, room layouts).
    - **SVG Rendering**: It renders realistic room floorplans, swing doors, and window frames using custom SVG logic based on the owner's configurations.
    - **Lead Capture API Integration**: Features an aggressive lead generation popup that sends `POST` requests to `http://localhost:3000/api/leads` using native `fetch`.
    - **External API Integration**: Uses the OpenStreetMap Nominatim API for debounced, dynamic address searching and suggestions (`dynamicSuggestions`).
@@ -73,5 +73,5 @@ Both the `owner-web` and `portfolio-web` apps have recently been migrated to a m
 
 ## 4. Design Aesthetics & Best Practices Used
 - **Rich Aesthetics**: Heavy reliance on tailored Tailwind utility classes and curated color palettes (e.g., `#1D9E75` for positive actions, dark slate themes for sleek components).
-- **Component-Driven**: Maximum reuse of base components from the `@rentflo/ui` package to maintain consistency across both apps.
+- **Component-Driven**: Maximum reuse of base components from the `@stayflo/ui` package to maintain consistency across both apps.
 - **Dynamic Feedback**: Use of micro-animations and interactive layout elements, fully leveraging Server/Client components boundaries in Next.js for optimized performance.

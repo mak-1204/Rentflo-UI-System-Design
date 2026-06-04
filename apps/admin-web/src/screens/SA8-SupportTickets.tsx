@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { useState } from 'react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function AdminSupportTickets() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
@@ -70,7 +70,7 @@ export function AdminSupportTickets() {
                   <p className="text-slate-600 mt-1">My tenant Amit Kumar paid the June dues but his dashboard still shows overdue. In Razorpay it says payment was captured. Please fix this immediately.</p>
                 </div>
                 <div className="p-3 bg-indigo-50 rounded-lg">
-                  <p className="font-semibold text-indigo-700">Rentflo Bot (Auto-Response) <span className="text-[10px] text-slate-400 font-normal">10:46 AM</span></p>
+                  <p className="font-semibold text-indigo-700">Stayflo Bot (Auto-Response) <span className="text-[10px] text-slate-400 font-normal">10:46 AM</span></p>
                   <p className="text-slate-600 mt-1">Ticket created. We are checking webhook status for SUNPG integration.</p>
                 </div>
               </div>

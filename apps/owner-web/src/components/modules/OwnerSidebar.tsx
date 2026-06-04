@@ -29,7 +29,7 @@ import {
   ChevronDown,
   ExternalLink,
 } from 'lucide-react';
-import { RentfloLogo, Avatar, AvatarFallback } from '@rentflo/ui';
+import { StayfloLogo, Avatar, AvatarFallback } from '@stayflo/ui';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -64,7 +64,7 @@ export function OwnerSidebar() {
   // ── PG multi-select state (persisted in localStorage) ───────────────────────
   const [selectedPgs, setSelectedPgs] = useState<string[]>(() => {
     if (typeof window === 'undefined') return [ALL_PROPERTIES[0]];
-    const saved = localStorage.getItem('rentflo_selected_pgs');
+    const saved = localStorage.getItem('stayflo_selected_pgs');
     if (saved) {
       try {
         const parsed: unknown = JSON.parse(saved);
@@ -73,29 +73,29 @@ export function OwnerSidebar() {
         // fall through to default
       }
     }
-    return [localStorage.getItem('rentflo_selected_pg') ?? ALL_PROPERTIES[0]];
+    return [localStorage.getItem('stayflo_selected_pg') ?? ALL_PROPERTIES[0]];
   });
 
   const handlePgsChange = (nextPgs: string[]) => {
     setSelectedPgs(nextPgs);
-    localStorage.setItem('rentflo_selected_pgs', JSON.stringify(nextPgs));
+    localStorage.setItem('stayflo_selected_pgs', JSON.stringify(nextPgs));
 
     const primaryPg = nextPgs[0] ?? ALL_PROPERTIES[0];
-    localStorage.setItem('rentflo_selected_pg', primaryPg);
+    localStorage.setItem('stayflo_selected_pg', primaryPg);
 
     // Sync PG name to builder state if it exists
-    const saved = localStorage.getItem('rentflo_builder_state');
+    const saved = localStorage.getItem('stayflo_builder_state');
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as Record<string, unknown>;
         parsed.pgName = primaryPg;
-        localStorage.setItem('rentflo_builder_state', JSON.stringify(parsed));
+        localStorage.setItem('stayflo_builder_state', JSON.stringify(parsed));
       } catch {
         // ignore
       }
     }
 
-    window.dispatchEvent(new Event('rentflo_website_update'));
+    window.dispatchEvent(new Event('stayflo_website_update'));
   };
 
   const togglePg = (pg: string) => {
@@ -118,7 +118,7 @@ export function OwnerSidebar() {
   // Sync from external events (e.g., builder updates PG name)
   useEffect(() => {
     const handleUpdate = () => {
-      const saved = localStorage.getItem('rentflo_selected_pgs');
+      const saved = localStorage.getItem('stayflo_selected_pgs');
       if (saved) {
         try {
           const parsed: unknown = JSON.parse(saved);
@@ -130,10 +130,10 @@ export function OwnerSidebar() {
           // ignore
         }
       }
-      setSelectedPgs([localStorage.getItem('rentflo_selected_pg') ?? ALL_PROPERTIES[0]]);
+      setSelectedPgs([localStorage.getItem('stayflo_selected_pg') ?? ALL_PROPERTIES[0]]);
     };
-    window.addEventListener('rentflo_website_update', handleUpdate);
-    return () => window.removeEventListener('rentflo_website_update', handleUpdate);
+    window.addEventListener('stayflo_website_update', handleUpdate);
+    return () => window.removeEventListener('stayflo_website_update', handleUpdate);
   }, []);
 
   // Close drawer on navigation
@@ -167,9 +167,9 @@ export function OwnerSidebar() {
           >
             <Menu className="w-6 h-6" />
           </button>
-          <RentfloLogo className="text-xl" />
+          <StayfloLogo className="text-xl" />
         </div>
-        <span className="text-xs font-semibold px-2 py-1 rounded bg-[#E1F5EE] text-[#1D9E75] truncate max-w-[150px]">
+        <span className="text-xs font-semibold px-2 py-1 rounded bg-[#f0fdfa] text-[#14b8a6] truncate max-w-[150px]">
           {selectedPgs.length === ALL_PROPERTIES.length ? 'All PGs' : selectedPgs[0]}
         </span>
       </header>
@@ -197,7 +197,7 @@ export function OwnerSidebar() {
         {/* ── Sidebar Header ──────────────────────────────────────────────── */}
         <div className="p-6 border-b flex flex-col relative" style={{ borderColor: '#E5E7EB' }}>
           <div className="flex justify-between items-center">
-            <RentfloLogo className="text-2xl" />
+            <StayfloLogo className="text-2xl" />
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="md:hidden p-1 rounded-md hover:bg-slate-100 text-slate-500"
@@ -249,7 +249,7 @@ export function OwnerSidebar() {
                       type="checkbox"
                       checked={selectedPgs.length === ALL_PROPERTIES.length}
                       onChange={toggleSelectAll}
-                      className="rounded border-slate-300 text-[#1D9E75] focus:ring-[#1D9E75] h-3.5 w-3.5"
+                      className="rounded border-slate-300 text-[#14b8a6] focus:ring-[#14b8a6] h-3.5 w-3.5"
                       aria-label="Select all properties"
                     />
                     <span style={{ color: '#111827' }}>Select All ({ALL_PROPERTIES.length})</span>
@@ -266,7 +266,7 @@ export function OwnerSidebar() {
                         type="checkbox"
                         checked={selectedPgs.includes(pg)}
                         onChange={() => togglePg(pg)}
-                        className="rounded border-slate-300 text-[#1D9E75] focus:ring-[#1D9E75] h-3.5 w-3.5"
+                        className="rounded border-slate-300 text-[#14b8a6] focus:ring-[#14b8a6] h-3.5 w-3.5"
                         aria-label={`Select ${pg}`}
                       />
                       <span style={{ color: '#374151' }}>{pg}</span>
@@ -282,7 +282,7 @@ export function OwnerSidebar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[11px] hover:underline font-semibold flex items-center gap-1"
-                style={{ color: '#1D9E75' }}
+                style={{ color: '#14b8a6' }}
                 aria-label="View live PG portfolio site"
               >
                 View live site <ExternalLink className="w-3 h-3" />
@@ -308,8 +308,8 @@ export function OwnerSidebar() {
                 href={item.href}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
                 style={{
-                  background: active ? '#E1F5EE' : 'transparent',
-                  color: active ? '#1D9E75' : '#6B7280',
+                  background: active ? '#f0fdfa' : 'transparent',
+                  color: active ? '#14b8a6' : '#6B7280',
                 }}
                 aria-current={active ? 'page' : undefined}
               >
@@ -322,8 +322,8 @@ export function OwnerSidebar() {
 
         {/* ── Subscription Badge ────────────────────────────────────────────── */}
         <div className="p-4 border-t" style={{ borderColor: '#E5E7EB' }}>
-          <div className="px-3 py-2 rounded-lg text-center" style={{ background: '#E1F5EE' }}>
-            <p className="text-sm font-semibold" style={{ color: '#1D9E75' }}>PG Plan ✓</p>
+          <div className="px-3 py-2 rounded-lg text-center" style={{ background: '#f0fdfa' }}>
+            <p className="text-sm font-semibold" style={{ color: '#14b8a6' }}>PG Plan ✓</p>
             <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>Active</p>
           </div>
         </div>
@@ -332,7 +332,7 @@ export function OwnerSidebar() {
         <div className="p-4 border-t" style={{ borderColor: '#E5E7EB' }}>
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarFallback style={{ background: '#1D9E75', color: '#FFFFFF' }}>RK</AvatarFallback>
+              <AvatarFallback style={{ background: '#14b8a6', color: '#FFFFFF' }}>RK</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>

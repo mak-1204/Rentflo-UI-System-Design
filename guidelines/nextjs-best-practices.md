@@ -1,6 +1,6 @@
-# Rentflo Next.js Enterprise Guidelines
+# Stayflo Next.js Enterprise Guidelines
 
-This document outlines the strict production-grade standards for writing Next.js App Router applications in the Rentflo monorepo. All code written must adhere to these architectural, security, and quality practices.
+This document outlines the strict production-grade standards for writing Next.js App Router applications in the Stayflo monorepo. All code written must adhere to these architectural, security, and quality practices.
 
 ## 1. Enterprise Architecture & Directory Structure
 As the codebase scales, we must avoid the legacy pattern of throwing everything into global `components/` or `hooks/` folders. Instead, we use a **Feature-First Architecture**.

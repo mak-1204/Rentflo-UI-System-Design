@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@rentflo/ui';
-import { ChevronLeft } from 'lucide-react'; import { Button } from '@rentflo/ui';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@stayflo/ui';
+import { ChevronLeft } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@stayflo/ui';
 
 export function OwnerOTP() {
   const navigate = useNavigate();

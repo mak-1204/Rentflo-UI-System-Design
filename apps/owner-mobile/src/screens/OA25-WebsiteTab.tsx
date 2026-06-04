@@ -1,8 +1,8 @@
-import { Copy, ExternalLink, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react'; import { Link } from 'react-router'; import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
-import { Progress } from '@rentflo/ui';
-import { Switch } from '@rentflo/ui';
+import { Copy, ExternalLink, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react'; import { Link } from 'react-router'; import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
+import { Progress } from '@stayflo/ui';
+import { Switch } from '@stayflo/ui';
 
 export function OwnerWebsiteTab() {
   const sections = [
@@ -32,7 +32,7 @@ export function OwnerWebsiteTab() {
     <div className="px-4 pt-12 pb-4" style={{ background: '#F8F9FA' }}>
       {/* Header */}
       <h1 className="text-2xl font-semibold mb-2" style={{ color: '#111827' }}>
-        Your Rentflo Page
+        Your Stayflo Page
       </h1>
       <p className="text-sm mb-6" style={{ color: '#6B7280' }}>
         Share your PG portfolio with potential tenants
@@ -47,7 +47,7 @@ export function OwnerWebsiteTab() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold" style={{ color: '#854F0B' }}>12 New Leads</p>
-              <p className="text-xs mt-0.5" style={{ color: '#633806' }}>From your Rentflo website</p>
+              <p className="text-xs mt-0.5" style={{ color: '#633806' }}>From your Stayflo website</p>
             </div>
             <ChevronRight className="w-5 h-5" style={{ color: '#EF9F27' }} />
           </div>
@@ -66,7 +66,7 @@ export function OwnerWebsiteTab() {
         
         <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: '#F8F9FA' }}>
           <p className="flex-1 text-sm truncate" style={{ color: '#1D9E75' }}>
-            rentflo.in/pg/sunrise-pg
+            stayflo.in/pg/sunrise-pg
           </p>
           <button>
             <Copy className="w-4 h-4" style={{ color: '#6B7280' }} />

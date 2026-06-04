@@ -1,47 +1,47 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Rentflo Brand Colors */
-  --rentflo-primary: #1D9E75;
-  --rentflo-primary-light: #E1F5EE;
-  --rentflo-primary-dark: #0F6E56;
-  --rentflo-secondary: #EF9F27;
-  --rentflo-secondary-light: #FAEEDA;
-  --rentflo-secondary-dark: #854F0B;
+  /* Stayflo Brand Colors */
+  --stayflo-primary: #1D9E75;
+  --stayflo-primary-light: #E1F5EE;
+  --stayflo-primary-dark: #0F6E56;
+  --stayflo-secondary: #EF9F27;
+  --stayflo-secondary-light: #FAEEDA;
+  --stayflo-secondary-dark: #854F0B;
   
   /* Status Colors */
-  --rentflo-danger-bg: #FCEBEB;
-  --rentflo-danger-text: #791F1F;
-  --rentflo-warning-bg: #FAEEDA;
-  --rentflo-warning-text: #633806;
-  --rentflo-success-bg: #E1F5EE;
-  --rentflo-success-text: #085041;
-  --rentflo-info-bg: #E6F1FB;
-  --rentflo-info-text: #0C447C;
-  --rentflo-purple-bg: #EEEDFE;
-  --rentflo-purple-text: #534AB7;
-  --rentflo-coral-bg: #FAECE7;
-  --rentflo-coral-text: #993C1D;
-  --rentflo-pink-bg: #FBEAF0;
-  --rentflo-pink-text: #993556;
-  --rentflo-green-bg: #EAF3DE;
-  --rentflo-green-text: #3B6D11;
+  --stayflo-danger-bg: #FCEBEB;
+  --stayflo-danger-text: #791F1F;
+  --stayflo-warning-bg: #FAEEDA;
+  --stayflo-warning-text: #633806;
+  --stayflo-success-bg: #E1F5EE;
+  --stayflo-success-text: #085041;
+  --stayflo-info-bg: #E6F1FB;
+  --stayflo-info-text: #0C447C;
+  --stayflo-purple-bg: #EEEDFE;
+  --stayflo-purple-text: #534AB7;
+  --stayflo-coral-bg: #FAECE7;
+  --stayflo-coral-text: #993C1D;
+  --stayflo-pink-bg: #FBEAF0;
+  --stayflo-pink-text: #993556;
+  --stayflo-green-bg: #EAF3DE;
+  --stayflo-green-text: #3B6D11;
   
   /* Surfaces */
-  --rentflo-page-bg: #F8F9FA;
-  --rentflo-card-bg: #FFFFFF;
-  --rentflo-border: #E5E7EB;
+  --stayflo-page-bg: #F8F9FA;
+  --stayflo-card-bg: #FFFFFF;
+  --stayflo-border: #E5E7EB;
   
   /* Text */
-  --rentflo-text-primary: #111827;
-  --rentflo-text-secondary: #6B7280;
-  --rentflo-text-muted: #9CA3AF;
+  --stayflo-text-primary: #111827;
+  --stayflo-text-secondary: #6B7280;
+  --stayflo-text-muted: #9CA3AF;
   
   /* Portfolio Website Dark Theme */
-  --rentflo-portfolio-bg: #0D0D0D;
-  --rentflo-portfolio-surface: #1A1A1A;
-  --rentflo-portfolio-text: #F5F5F0;
-  --rentflo-portfolio-text-secondary: #9CA3AF;
+  --stayflo-portfolio-bg: #0D0D0D;
+  --stayflo-portfolio-surface: #1A1A1A;
+  --stayflo-portfolio-text: #F5F5F0;
+  --stayflo-portfolio-text-secondary: #9CA3AF;
 
   /* Original theme tokens */
   --font-size: 16px;

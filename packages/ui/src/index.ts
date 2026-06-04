@@ -1,6 +1,6 @@
 // Core Components
 export * from "./components/MobileFrame";
-export * from "./components/RentfloLogo";
+export * from "./components/StayfloLogo";
 export * from "./components/figma/ImageWithFallback";
 
 // UI Primitives

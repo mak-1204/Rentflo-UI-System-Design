@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   // Ensure internal monorepo packages are transpiled by Next.js SWC
-  transpilePackages: ['@rentflo/ui', '@rentflo/utils', '@rentflo/types'],
+  transpilePackages: ['@stayflo/ui', '@stayflo/utils', '@stayflo/types'],
 
   images: {
     remotePatterns: [

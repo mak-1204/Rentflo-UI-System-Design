@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'; import { Search, Plus, Phone, Mail, X, Edit3, Check, Trash2, Calendar } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
+import { useState, useEffect } from 'react'; import { Search, Plus, Phone, Mail, X, Edit3, Check, Trash2, Calendar } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
 
 interface Tenant {
   name: string;
@@ -28,13 +28,13 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
         floor: t.floor || (t.bedId?.includes('101') ? 'Ground Floor' : '1st Floor'),
         rent: typeof t.rent === 'number' ? t.rent : (t.baseRent || 8500),
         phone: t.phone || '+91 99999 88888',
-        email: t.email || 'resident@rentflo.com',
+        email: t.email || 'resident@stayflo.com',
         status: t.status === 'Paid' || t.status === 'Overdue' ? t.status : 'Paid',
         moveIn: t.moveIn || t.checkInDate || 'Today',
         activeMonths: typeof t.activeMonths === 'number' ? t.activeMonths : 1
       }));
     }
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('rentflo_tenants_list') : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('stayflo_tenants_list') : null;
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
@@ -62,7 +62,7 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
 
   // Save tenants list
   useEffect(() => {
-    localStorage.setItem('rentflo_tenants_list', JSON.stringify(tenants));
+    localStorage.setItem('stayflo_tenants_list', JSON.stringify(tenants));
   }, [tenants]);
 
   // Load edit states when tenant is selected
@@ -112,7 +112,7 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
       floor: 'Ground Floor',
       rent: 8500,
       phone: '+91 99999 88888',
-      email: 'resident@rentflo.com',
+      email: 'resident@stayflo.com',
       status: 'Paid',
       moveIn: 'Today',
       activeMonths: 0
@@ -137,21 +137,25 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
   const selectedTenant = selectedIndex !== null ? tenants[selectedIndex] : null;
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto relative overflow-hidden text-left min-h-screen">
+    <div className="p-8 space-y-8 max-w-7xl mx-auto relative overflow-hidden text-left min-h-screen" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Toast */}
       {notif && (
-        <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
-          <Check className="w-4 h-4 text-[#1D9E75]" /> {notif}
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 animate-in fade-in duration-300">
+          <Check className="w-4 h-4 text-[#14b8a6]" /> {notif}
         </div>
       )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Tenants Directory</h1>
-          <p className="text-slate-500 mt-1">Manage tenant profiles, stay details, room rents, and KYC documents</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Tenants Directory</h1>
+          <p className="text-xs text-slate-400 mt-1.5 font-medium">Manage tenant profiles, stay details, room rents, and KYC documents</p>
         </div>
-        <Button style={{ background: '#1D9E75', color: '#FFFFFF' }} className="hover:bg-[#0F6E56] whitespace-nowrap" onClick={handleAddTenant}>
+        <Button 
+          style={{ background: '#14b8a6', color: '#FFFFFF' }} 
+          className="hover:opacity-95 active:scale-98 whitespace-nowrap rounded-xl text-xs font-bold h-10 px-4 transition-all shadow-md shadow-teal-500/10 border-none cursor-pointer" 
+          onClick={handleAddTenant}
+        >
           <Plus className="w-4 h-4 mr-2" /> Add Tenant
         </Button>
       </div>
@@ -159,23 +163,23 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
       {/* Filter / Search Bar */}
       <div className="flex gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search by resident name or room number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white text-sm"
+            className="w-full pl-11 pr-4 py-3 border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 rounded-xl bg-[#f8fafc] transition-all shadow-inner"
           />
         </div>
       </div>
 
       {/* Table */}
-      <Card className="overflow-hidden border border-slate-200">
+      <Card className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-500">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-slate-50 border-b text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                 <th className="px-6 py-4">Tenant</th>
                 <th className="px-6 py-4">Room Info</th>
                 <th className="px-6 py-4">Contact</th>
@@ -184,7 +188,7 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
                 <th className="px-6 py-4">Move-In Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-slate-50 bg-white">
               {filteredTenants.map((t, idx) => {
                 // find absolute index in main tenants array
                 const originalIndex = tenants.findIndex(x => x.phone === t.phone);
@@ -192,33 +196,34 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
                   <tr 
                     key={idx} 
                     onClick={() => handleSelectTenant(originalIndex)}
-                    className={`hover:bg-slate-50 transition-colors cursor-pointer ${selectedIndex === originalIndex ? 'bg-slate-50/80 border-l-4 border-l-[#1D9E75]' : ''}`}
+                    className={`hover:bg-slate-50/40 transition-colors cursor-pointer duration-200 ${selectedIndex === originalIndex ? 'bg-teal-50/[0.15] border-l-4 border-l-[#14b8a6]' : ''}`}
                   >
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-teal-100 text-[#1D9E75] flex items-center justify-center font-bold text-xs uppercase">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-9 h-9 rounded-full bg-teal-50 text-[#14b8a6] flex items-center justify-center font-bold text-xs uppercase border border-teal-100/30">
                           {t.name.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span className="font-semibold text-slate-800">{t.name}</span>
+                        <span className="font-bold text-slate-900 group-hover:text-teal-650 transition-colors">{t.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{t.room} · {t.floor}</td>
+                    <td className="px-6 py-4 text-xs font-semibold text-slate-600">{t.room} · {t.floor}</td>
                     <td className="px-6 py-4">
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-400 font-medium">
                         <p>{t.phone}</p>
                         <p className="truncate max-w-[150px]">{t.email}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">₹{t.rent.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-xs font-bold text-slate-800">₹{t.rent.toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{
-                        background: t.status === 'Paid' ? '#E1F5EE' : '#FCEBEB',
-                        color: t.status === 'Paid' ? '#085041' : '#791F1F'
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-transparent shadow-none" style={{
+                        background: t.status === 'Paid' ? '#f0fdfa' : '#FCEBEB',
+                        color: t.status === 'Paid' ? '#0f766e' : '#791F1F',
+                        borderColor: t.status === 'Paid' ? 'rgba(20,184,166,0.1)' : 'rgba(239,68,68,0.1)'
                       }}>
                         {t.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{t.moveIn}</td>
+                    <td className="px-6 py-4 text-xs font-medium text-slate-400">{t.moveIn}</td>
                   </tr>
                 );
               })}
@@ -229,19 +234,19 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
 
       {/* Side Slide-In Panel (Details / Edit Mode) */}
       {selectedTenant && (
-        <div className="fixed inset-y-0 right-0 w-[460px] bg-white border-l shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
-          <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-            <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-y-0 right-0 w-[460px] bg-white border-l border-slate-205 shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>
               {isEditing ? 'Edit Tenant Profile' : 'Tenant Details'}
             </h3>
             <div className="flex items-center gap-2">
               {!isEditing && (
-                <Button size="sm" variant="outline" className="flex items-center gap-1.5 h-8 text-xs font-semibold" onClick={() => setIsEditing(true)}>
+                <Button size="sm" variant="outline" className="flex items-center gap-1.5 h-8 text-xs font-bold rounded-xl border-slate-200 hover:bg-slate-50" onClick={() => setIsEditing(true)}>
                   <Edit3 className="w-3.5 h-3.5" /> Edit
                 </Button>
               )}
-              <button onClick={() => setSelectedIndex(null)} className="p-1 hover:bg-slate-200 rounded">
-                <X className="w-5 h-5 text-slate-500" />
+              <button onClick={() => setSelectedIndex(null)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400">
+                <X className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -251,103 +256,103 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
             {!isEditing ? (
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-teal-100 text-[#1D9E75] flex items-center justify-center font-bold text-xl uppercase">
+                  <div className="w-14 h-14 rounded-full bg-teal-50 text-[#14b8a6] flex items-center justify-center font-extrabold text-xl uppercase border border-teal-100/30">
                     {selectedTenant.name.split(' ').map((n: string) => n[0]).join('')}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-800 text-lg">{selectedTenant.name}</h4>
-                    <p className="text-xs text-slate-400">Active stay since {selectedTenant.activeMonths} months · Moved in on {selectedTenant.moveIn}</p>
+                    <h4 className="font-extrabold text-slate-900 text-lg" style={{ fontFamily: 'var(--font-heading)' }}>{selectedTenant.name}</h4>
+                    <p className="text-xs text-slate-400 mt-1">Active stay since {selectedTenant.activeMonths} months · Moved in on {selectedTenant.moveIn}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-lg border">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Room / Floor</span>
-                    <span className="font-bold text-slate-700">{selectedTenant.room} ({selectedTenant.floor})</span>
+                  <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block font-extrabold uppercase tracking-wider mb-1">Room / Floor</span>
+                    <span className="font-bold text-slate-800">{selectedTenant.room} ({selectedTenant.floor})</span>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg border">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Monthly Rent</span>
-                    <span className="font-bold text-[#1D9E75]">₹{selectedTenant.rent.toLocaleString()}</span>
+                  <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                    <span className="text-[10px] text-slate-400 block font-extrabold uppercase tracking-wider mb-1">Monthly Rent</span>
+                    <span className="font-extrabold text-[#14b8a6]">₹{selectedTenant.rent.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Info</p>
-                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                <div className="space-y-3.5 pt-5 border-t border-slate-100">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Contact Info</p>
+                  <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-700">
                     <Phone className="w-4 h-4 text-slate-400" /> {selectedTenant.phone}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                  <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-700">
                     <Mail className="w-4 h-4 text-slate-400" /> {selectedTenant.email}
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">KYC Compliance</p>
-                  <div className="flex justify-between items-center text-xs p-3 bg-slate-50 rounded border">
-                    <span className="text-slate-600 font-medium">Rental Agreement</span>
-                    <Badge style={{ background: '#E1F5EE', color: '#085041' }}>Signed ✓</Badge>
+                <div className="space-y-3.5 pt-5 border-t border-slate-100">
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">KYC Compliance</p>
+                  <div className="flex justify-between items-center text-xs p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                    <span className="text-slate-700 font-semibold">Rental Agreement</span>
+                    <Badge className="bg-teal-50 text-teal-700 border-none font-bold text-[10px] rounded-md px-2 py-0.5">Signed ✓</Badge>
                   </div>
-                  <div className="flex justify-between items-center text-xs p-3 bg-slate-50 rounded border">
-                    <span className="text-slate-600 font-medium">Aadhaar Card Verification</span>
-                    <Badge style={{ background: '#E1F5EE', color: '#085041' }}>Verified ✓</Badge>
+                  <div className="flex justify-between items-center text-xs p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                    <span className="text-slate-700 font-semibold">Aadhaar Card Verification</span>
+                    <Badge className="bg-teal-50 text-teal-700 border-none font-bold text-[10px] rounded-md px-2 py-0.5">Verified ✓</Badge>
                   </div>
                 </div>
               </div>
             ) : (
               // EDIT MODE FORM
-              <div className="space-y-4 text-xs">
+              <div className="space-y-5 text-xs">
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Full Name</label>
-                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Full Name</label>
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Room</label>
-                    <Input value={editRoom} onChange={(e) => setEditRoom(e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Room</label>
+                    <Input value={editRoom} onChange={(e) => setEditRoom(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Floor</label>
-                    <Input value={editFloor} onChange={(e) => setEditFloor(e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Floor</label>
+                    <Input value={editFloor} onChange={(e) => setEditFloor(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Monthly Rent (₹)</label>
-                    <Input type="number" value={editRent} onChange={(e) => setEditRent(+e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Monthly Rent (₹)</label>
+                    <Input type="number" value={editRent} onChange={(e) => setEditRent(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Move-In Date</label>
-                    <Input value={editMoveIn} onChange={(e) => setEditMoveIn(e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Move-In Date</label>
+                    <Input value={editMoveIn} onChange={(e) => setEditMoveIn(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Phone Number</label>
-                  <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Phone Number</label>
+                  <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                 </div>
 
                 <div>
-                  <label className="block text-slate-500 font-bold mb-1">Email Address</label>
-                  <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                  <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Email Address</label>
+                  <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Rent Status</label>
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Rent Status</label>
                     <select
                       value={editStatus}
                       onChange={(e: any) => setEditStatus(e.target.value)}
-                      className="w-full p-2 border rounded-lg bg-white text-xs"
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner cursor-pointer"
                     >
                       <option value="Paid">Paid</option>
                       <option value="Overdue">Overdue</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">Active Months</label>
-                    <Input type="number" value={editActiveMonths} onChange={(e) => setEditActiveMonths(+e.target.value)} />
+                    <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">Active Months</label>
+                    <Input type="number" value={editActiveMonths} onChange={(e) => setEditActiveMonths(+e.target.value)} className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner" />
                   </div>
                 </div>
               </div>
@@ -355,23 +360,23 @@ export function OwnerWebTenants({ initialTenants }: { initialTenants?: Tenant[] 
           </div>
           
           {/* Footer Actions */}
-          <div className="p-4 border-t bg-slate-50 flex gap-2">
+          <div className="p-4 border-t bg-slate-50/50 flex gap-3">
             {isEditing ? (
               <>
-                <Button className="flex-1 font-semibold" style={{ background: '#1D9E75', color: '#FFFFFF' }} onClick={handleSaveChanges}>
-                  Save Profile Changes
+                <Button className="flex-1 font-bold text-white border-none rounded-xl h-11" style={{ background: '#14b8a6' }} onClick={handleSaveChanges}>
+                  Save Changes
                 </Button>
-                <Button variant="outline" className="flex-1 font-semibold text-slate-500" onClick={() => setIsEditing(false)}>
+                <Button variant="outline" className="flex-1 font-bold text-slate-500 rounded-xl h-11 border-slate-200" onClick={() => setIsEditing(false)}>
                   Cancel
                 </Button>
               </>
             ) : (
               <>
-                <Button className="flex-1 font-semibold" variant="outline" onClick={handleDeleteTenant}>
-                  <Trash2 className="w-4 h-4 mr-1 text-rose-600" /> Remove Tenant
+                <Button className="flex-1 font-bold rounded-xl h-11 border-slate-250 hover:bg-slate-50 text-slate-650" variant="outline" onClick={handleDeleteTenant}>
+                  <Trash2 className="w-4 h-4 mr-1 text-rose-600" /> Remove
                 </Button>
-                <Button className="flex-1 font-semibold" style={{ background: '#1D9E75', color: '#FFFFFF' }} onClick={() => setSelectedIndex(null)}>
-                  Close Details
+                <Button className="flex-1 font-bold text-white border-none rounded-xl h-11" style={{ background: '#14b8a6' }} onClick={() => setSelectedIndex(null)}>
+                  Close
                 </Button>
               </>
             )}

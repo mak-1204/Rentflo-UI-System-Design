@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { Search, Plus } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { useState } from 'react'; import { Search, Plus } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function AdminOwnersList() {
   const [search, setSearch] = useState('');
@@ -63,7 +63,7 @@ export function AdminOwnersList() {
                     </div>
                     <div>
                       <span className="font-semibold text-slate-900 block">{owner.name}</span>
-                      <span className="text-xs text-slate-400">On Rentflo since {owner.activeSince}</span>
+                      <span className="text-xs text-slate-400">On Stayflo since {owner.activeSince}</span>
                     </div>
                   </div>
                 </td>

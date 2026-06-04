@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabase } from '@rentflo/utils';
+import { supabase } from '@stayflo/utils';
 
 const TenantPaymentStatusSchema = z.enum(['Paid', 'Overdue']);
 

@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabase } from '@rentflo/utils';
+import { supabase } from '@stayflo/utils';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 

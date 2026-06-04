@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, TrendingUp, TrendingDown, IndianRupee, Zap, Droplets, Wrench, ShieldAlert, Check, Plus, QrCode, Scan, X } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
+import { Avatar, AvatarFallback } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Booking {
@@ -92,26 +92,120 @@ export function OwnerWebDashboard({
     triggerToast(`Marked ${mealType} as served for ${scannedResult.name}!`);
   };
 
+  // Load / initialize tenants & rentData states dynamically from localStorage/props
+  const [tenants, setTenants] = useState<any[]>([]);
+  const [rentRecords, setRentRecords] = useState<any[]>([]);
+  const [opExpenses, setOpExpenses] = useState<any[]>([]);
+
+  useEffect(() => {
+    // 1. Tenants list
+    const savedTenants = localStorage.getItem('stayflo_tenants_list');
+    let loadedTenants = [];
+    if (savedTenants) {
+      try { loadedTenants = JSON.parse(savedTenants); } catch (e) {}
+    }
+    if (!loadedTenants || loadedTenants.length === 0) {
+      loadedTenants = initialTenants && initialTenants.length > 0 ? initialTenants.map((t: any, idx) => ({
+        name: t.name || (t.userId === 'u-2' ? 'Amit Kumar' : `Resident ${idx + 1}`),
+        room: t.room || (t.bedId ? `Room ${t.bedId.replace(/[^0-9]/g, '')}` : 'Room TBD'),
+        floor: t.floor || (t.bedId?.includes('101') ? 'Ground Floor' : '1st Floor'),
+        rent: typeof t.rent === 'number' ? t.rent : (t.baseRent || 8500),
+        phone: t.phone || '+91 99999 88888',
+        email: t.email || 'resident@stayflo.com',
+        status: t.status === 'Paid' || t.status === 'Overdue' ? t.status : 'Paid',
+        moveIn: t.moveIn || t.checkInDate || 'Today',
+        activeMonths: typeof t.activeMonths === 'number' ? t.activeMonths : 1
+      })) : [
+        { name: 'Amit Kumar', room: 'Room 4', floor: '1st Floor', rent: 8500, phone: '+91 98765 43210', email: 'amit.k@gmail.com', status: 'Overdue', moveIn: '15 Oct 2025', activeMonths: 8 },
+        { name: 'Sanjay Ramaswamy', room: 'Room 2', floor: 'Ground Floor', rent: 8500, phone: '+91 99000 88776', email: 'sanjay.r@outlook.com', status: 'Paid', moveIn: '01 Nov 2025', activeMonths: 7 },
+        { name: 'Vijay Nair', room: 'Room 8', floor: '2nd Floor', rent: 9200, phone: '+91 91234 56789', email: 'vijay.nair@yahoo.com', status: 'Paid', moveIn: '10 Jan 2026', activeMonths: 5 },
+      ];
+    }
+    setTenants(loadedTenants);
+
+    // 2. Rent Records
+    const savedRent = localStorage.getItem('stayflo_rent_records');
+    let loadedRent = [];
+    if (savedRent) {
+      try { loadedRent = JSON.parse(savedRent); } catch (e) {}
+    }
+    if (!loadedRent || loadedRent.length === 0) {
+      loadedRent = [
+        { name: 'Amit Kumar', room: 'Room 4', rent: 8500, utilities: 530, lateFee: 250, status: 'Overdue', date: '-', method: '-' },
+        { name: 'Sanjay Ramaswamy', room: 'Room 2', rent: 8500, utilities: 450, lateFee: 0, status: 'Paid', date: '05 Jun 2026', method: 'Razorpay UPI' },
+        { name: 'Vijay Nair', room: 'Room 8', rent: 9200, utilities: 480, lateFee: 0, status: 'Paid', date: '04 Jun 2026', method: 'Cash' },
+        { name: 'Rahul Verma', room: 'Room 11', rent: 8000, utilities: 420, lateFee: 0, status: 'Delay Requested', date: '-', method: '-' },
+      ];
+    }
+    setRentRecords(loadedRent);
+
+    // 3. Operational Expenses
+    const savedExpenses = localStorage.getItem('stayflo_operational_expenses');
+    let loadedExpenses = [];
+    if (savedExpenses) {
+      try { loadedExpenses = JSON.parse(savedExpenses); } catch (e) {}
+    }
+    if (!loadedExpenses || loadedExpenses.length === 0) {
+      loadedExpenses = [
+        { name: 'Electricity (BESCOM)', amount: '₹8,450', date: 'Due in 5 days', status: 'Unpaid' },
+        { name: 'Water Tanker Sourcing', amount: '₹4,200', date: 'Paid on 28 May', status: 'Paid' },
+        { name: 'Catering / Cook Sourcing', amount: '₹18,500', date: 'Paid on 30 May', status: 'Paid' },
+        { name: 'Cleaning & Consumables', amount: '₹3,400', date: 'Paid on 25 May', status: 'Paid' },
+        { name: 'Elevator Maintenance', amount: '₹2,500', date: 'Due in 10 days', status: 'Unpaid' },
+      ];
+    }
+    setOpExpenses(loadedExpenses);
+  }, [initialTenants]);
+
+  // Rent Collected (Default: 48200)
+  const paidRentSum = rentRecords.filter(r => r.status === 'Paid').reduce((sum, r) => sum + r.rent, 0);
+  const rentCollectedVal = 30500 + paidRentSum;
+
+  // Pending Dues (Default: 6400)
+  const unpaidRentSum = rentRecords.filter(r => r.status !== 'Paid').reduce((sum, r) => sum + r.rent, 0);
+  const pendingDuesVal = Math.max(0, -10100 + unpaidRentSum);
+
+  // Electricity Charges (Default: 8450)
+  const electricityVal = opExpenses
+    .filter(e => e.name.toLowerCase().includes('electricity'))
+    .reduce((sum, e) => sum + parseInt(e.amount.replace(/[^0-9]/g, '') || '0'), 0);
+
+  // Water Tanker Fees (Default: 4200)
+  const waterVal = opExpenses
+    .filter(e => e.name.toLowerCase().includes('water'))
+    .reduce((sum, e) => sum + parseInt(e.amount.replace(/[^0-9]/g, '') || '0'), 0);
+
+  // Catering / Food Sourcing (Default: 18500 -> June chart shows 9800)
+  const cateringVal = opExpenses
+    .filter(e => e.name.toLowerCase().includes('catering') || e.name.toLowerCase().includes('cook'))
+    .reduce((sum, e) => sum + parseInt(e.amount.replace(/[^0-9]/g, '') || '0'), 0);
+  const foodVal = Math.max(0, cateringVal - 8700);
+
   const metrics = [
-    { label: 'Rent Collected', value: '₹48,200', change: '+12%', trend: 'up', color: '#E1F5EE', textColor: '#1D9E75', icon: IndianRupee },
-    { label: 'Pending Dues', value: '₹6,400', change: '-8%', trend: 'down', color: '#FAEEDA', textColor: '#EF9F27', icon: IndianRupee },
-    { label: 'Electricity Charges', value: '₹8,450', change: '850 units', trend: 'up', color: '#E6F1FB', textColor: '#0C447C', icon: Zap },
-    { label: 'Water Tanker Fees', value: '₹4,200', change: '6 Tankers', trend: 'up', color: '#E1F5EE', textColor: '#085041', icon: Droplets },
+    { label: 'Rent Collected', value: `₹${rentCollectedVal.toLocaleString()}`, change: '+12%', trend: 'up', color: '#f0fdfa', textColor: '#0f766e', icon: IndianRupee },
+    { label: 'Pending Dues', value: `₹${pendingDuesVal.toLocaleString()}`, change: '-8%', trend: 'down', color: '#fff7ed', textColor: '#c2410c', icon: IndianRupee },
+    { label: 'Electricity Charges', value: `₹${electricityVal.toLocaleString()}`, change: `${Math.round(electricityVal / 9.94)} units`, trend: 'up', color: '#eff6ff', textColor: '#1d4ed8', icon: Zap },
+    { label: 'Water Tanker Fees', value: `₹${waterVal.toLocaleString()}`, change: `${Math.round(waterVal / 700)} Tankers`, trend: 'up', color: '#f0fdfa', textColor: '#0f766e', icon: Droplets },
   ];
-  
-  const pendingDues = [
-    { name: 'Amit Kumar', room: 4, rent: 8500, utilities: 530, total: 9030, days: 8 },
-    { name: 'Rahul Verma', room: 11, rent: 8000, utilities: 420, total: 8420, days: 12 },
-    { name: 'Vikram Singh', room: 9, rent: 8500, utilities: 0, total: 8500, days: 3 },
-  ];
-  
+
+  const pendingDues = rentRecords
+    .filter(r => r.status !== 'Paid')
+    .map(r => ({
+      name: r.name,
+      room: parseInt(r.room.replace(/[^0-9]/g, '') || '0') || 4,
+      rent: r.rent,
+      utilities: r.utilities,
+      total: r.rent + r.utilities + r.lateFee,
+      days: r.status === 'Overdue' ? 8 : r.status === 'Delay Requested' ? 12 : 3
+    }));
+
   const chartData = [
     { month: 'Jan', Rent: 96000, Utilities: 8900, Food: 14000 },
     { month: 'Feb', Rent: 94500, Utilities: 9200, Food: 13500 },
     { month: 'Mar', Rent: 102000, Utilities: 9800, Food: 15000 },
     { month: 'Apr', Rent: 99500, Utilities: 10500, Food: 14800 },
     { month: 'May', Rent: 101000, Utilities: 11800, Food: 16000 },
-    { month: 'Jun', Rent: 48200, Utilities: 12650, Food: 9800 },
+    { month: 'Jun', Rent: rentCollectedVal, Utilities: electricityVal + waterVal, Food: foodVal },
   ];
   
   const activities = [
@@ -130,34 +224,38 @@ export function OwnerWebDashboard({
   ];
   
   return (
-    <div className="h-full overflow-y-auto text-left bg-[#F8F9FA] pb-12 relative">
+    <div className="h-full overflow-y-auto text-left bg-gradient-to-br from-slate-50 via-slate-50 to-[#14b8a6]/[0.03] pb-12 relative" style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Toast */}
       {notif && (
-        <div className="fixed bottom-6 right-6 bg-[#111827] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 text-xs font-semibold z-50 animate-bounce">
-          <Check className="w-4 h-4 text-[#1D9E75]" /> {notif}
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <Check className="w-4 h-4 text-[#14b8a6]" /> {notif}
         </div>
       )}
 
       {/* Top Bar */}
-      <div className="sticky top-0 z-10 bg-white border-b px-8 py-4 flex items-center justify-between" style={{ borderColor: '#E5E7EB' }}>
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b px-8 py-5 flex items-center justify-between" style={{ borderColor: '#E5E7EB' }}>
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: '#111827' }}>Owner Dashboard</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>Sunrise PG · Koramangala · June 2026</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Owner Dashboard</h1>
+          <p className="text-xs mt-1 text-slate-450 font-medium">Sunrise PG · Koramangala · June 2026</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
             onClick={() => setShowScanner(true)}
-            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-            className="hover:opacity-90 flex items-center gap-2 h-9 px-3 text-xs font-semibold rounded-lg shadow-sm"
+            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+            className="hover:opacity-95 active:scale-98 flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-wider rounded-xl shadow-md shadow-teal-500/10 transition-all cursor-pointer border-none"
           >
             <QrCode className="w-4 h-4" /> Scan Food Pass
           </Button>
-          <button className="relative p-2" onClick={() => triggerToast('No new notifications!')}>
-            <Bell className="w-5 h-5" style={{ color: '#6B7280' }} />
-            <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#EF9F27' }}></div>
+          <button 
+            className="relative p-2 rounded-xl hover:bg-slate-55 text-slate-500 hover:text-slate-700 transition-colors" 
+            onClick={() => triggerToast('No new notifications!')}
+            aria-label="View notifications"
+          >
+            <Bell className="w-5 h-5" />
+            <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500"></div>
           </button>
           <Avatar>
-            <AvatarFallback style={{ background: '#1D9E75', color: '#FFFFFF' }}>RK</AvatarFallback>
+            <AvatarFallback style={{ background: '#14b8a6', color: '#FFFFFF' }}>RK</AvatarFallback>
           </Avatar>
         </div>
       </div>
@@ -175,13 +273,15 @@ export function OwnerWebDashboard({
             </button>
             
             <div className="space-y-1">
-              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5"><Scan className="w-5 h-5 text-[#1D9E75]" /> Scanner: Daily Food Pass</h4>
+              <h4 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-heading)' }}>
+                <Scan className="w-5 h-5 text-[#14b8a6]" /> Scanner: Daily Food Pass
+              </h4>
               <p className="text-xs text-slate-500">Simulate or scan active resident food passes for verification</p>
             </div>
 
             {scanStatus === 'idle' && (
-              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#1D9E75] flex items-center justify-center">
+              <div className="bg-slate-50 border border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-teal-50 text-[#14b8a6] flex items-center justify-center">
                   <QrCode className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
@@ -204,8 +304,8 @@ export function OwnerWebDashboard({
 
             {scanStatus === 'scanning' && (
               <div className="bg-slate-900 rounded-xl p-12 flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden h-[240px]">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,158,117,0.15),transparent)] animate-pulse" />
-                <div className="absolute left-0 right-0 h-1 bg-[#1D9E75] shadow-[0_0_10px_#1D9E75] top-0 animate-[bounce_2s_infinite]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.15),transparent)] animate-pulse" />
+                <div className="absolute left-0 right-0 h-1 bg-[#14b8a6] shadow-[0_0_10px_#14b8a6] top-0 animate-[bounce_2s_infinite]" />
                 <div className="w-16 h-16 rounded-xl border-2 border-white/20 flex items-center justify-center text-white text-xl animate-pulse">
                   📷
                 </div>
@@ -216,102 +316,102 @@ export function OwnerWebDashboard({
 
             {scanStatus === 'success' && scannedResult && (
               <div className="space-y-4 text-left">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between">
+                <div className="bg-teal-50 border border-teal-100 rounded-xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-extrabold text-emerald-950">{scannedResult.name}</p>
-                    <p className="text-xs text-emerald-800">{scannedResult.room} · Daily Food Pass</p>
+                    <p className="text-sm font-bold text-slate-900">{scannedResult.name}</p>
+                    <p className="text-xs text-slate-500">{scannedResult.room} · Daily Food Pass</p>
                   </div>
-                  <Badge className="bg-emerald-500 text-white font-bold border-none">VALID PASS ✓</Badge>
+                  <Badge className="bg-[#14b8a6] text-white font-bold border-none text-[10px] px-2.5 py-0.5 rounded-md">VALID PASS ✓</Badge>
                 </div>
 
-                <div className="border border-slate-200 rounded-xl divide-y text-xs text-slate-700">
-                  <div className="p-3 flex justify-between items-center">
+                <div className="border border-slate-100 rounded-xl divide-y divide-slate-100 text-xs text-slate-700 bg-slate-50/50">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Breakfast Booking</p>
-                      <p className="text-[10px] text-slate-400">8:00 AM - 9:00 AM</p>
+                      <p className="font-bold text-slate-800">Breakfast Booking</p>
+                      <p className="text-[10px] text-slate-450 mt-0.5">8:00 AM - 9:00 AM</p>
                     </div>
                     <div>
                       {scannedResult.meals.breakfast ? (
                         scannedResult.servedMeals.breakfast ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('breakfast')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3 flex justify-between items-center">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Lunch Booking</p>
-                      <p className="text-[10px] text-slate-400">12:00 PM - 1:00 PM</p>
+                      <p className="font-bold text-slate-800">Lunch Booking</p>
+                      <p className="text-[10px] text-slate-450 mt-0.5">12:00 PM - 1:00 PM</p>
                     </div>
                     <div>
                       {scannedResult.meals.lunch ? (
                         scannedResult.servedMeals.lunch ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('lunch')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3 flex justify-between items-center">
+                  <div className="p-3.5 flex justify-between items-center">
                     <div>
-                      <p className="font-bold">Dinner Booking</p>
-                      <p className="text-[10px] text-slate-400">7:00 PM - 8:00 PM</p>
+                      <p className="font-bold text-slate-800">Dinner Booking</p>
+                      <p className="text-[10px] text-slate-455 mt-0.5">7:00 PM - 8:00 PM</p>
                     </div>
                     <div>
                       {scannedResult.meals.dinner ? (
                         scannedResult.servedMeals.dinner ? (
-                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold">Served ✓</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Served ✓</Badge>
                         ) : (
                           <Button 
                             size="sm" 
-                            style={{ background: '#1D9E75', color: '#FFFFFF' }}
-                            className="h-7 text-[10px]"
+                            style={{ background: '#14b8a6', color: '#FFFFFF' }}
+                            className="h-8 text-[10px] font-bold rounded-lg border-none px-3"
                             onClick={() => handleServeMeal('dinner')}
                           >
                             Mark Served
                           </Button>
                         )
                       ) : (
-                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold">Not Registered ✗</Badge>
+                        <Badge className="bg-rose-50 text-rose-700 border-none font-semibold text-[10px] px-2 py-0.5 rounded-md">Not Registered ✗</Badge>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3 pt-2">
                   <Button 
-                    className="flex-1"
+                    className="flex-1 rounded-xl h-11 border-slate-200 text-slate-650 hover:bg-slate-50 font-bold"
                     variant="outline"
                     onClick={() => { setScannedResult(null); setScanStatus('idle'); }}
                   >
                     Scan Another
                   </Button>
                   <Button 
-                    className="flex-1"
-                    style={{ background: '#1D9E75' }}
+                    className="flex-1 rounded-xl h-11 border-none font-bold text-white"
+                    style={{ background: '#14b8a6' }}
                     onClick={() => { setShowScanner(false); setScannedResult(null); setScanStatus('idle'); }}
                   >
                     Done
@@ -323,26 +423,43 @@ export function OwnerWebDashboard({
         </div>
       )}
       
-      <div className="p-8 space-y-6">
+      <div className="p-8 space-y-8">
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {metrics.map((metric, i) => {
             const Icon = metric.icon;
             return (
-              <Card key={i} className="p-6 relative overflow-hidden" style={{ background: metric.color, border: 'none' }}>
+              <Card 
+                key={i} 
+                style={{ backgroundColor: metric.color }}
+                className="p-6 border-none rounded-2xl relative overflow-hidden transition-all duration-300 hover:shadow-md"
+              >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs mb-1 font-semibold text-slate-500 uppercase tracking-wider">{metric.label}</p>
-                    <p className="text-3xl font-bold mb-1" style={{ color: metric.textColor }}>
+                    <p 
+                      style={{ color: metric.textColor }}
+                      className="text-[10px] mb-1.5 font-extrabold uppercase tracking-wider opacity-80"
+                    >
+                      {metric.label}
+                    </p>
+                    <p 
+                      style={{ fontFamily: 'var(--font-heading)', color: metric.textColor }}
+                      className="text-3xl font-extrabold mb-1 tracking-tight"
+                    >
                       {metric.value}
                     </p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-white/60">
+                  <div className="p-2.5 rounded-xl bg-white shadow-sm flex items-center justify-center">
                     <Icon className="w-5 h-5" style={{ color: metric.textColor }} />
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-xs mt-2 font-medium" style={{ color: metric.textColor }}>
-                  <span>{metric.change}</span>
+                <div 
+                  style={{ color: metric.textColor }}
+                  className="flex items-center gap-1.5 text-xs mt-3 font-bold opacity-90"
+                >
+                  <span>
+                    {metric.change}
+                  </span>
                 </div>
               </Card>
             );
@@ -350,68 +467,73 @@ export function OwnerWebDashboard({
         </div>
         
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Dues & Charts */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             
             {/* Chart: Stacked monthly revenue and expenses */}
-            <Card className="p-6">
-              <div className="flex justify-between items-center mb-6">
+            <Card className="p-8 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Revenue & Utility Tracking</h2>
-                  <p className="text-xs text-slate-400">Monthly breakdown of Rent Collection vs Utilities & Food expenses</p>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Revenue & Utility Tracking</h2>
+                  <p className="text-xs text-slate-400 mt-1.5 font-medium">Monthly breakdown of Rent Collection vs Utilities & Food expenses</p>
                 </div>
-                <Badge className="bg-[#E1F5EE] text-[#085041]">June projections look stable</Badge>
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100/50 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-none whitespace-nowrap">
+                  June projections look stable
+                </span>
               </div>
-              <div className="h-[300px]">
+              <div className="h-[350px] px-2 py-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
-                    <YAxis tick={{ fill: '#6B7280' }} />
-                    <Tooltip />
-                    <Bar dataKey="Rent" name="Rent Collected" fill="#1D9E75" stackId="a" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Utilities" name="Utility Bills" fill="#0C447C" stackId="b" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Food" name="Food Sourcing" fill="#EF9F27" stackId="b" radius={[4, 4, 0, 0]} />
+                  <BarChart data={chartData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fill: '#94A3B8' }} tickLine={false} axisLine={false} style={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }} />
+                    <YAxis tick={{ fill: '#94A3B8' }} tickLine={false} axisLine={false} style={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }} />
+                    <Tooltip 
+                      contentStyle={{ background: '#0F172A', border: 'none', borderRadius: '12px', color: '#FFF', fontSize: '11px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} 
+                      itemStyle={{ color: '#94A3B8' }}
+                    />
+                    <Bar dataKey="Rent" name="Rent Collected" fill="#14b8a6" stackId="a" radius={[6, 6, 0, 0]} maxBarSize={45} />
+                    <Bar dataKey="Utilities" name="Utility Bills" fill="#6366f1" stackId="b" radius={[6, 6, 0, 0]} maxBarSize={45} />
+                    <Bar dataKey="Food" name="Food Sourcing" fill="#94a3b8" stackId="b" radius={[6, 6, 0, 0]} maxBarSize={45} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </Card>
 
             {/* Pending Dues Table */}
-            <Card className="p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+            <Card className="p-8 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Dues Monitoring</h2>
-                  <p className="text-xs text-slate-400">Tenants with unpaid rent and utility bill breakdowns</p>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Dues Monitoring</h2>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">Tenants with unpaid rent and utility bill breakdowns</p>
                 </div>
-                <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={() => triggerToast('Redirecting to Rent Collection tab...')}>View All Dues</Button>
+                <Button size="sm" variant="outline" className="whitespace-nowrap rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 text-slate-700 h-9 px-4 transition-all" onClick={() => triggerToast('Redirecting to Rent Collection tab...')}>View All Dues</Button>
               </div>
               
-              <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[600px]">
+              <div className="overflow-x-auto rounded-xl border border-slate-100">
+                <table className="w-full text-left min-w-[600px] border-collapse">
                   <thead>
-                    <tr style={{ background: '#F8F9FA' }}>
-                      <th className="text-left text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Name</th>
-                      <th className="text-center text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Room</th>
-                      <th className="text-right text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Rent</th>
-                      <th className="text-right text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Utilities Due</th>
-                      <th className="text-right text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Total Due</th>
-                      <th className="text-center text-xs font-semibold px-4 py-3 text-slate-500 uppercase tracking-wider">Overdue</th>
+                    <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-400 font-extrabold">
+                      <th className="text-left px-5 py-4">Name</th>
+                      <th className="text-center px-5 py-4">Room</th>
+                      <th className="text-right px-5 py-4">Rent</th>
+                      <th className="text-right px-5 py-4">Utilities Due</th>
+                      <th className="text-right px-5 py-4">Total Due</th>
+                      <th className="text-center px-5 py-4">Overdue</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-50 text-sm">
                     {pendingDues.map((tenant, i) => (
-                      <tr key={i} className="border-t" style={{ borderColor: '#E5E7EB' }}>
-                        <td className="px-4 py-4 text-sm font-semibold text-slate-900">{tenant.name}</td>
-                        <td className="px-4 py-4 text-center">
-                          <Badge variant="outline">{tenant.room}</Badge>
+                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-5 py-4 font-semibold text-slate-900">{tenant.name}</td>
+                        <td className="px-5 py-4 text-center">
+                          <Badge variant="outline" className="text-[10px] font-bold border-slate-200/80 text-slate-600 rounded-md bg-white px-2 py-0.5">{tenant.room}</Badge>
                         </td>
-                        <td className="px-4 py-4 text-right text-sm text-slate-700">₹{tenant.rent.toLocaleString()}</td>
-                        <td className="px-4 py-4 text-right text-sm text-slate-700">₹{tenant.utilities}</td>
-                        <td className="px-4 py-4 text-right text-sm font-bold text-[#1D9E75]">₹{tenant.total.toLocaleString()}</td>
-                        <td className="px-4 py-4 text-center">
-                          <Badge style={{ background: '#FCEBEB', color: '#791F1F' }}>{tenant.days} days</Badge>
+                        <td className="px-5 py-4 text-right text-slate-600">₹{tenant.rent.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-right text-slate-600">₹{tenant.utilities}</td>
+                        <td className="px-5 py-4 text-right font-extrabold text-[#14b8a6]">₹{tenant.total.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-center">
+                          <span className="bg-rose-50 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-rose-100/50">{tenant.days} days</span>
                         </td>
                       </tr>
                     ))}
@@ -423,24 +545,24 @@ export function OwnerWebDashboard({
           </div>
           
           {/* Right Column - Expenses & Activity */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             
             {/* Utility & Operational Cost monitoring */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900">Operational Expenses Log</h3>
+            <Card className="p-8 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md">
+              <h3 className="text-xl font-bold mb-6 text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Operational Expenses</h3>
               <div className="space-y-3">
                 {operationalExpenses.map((exp, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs p-3 rounded-lg border bg-white">
-                    <div className="space-y-0.5">
-                      <p className="font-semibold text-slate-800">{exp.name}</p>
-                      <p className="text-slate-400">{exp.date}</p>
+                  <div key={i} className="flex justify-between items-center text-xs p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                    <div className="space-y-1">
+                      <p className="font-bold text-slate-800">{exp.name}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{exp.date}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-slate-950">{exp.amount}</p>
+                    <div className="text-right space-y-1">
+                      <p className="font-extrabold text-slate-900">{exp.amount}</p>
                       <Badge style={{
-                        background: exp.status === 'Paid' ? '#E1F5EE' : '#FCEBEB',
-                        color: exp.status === 'Paid' ? '#085041' : '#791F1F'
-                      }} className="text-[9px] px-1.5 py-0 border-none font-semibold">
+                        background: exp.status === 'Paid' ? '#f0fdfa' : '#FCEBEB',
+                        color: exp.status === 'Paid' ? '#14b8a6' : '#791F1F'
+                      }} className="text-[9px] px-2 py-0.5 border-none font-bold rounded-md uppercase tracking-wider">
                         {exp.status}
                       </Badge>
                     </div>
@@ -450,39 +572,40 @@ export function OwnerWebDashboard({
             </Card>
 
             {/* Today's Food waste alerts */}
-            <Card className="p-6 bg-slate-900 text-white relative overflow-hidden">
-              <div className="flex justify-between items-start mb-4">
+            <Card className="p-8 bg-slate-950 border border-slate-900 rounded-2xl shadow-xl relative overflow-hidden">
+              <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
+              <div className="flex justify-between items-start mb-6 relative z-10">
                 <div>
-                  <h3 className="font-bold text-base">Meal Bookings Count</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Saves ~30% in food waste daily</p>
+                  <h3 className="font-extrabold text-lg text-white" style={{ fontFamily: 'var(--font-heading)' }}>Meal Bookings Count</h3>
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Saves ~30% in food waste daily</p>
                 </div>
-                <Badge className="bg-[#1D9E75] text-white">Active</Badge>
+                <Badge className="bg-[#14b8a6] text-white border-none font-bold text-[10px] px-2 py-0.5 rounded-md">ACTIVE</Badge>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-center py-2 bg-slate-800/50 rounded-lg">
+              <div className="grid grid-cols-3 gap-2 text-center py-3 bg-slate-900/60 rounded-xl border border-slate-800/80 relative z-10 shadow-inner">
                 <div>
-                  <p className="text-[10px] text-slate-400">Breakfast</p>
-                  <p className="text-lg font-bold text-white">8</p>
+                  <p className="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Breakfast</p>
+                  <p className="text-xl font-extrabold text-white mt-1">8</p>
                 </div>
-                <div className="border-x border-slate-700">
-                  <p className="text-[10px] text-slate-400">Lunch</p>
-                  <p className="text-lg font-bold text-white">11</p>
+                <div className="border-x border-slate-800">
+                  <p className="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Lunch</p>
+                  <p className="text-xl font-extrabold text-white mt-1">11</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400">Dinner</p>
-                  <p className="text-lg font-bold text-white">9</p>
+                  <p className="text-[10px] text-slate-450 uppercase font-bold tracking-wider">Dinner</p>
+                  <p className="text-xl font-extrabold text-white mt-1">9</p>
                 </div>
               </div>
             </Card>
             
             {/* Recent Activity */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900">Recent Activity Log</h3>
-              <div className="space-y-4">
+            <Card className="p-8 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md">
+              <h3 className="text-xl font-bold mb-6 text-slate-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Recent Activity Log</h3>
+              <div className="space-y-5">
                 {activities.map((activity, i) => (
-                  <div key={i} className="pb-4 border-b last:border-0 last:pb-0" style={{ borderColor: '#E5E7EB' }}>
-                    <p className="text-sm text-slate-700 leading-relaxed">{activity.text}</p>
-                    <p className="text-xs mt-1 text-slate-400 font-medium">{activity.time}</p>
+                  <div key={i} className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+                    <p className="text-xs text-slate-650 leading-relaxed font-semibold">{activity.text}</p>
+                    <p className="text-[10px] mt-1.5 text-slate-400 font-medium">{activity.time}</p>
                   </div>
                 ))}
               </div>

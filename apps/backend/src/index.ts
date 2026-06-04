@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { Tenant, PGProperty, Complaint, Lead } from '@rentflo/types';
+import { Tenant, PGProperty, Complaint, Lead } from '@stayflo/types';
 
 const app = express();
 const PORT = 3000;
@@ -153,5 +153,5 @@ app.post('/api/leads', (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Rentflo backend API running on http://localhost:${PORT}`);
+  console.log(`Stayflo backend API running on http://localhost:${PORT}`);
 });

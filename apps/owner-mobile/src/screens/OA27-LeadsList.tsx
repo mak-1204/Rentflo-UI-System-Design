@@ -1,7 +1,7 @@
-import { ChevronLeft, Phone, MessageCircle } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Avatar, AvatarFallback } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
+import { ChevronLeft, Phone, MessageCircle } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Avatar, AvatarFallback } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
 
 export function OwnerLeadsList() {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ export function OwnerLeadsList() {
           Website Leads
         </h1>
         <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
-          From your Rentflo portfolio
+          From your Stayflo portfolio
         </p>
       </div>
       

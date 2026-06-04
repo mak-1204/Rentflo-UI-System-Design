@@ -1,5 +1,5 @@
-import { Wrench, Zap, Sofa, Sparkles, Wifi, AlertCircle } from 'lucide-react'; import { Link } from 'react-router'; import { Badge } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
+import { Wrench, Zap, Sofa, Sparkles, Wifi, AlertCircle } from 'lucide-react'; import { Link } from 'react-router'; import { Badge } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
 
 export function OwnerComplaintsList() {
   const complaints = [

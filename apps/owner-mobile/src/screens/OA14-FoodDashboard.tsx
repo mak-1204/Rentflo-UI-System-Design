@@ -1,6 +1,6 @@
-import { ChevronLeft, Share2, Coffee, UtensilsCrossed, Moon } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
+import { ChevronLeft, Share2, Coffee, UtensilsCrossed, Moon } from 'lucide-react'; import { useNavigate } from 'react-router'; import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
 
 export function OwnerFoodDashboard() {
   const navigate = useNavigate();

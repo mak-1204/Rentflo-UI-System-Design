@@ -1,5 +1,5 @@
 {
-  "name": "rentflo-monorepo",
+  "name": "stayflo-monorepo",
   "private": true,
   "version": "1.0.0",
   "workspaces": [

@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { useRouter } from 'next/navigation'; import { Search, SlidersHorizontal, Eye, MoreVertical } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { useState } from 'react'; import { useRouter } from 'next/navigation'; import { Search, SlidersHorizontal, Eye, MoreVertical } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function AdminPGsList() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export function AdminPGsList() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Registered PGs</h1>
-          <p className="text-slate-500 mt-1">Manage and audit all registered properties on the Rentflo network</p>
+          <p className="text-slate-500 mt-1">Manage and audit all registered properties on the Stayflo network</p>
         </div>
       </div>
 

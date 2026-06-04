@@ -1,5 +1,5 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { ChevronLeft } from 'lucide-react'; import { Button } from '@rentflo/ui';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { ChevronLeft } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@stayflo/ui';
 
 export function TenantJoinPG() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export function TenantJoinPG() {
           
           <div className="rounded-xl p-4" style={{ background: '#E6F1FB' }}>
             <p className="text-xs leading-relaxed" style={{ color: '#0C447C' }}>
-              💡 Get this code from your PG owner or manager. They can find it in their Rentflo Owner Web Dashboard.
+              💡 Get this code from your PG owner or manager. They can find it in their Stayflo Owner Web Dashboard.
             </p>
           </div>
           

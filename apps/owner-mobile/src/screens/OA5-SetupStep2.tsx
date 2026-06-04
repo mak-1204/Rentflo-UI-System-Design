@@ -1,8 +1,8 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@rentflo/ui';
-import { ChevronLeft, Minus, Plus } from 'lucide-react'; import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
-import { Switch } from '@rentflo/ui';
-import { Progress } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@stayflo/ui';
+import { ChevronLeft, Minus, Plus } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
+import { Switch } from '@stayflo/ui';
+import { Progress } from '@stayflo/ui';
 
 export function OwnerSetupStep2() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
-import { Outlet, Link, useLocation } from "react-router"; import { Home, CreditCard, UtensilsCrossed, MessageSquare, MoreHorizontal, Bell } from "lucide-react"; import { RentfloLogo } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
+import { Outlet, Link, useLocation } from "react-router"; import { Home, CreditCard, UtensilsCrossed, MessageSquare, MoreHorizontal, Bell } from "lucide-react"; import { StayfloLogo } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
 
 export function TenantMobileLayout() {
   const location = useLocation();
@@ -18,7 +18,7 @@ export function TenantMobileLayout() {
       <header className="sticky top-0 z-40 bg-white border-b px-6 py-3" style={{ borderColor: '#E5E7EB' }}>
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <RentfloLogo className="text-xl" />
+            <StayfloLogo className="text-xl" />
             <Badge style={{ background: '#E1F5EE', color: '#1D9E75' }} className="border-none">Room 4</Badge>
           </div>
           

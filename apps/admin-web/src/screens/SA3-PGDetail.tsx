@@ -1,7 +1,7 @@
-import { useParams, useRouter } from 'next/navigation'; import { ArrowLeft, Edit2, ShieldAlert, CheckCircle, Globe, DollarSign, Users, HelpCircle } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@rentflo/ui';
+import { useParams, useRouter } from 'next/navigation'; import { ArrowLeft, Edit2, ShieldAlert, CheckCircle, Globe, DollarSign, Users, HelpCircle } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@stayflo/ui';
 
 export function AdminPGDetail() {
   const { id } = useParams() as { id?: string };
@@ -219,7 +219,7 @@ export function AdminPGDetail() {
               <div>
                 <h3 className="text-lg font-semibold text-slate-900">PG Lead Capture Page</h3>
                 <a href="/portfolio/sunrise-pg" target="_blank" className="text-xs text-teal-600 hover:underline flex items-center gap-1 mt-1">
-                  <Globe className="w-3.5 h-3.5" /> rentflo.in/pg/sunrise-pg
+                  <Globe className="w-3.5 h-3.5" /> stayflo.in/pg/sunrise-pg
                 </a>
               </div>
               <Badge style={{ background: '#E1F5EE', color: '#085041' }}>Published</Badge>

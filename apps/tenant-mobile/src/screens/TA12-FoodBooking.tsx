@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { Clock, Check, X, Calendar, AlertCircle } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
+import { useState } from 'react'; import { Clock, Check, X, Calendar, AlertCircle } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
 
 export function TenantFoodBooking() {
   const [showQrModal, setShowQrModal] = useState(false);

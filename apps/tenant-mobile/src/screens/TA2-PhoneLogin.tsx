@@ -1,6 +1,6 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { RentfloLogo } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { StayfloLogo } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
 
 export function TenantPhoneLogin() {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export function TenantPhoneLogin() {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-center items-center p-6 text-left">
       <div className="w-full max-w-md bg-white p-8 rounded-xl border shadow-sm">
         <div className="mb-8 text-center">
-          <RentfloLogo className="text-3xl mb-4" />
+          <StayfloLogo className="text-3xl mb-4" />
           <h1 className="text-2xl font-bold mb-1.5" style={{ color: '#111827' }}>
             Resident Portal
           </h1>

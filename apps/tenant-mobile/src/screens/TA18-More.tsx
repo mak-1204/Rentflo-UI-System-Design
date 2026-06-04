@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router'; import { LogOut, FileText, Bell, MessageSquare, ClipboardCheck, Star } from 'lucide-react'; import { Card } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Avatar, AvatarFallback } from '@rentflo/ui';
+import { useNavigate } from 'react-router'; import { LogOut, FileText, Bell, MessageSquare, ClipboardCheck, Star } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Avatar, AvatarFallback } from '@stayflo/ui';
 
 export function TenantMore() {
   const navigate = useNavigate();

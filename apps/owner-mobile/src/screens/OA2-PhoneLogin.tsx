@@ -1,7 +1,7 @@
-import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@rentflo/ui';
-import { RentfloLogo } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Input } from '@rentflo/ui';
+import { useState } from 'react'; import { useNavigate } from 'react-router'; import { MobileFrame } from '@stayflo/ui';
+import { StayfloLogo } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Input } from '@stayflo/ui';
 
 export function OwnerPhoneLogin() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export function OwnerPhoneLogin() {
     <MobileFrame>
       <div className="h-full flex flex-col px-6 pt-16 pb-8">
         <div className="mb-12">
-          <RentfloLogo className="text-3xl mb-8" />
+          <StayfloLogo className="text-3xl mb-8" />
           <h1 className="text-2xl font-semibold mb-2" style={{ color: '#111827' }}>
             Welcome back
           </h1>

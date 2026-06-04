@@ -24,7 +24,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#F8F9FA' }}>
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-slate-50 to-[#14b8a6]/[0.03]">
       {/* Sidebar — client component (handles usePathname, localStorage, dropdowns) */}
       <OwnerSidebar />
 

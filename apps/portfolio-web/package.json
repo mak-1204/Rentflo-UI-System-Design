@@ -1,5 +1,5 @@
 {
-  "name": "@rentflo/portfolio-web",
+  "name": "@stayflo/portfolio-web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,9 +10,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@rentflo/types": "*",
-    "@rentflo/ui": "*",
-    "@rentflo/utils": "*",
+    "@stayflo/types": "*",
+    "@stayflo/ui": "*",
+    "@stayflo/utils": "*",
     "lucide-react": "0.487.0",
     "next": "^16.2.7",
     "react": "18.3.1",

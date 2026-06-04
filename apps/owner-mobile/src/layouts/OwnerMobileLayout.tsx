@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router"; import { Home, Users, UtensilsCrossed, Globe, MoreHorizontal } from "lucide-react"; import { MobileFrame } from '@rentflo/ui';
+import { Outlet, Link, useLocation } from "react-router"; import { Home, Users, UtensilsCrossed, Globe, MoreHorizontal } from "lucide-react"; import { MobileFrame } from '@stayflo/ui';
 
 export function OwnerMobileLayout() {
   const location = useLocation();

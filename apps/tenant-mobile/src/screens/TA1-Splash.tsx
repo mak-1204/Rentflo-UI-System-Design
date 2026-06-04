@@ -1,5 +1,5 @@
-import { useEffect } from 'react'; import { useNavigate } from 'react-router'; import { RentfloLogo } from '@rentflo/ui';
-import { Progress } from '@rentflo/ui';
+import { useEffect } from 'react'; import { useNavigate } from 'react-router'; import { StayfloLogo } from '@stayflo/ui';
+import { Progress } from '@stayflo/ui';
 
 export function TenantSplash() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export function TenantSplash() {
       style={{ background: '#1D9E75' }}
     >
       <div className="flex-1 flex flex-col items-center justify-center">
-        <RentfloLogo variant="white" className="text-6xl mb-4" />
+        <StayfloLogo variant="white" className="text-6xl mb-4" />
         <p className="text-white text-xl text-center opacity-90 font-medium">
           Your home away from home
         </p>

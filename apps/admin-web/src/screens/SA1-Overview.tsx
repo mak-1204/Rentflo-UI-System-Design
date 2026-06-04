@@ -1,4 +1,4 @@
-import { TrendingUp, Users, Building, AlertCircle, ArrowUpRight, DollarSign } from 'lucide-react'; import { Card } from '@rentflo/ui';
+import { TrendingUp, Users, Building, AlertCircle, ArrowUpRight, DollarSign } from 'lucide-react'; import { Card } from '@stayflo/ui';
 
 export function AdminOverview() {
   const metrics = [
@@ -24,7 +24,7 @@ export function AdminOverview() {
       {/* Top Bar */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Rentflo Admin Overview</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Stayflo Admin Overview</h1>
           <p className="text-slate-500 mt-1">Platform analytics and health indicators</p>
         </div>
         <div className="flex items-center gap-3">

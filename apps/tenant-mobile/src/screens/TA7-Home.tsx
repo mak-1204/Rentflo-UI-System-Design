@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Bell, ChevronRight, X } from 'lucide-react';
 import { Link } from 'react-router';
-import { RentfloLogo } from '@rentflo/ui';
-import { Badge } from '@rentflo/ui';
-import { Button } from '@rentflo/ui';
-import { Card } from '@rentflo/ui';
+import { StayfloLogo } from '@stayflo/ui';
+import { Badge } from '@stayflo/ui';
+import { Button } from '@stayflo/ui';
+import { Card } from '@stayflo/ui';
 
 export function TenantHome() {
   const [showQrModal, setShowQrModal] = useState(false);
@@ -13,7 +13,7 @@ export function TenantHome() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <RentfloLogo className="text-xl" />
+          <StayfloLogo className="text-xl" />
           <Badge style={{ background: '#E1F5EE', color: '#1D9E75' }}>Room 4</Badge>
         </div>
         <button>

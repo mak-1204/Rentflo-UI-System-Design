@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '@rentflo/utils';
+import { supabase } from '@stayflo/utils';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
