@@ -55,7 +55,7 @@ export function AirbnbStyleHero({
           <div className="flex items-center justify-between p-4">
             <button
               onClick={() => setShowAllPhotos(false)}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
             >
               <X size={28} />
             </button>
@@ -71,13 +71,13 @@ export function AirbnbStyleHero({
             />
             <button
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white p-3 rounded-full shadow-md cursor-pointer border-none"
             >
               <ChevronLeft size={24} className="text-gray-900" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white p-3 rounded-full shadow-md cursor-pointer border-none"
             >
               <ChevronRight size={24} className="text-gray-900" />
             </button>
@@ -86,35 +86,35 @@ export function AirbnbStyleHero({
       )}
 
       {/* Main Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 text-left">
         {/* Title with Share/Save */}
-        <div className="flex justify-between items-start mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 max-w-3xl">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 max-w-3xl" style={{ fontFamily: 'Outfit, sans-serif' }}>
             {pgName}
           </h1>
           <div className="flex gap-4">
-            <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold transition-colors">
+            <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold transition-colors cursor-pointer bg-transparent border-none">
               <Share2 size={20} />
-              <span className="hidden md:inline">Share</span>
+              <span>Share</span>
             </button>
-            <button className="flex items-center gap-2 text-gray-700 hover:text-teal-600 font-semibold transition-colors">
+            <button className="flex items-center gap-2 text-gray-700 hover:text-teal-600 font-semibold transition-colors cursor-pointer bg-transparent border-none">
               <Heart size={20} />
-              <span className="hidden md:inline">Save</span>
+              <span>Save</span>
             </button>
           </div>
         </div>
 
         {/* Gallery Section */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-8 rounded-xl overflow-hidden">
-          {/* Main Large Image - Left Side (60%) */}
+          {/* Main Large Image - Left Side (Full width on mobile, 60% on desktop) */}
           <div
-            className="md:col-span-3 relative h-64 md:h-96 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer"
+            className="col-span-1 md:col-span-3 relative h-64 md:h-96 bg-gray-200 overflow-hidden group cursor-pointer"
             onClick={() => setShowAllPhotos(true)}
           >
             <img
               src={displayImages[currentImageIndex]}
               alt={pgName}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
             />
 
             {/* Image Counter */}
@@ -128,7 +128,7 @@ export function AirbnbStyleHero({
                 e.stopPropagation();
                 prevImage();
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer border-none"
             >
               <ChevronLeft size={20} className="text-gray-900" />
             </button>
@@ -137,14 +137,14 @@ export function AirbnbStyleHero({
                 e.stopPropagation();
                 nextImage();
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer border-none"
             >
               <ChevronRight size={20} className="text-gray-900" />
             </button>
           </div>
 
-          {/* Right Side Image Grid (40%) */}
-          <div className="md:col-span-2 grid grid-cols-2 gap-2">
+          {/* Right Side Image Grid - Hidden on mobile, visible on desktop (40% width) */}
+          <div className="hidden md:grid md:col-span-2 grid-cols-2 gap-2">
             {displayImages.slice(1, 5).map((img, index) => (
               <div
                 key={index}
@@ -152,12 +152,12 @@ export function AirbnbStyleHero({
                   setCurrentImageIndex(index + 1);
                   setShowAllPhotos(false);
                 }}
-                className="relative h-32 md:h-[188px] bg-gray-200 rounded-lg overflow-hidden cursor-pointer group"
+                className="relative h-[188px] bg-gray-200 overflow-hidden cursor-pointer group"
               >
                 <img
                   src={img}
                   alt={`Gallery ${index + 2}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 {index === 3 && displayImages.length > 5 && (
                   <div
@@ -180,17 +180,16 @@ export function AirbnbStyleHero({
           </div>
         </div>
 
-        {/* Content Section: Info Pane without Booking Panel */}
+        {/* Content Section: Info Pane */}
         <div className="max-w-4xl border-t border-gray-100 pt-8">
-          {/* Property Details */}
           <div>
             {/* Property Type and Info */}
             <div className="mb-8 pb-8 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 Premium Paying Guest Accommodation
               </h2>
               <p className="text-lg text-gray-650 mb-4">{tagline}</p>
-              <div className="text-sm text-gray-705 space-y-1">
+              <div className="text-sm text-gray-700 space-y-1">
                 <p>📍 {location}</p>
                 <p>🏠 Multiple rooms • Fully furnished</p>
                 <p>👥 35+ beds • 500+ satisfied residents</p>
@@ -199,7 +198,7 @@ export function AirbnbStyleHero({
 
             {/* Key Features */}
             <div className="mb-8 pb-8 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 What this place offers
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -236,7 +235,7 @@ export function AirbnbStyleHero({
 
             {/* Description */}
             <div className="mb-8">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 About this place
               </h3>
               <p className="text-gray-700 leading-relaxed">

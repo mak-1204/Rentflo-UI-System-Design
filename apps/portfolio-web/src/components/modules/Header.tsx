@@ -36,7 +36,7 @@ export function Header({
             {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 md:w-9 md:h-9 bg-[#14b8a6] rounded-full flex items-center justify-center text-white font-black text-sm select-none">
-                R
+                S
               </div>
               <span className="text-lg md:text-xl font-bold text-gray-900 select-none">
                 {pgName}
@@ -50,7 +50,7 @@ export function Header({
                 <span>Powered by</span>
                 <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold">
                   <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[8px] font-black">
-                    R
+                    S
                   </span>
                   Stayflo.
                 </span>

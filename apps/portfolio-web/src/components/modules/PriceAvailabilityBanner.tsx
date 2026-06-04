@@ -19,21 +19,23 @@ export function PriceAvailabilityBanner({
           <div>
             <p className="text-[10px] text-teal-600 font-extrabold uppercase tracking-wider mb-0.5">Starting from</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl md:text-3xl font-black text-teal-600">{startingPrice}</span>
-              <span className="text-xs text-gray-500">/mo</span>
+              <span className="text-xl md:text-3xl font-black text-teal-600">{startingPrice}</span>
+              <span className="text-[10px] md:text-xs text-gray-500">/mo</span>
             </div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
+            <p className="hidden sm:block text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
               {vacantRooms} ROOMS VACANT ON FLOOR
             </p>
           </div>
 
           {/* Right: CTAs */}
           <div className="flex gap-2">
-            <a href="tel:9876543210" className="px-4 py-2.5 border border-teal-600 text-teal-600 font-bold rounded-lg hover:bg-teal-50 text-xs transition-all cursor-pointer inline-flex items-center justify-center">
-              📞 Call PG Owner
+            <a href="tel:9876543210" className="px-3 py-2 md:px-4 md:py-2.5 border border-teal-600 text-teal-600 font-bold rounded-lg hover:bg-teal-50 text-[10px] md:text-xs transition-all cursor-pointer inline-flex items-center justify-center">
+              <span className="inline sm:hidden">📞 Call</span>
+              <span className="hidden sm:inline">📞 Call PG Owner</span>
             </a>
-            <a href="#floorplans" className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs transition-all shadow-md cursor-pointer inline-flex items-center justify-center">
-              🎯 BOOK VISIT
+            <a href="#floorplans" className="px-3.5 py-2 md:px-5 md:py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-[10px] md:text-xs transition-all shadow-md cursor-pointer inline-flex items-center justify-center">
+              <span className="inline sm:hidden">🎯 Book</span>
+              <span className="hidden sm:inline">🎯 BOOK VISIT</span>
             </a>
           </div>
         </div>
