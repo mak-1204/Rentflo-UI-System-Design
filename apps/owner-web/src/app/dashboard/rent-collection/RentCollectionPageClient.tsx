@@ -7,17 +7,20 @@ import { Button, Card } from '@stayflo/ui';
 import { DuesTable } from './_components/DuesTable';
 import { BillCalculator } from './_components/BillCalculator';
 import { PaymentModal } from './_components/PaymentModal';
+import { SettingsCard } from './_components/SettingsCard';
 import {
   fetchRentRecords,
   approveDelayRequest,
   saveRentBill,
   collectRentPayment,
+  updatePGSettings,
 } from './actions';
 import type { RentRecord } from './types';
 
 interface RentCollectionPageClientProps {
   initialRentData: RentRecord[];
   initialMonth: string;
+  initialSettings: { due_day: number; late_fee: number };
 }
 
 const MONTHS = [
@@ -29,9 +32,11 @@ const MONTHS = [
 export function RentCollectionPageClient({
   initialRentData,
   initialMonth,
+  initialSettings,
 }: RentCollectionPageClientProps) {
   const [rentData, setRentData] = useState<RentRecord[]>(initialRentData);
   const [selectedMonth, setSelectedMonth] = useState<string>(initialMonth);
+  const [settings, setSettings] = useState(initialSettings);
   const [activeCollectTenant, setActiveCollectTenant] = useState<RentRecord | null>(null);
   const [notif, setNotif] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -50,6 +55,22 @@ export function RentCollectionPageClient({
       const data = await fetchRentRecords(monthStr);
       setRentData(data);
     });
+  };
+
+  const handleSaveSettings = async (dueDay: number, lateFee: number): Promise<boolean> => {
+    const result = await updatePGSettings(dueDay, lateFee);
+    if (result.success) {
+      setSettings({ due_day: dueDay, late_fee: lateFee });
+      startTransition(async () => {
+        const data = await fetchRentRecords(selectedMonth);
+        setRentData(data);
+      });
+      triggerToast(`Billing rules updated successfully!`);
+      return true;
+    } else {
+      triggerToast(`Error updating billing rules: ${result.error}`);
+      return false;
+    }
   };
 
   // ── Apply Utility Charges ──────────────────────────────────────────────────
@@ -224,6 +245,9 @@ export function RentCollectionPageClient({
         ))}
       </div>
 
+      {/* Settings Card */}
+      <SettingsCard initialSettings={settings} onSave={handleSaveSettings} />
+
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
@@ -267,7 +291,7 @@ export function RentCollectionPageClient({
             ₹{totalLateFees.toLocaleString('en-IN')}
           </p>
           <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-            ₹250 default applied past due date
+            ₹{settings.late_fee} default applied past day {settings.due_day} of month
           </span>
         </Card>
       </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { RentCollectionPageClient } from './RentCollectionPageClient';
-import { fetchRentRecords } from './actions';
+import { fetchRentRecords, fetchPGSettings } from './actions';
 
 export const metadata: Metadata = {
   title: 'Rent & Utility Bills',
@@ -11,7 +11,17 @@ export const revalidate = 30;
 
 export default async function RentCollectionPage() {
   const defaultMonth = '2026-06';
-  const rentData = await fetchRentRecords(defaultMonth);
+  
+  const [rentData, settings] = await Promise.all([
+    fetchRentRecords(defaultMonth),
+    fetchPGSettings(),
+  ]);
 
-  return <RentCollectionPageClient initialRentData={rentData} initialMonth={defaultMonth} />;
+  return (
+    <RentCollectionPageClient
+      initialRentData={rentData}
+      initialMonth={defaultMonth}
+      initialSettings={settings}
+    />
+  );
 }

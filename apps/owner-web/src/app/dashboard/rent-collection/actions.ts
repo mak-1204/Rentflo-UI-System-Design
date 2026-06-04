@@ -61,7 +61,21 @@ export async function fetchRentRecords(monthString: string): Promise<RentRecord[
     return [];
   }
 
+  // Fetch PG settings for due_day and late_fee
+  const { data: pgData, error: pgError } = await supabase
+    .from('pg_properties')
+    .select('due_day, late_fee')
+    .eq('id', '11111111-1111-1111-1111-111111111111')
+    .single();
+
+  const due_day = pgData?.due_day ?? 5;
+  const late_fee = pgData?.late_fee ?? 250;
+
   const [queryYear, queryMonth] = monthString.split('-').map(Number);
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
 
   return (tenants ?? []).map((row: any) => {
     // Find the bill record for this specific month (if any)
@@ -93,6 +107,29 @@ export async function fetchRentRecords(monthString: string): Promise<RentRecord[
       }
     }
 
+    // Dynamic Late Fee logic
+    let calculatedLateFee = bill?.lateFee ?? 0;
+    if (bill?.status === 'Delay Approved') {
+      calculatedLateFee = 0;
+    } else if (bill?.status === 'Paid') {
+      calculatedLateFee = bill?.lateFee ?? 0;
+    } else {
+      // Unpaid or Delay Requested or Overdue (or not created yet)
+      let isPastDue = false;
+      if (todayYear > queryYear) {
+        isPastDue = true;
+      } else if (todayYear === queryYear) {
+        if (todayMonth > queryMonth) {
+          isPastDue = true;
+        } else if (todayMonth === queryMonth) {
+          if (todayDay > due_day) {
+            isPastDue = true;
+          }
+        }
+      }
+      calculatedLateFee = isPastDue ? late_fee : 0;
+    }
+
     return {
       id:            bill?.id,
       tenant_id:     row.id,
@@ -102,7 +139,7 @@ export async function fetchRentRecords(monthString: string): Promise<RentRecord[
       month:         monthString,
       rent:          bill?.rent      ?? calculatedRent,
       utilities:     bill?.utilities ?? 0,
-      lateFee:       bill?.lateFee   ?? 0,
+      lateFee:       calculatedLateFee,
       status:        bill?.status    ?? 'Overdue',
       paymentDate:   bill?.paymentDate   ?? undefined,
       paymentMethod: bill?.paymentMethod ?? undefined,
@@ -220,3 +257,42 @@ export async function collectRentPayment(
   revalidatePath(PAGE);
   return { success: true };
 }
+
+// ─── Property Settings ────────────────────────────────────────────────────────
+
+export async function fetchPGSettings(): Promise<{ due_day: number; late_fee: number }> {
+  const { data, error } = await supabase
+    .from('pg_properties')
+    .select('due_day, late_fee')
+    .eq('id', '11111111-1111-1111-1111-111111111111')
+    .single();
+
+  if (error) {
+    console.error('[fetchPGSettings]', error.message);
+    return { due_day: 5, late_fee: 250 };
+  }
+
+  return {
+    due_day: data.due_day ?? 5,
+    late_fee: data.late_fee ?? 250,
+  };
+}
+
+export async function updatePGSettings(
+  dueDay: number,
+  lateFee: number
+): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('pg_properties')
+    .update({ due_day: dueDay, late_fee: lateFee })
+    .eq('id', '11111111-1111-1111-1111-111111111111');
+
+  if (error) {
+    console.error('[updatePGSettings]', error.message);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath(PAGE);
+  return { success: true };
+}
+
