@@ -1,6 +1,7 @@
 'use client';
 
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Heart } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,8 +14,8 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg" />
-              <span className="text-xl font-bold">Stayflo</span>
+              <img src={logoImg.src} alt="logo" className="h-6 w-auto object-contain" />
+              <span className="text-xl font-bold">stayfloww</span>
             </div>
             <p className="text-gray-400 text-sm mb-4">
               Finding the perfect room for your perfect life.
@@ -99,7 +100,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <Mail size={18} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                <span>support@stayflo.com</span>
+                <span>support@stayfloww.com</span>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-blue-400 flex-shrink-0 mt-0.5" />
@@ -115,7 +116,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
           <p>
-            © {currentYear} Stayflo. All rights reserved. Made with{' '}
+            © {currentYear} stayfloww. All rights reserved. Made with{' '}
             <Heart size={14} className="inline text-red-500 fill-red-500" /> in India.
           </p>
           <div className="flex gap-6 mt-4 md:mt-0">

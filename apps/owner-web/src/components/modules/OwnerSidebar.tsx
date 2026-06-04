@@ -29,7 +29,8 @@ import {
   ChevronDown,
   ExternalLink,
 } from 'lucide-react';
-import { StayfloLogo, Avatar, AvatarFallback } from '@stayflo/ui';
+import { Avatar, AvatarFallback } from '@stayflo/ui';
+import logoImg from '../../../logo.png';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -167,7 +168,7 @@ export function OwnerSidebar() {
           >
             <Menu className="w-6 h-6" />
           </button>
-          <StayfloLogo className="text-xl" />
+          <img src={logoImg.src} alt="stayfloww logo" className="h-8 w-auto object-contain" />
         </div>
         <span className="text-xs font-semibold px-2 py-1 rounded bg-[#f0fdfa] text-[#14b8a6] truncate max-w-[150px]">
           {selectedPgs.length === ALL_PROPERTIES.length ? 'All PGs' : selectedPgs[0]}
@@ -197,7 +198,7 @@ export function OwnerSidebar() {
         {/* ── Sidebar Header ──────────────────────────────────────────────── */}
         <div className="p-6 border-b flex flex-col relative" style={{ borderColor: '#E5E7EB' }}>
           <div className="flex justify-between items-center">
-            <StayfloLogo className="text-2xl" />
+            <img src={logoImg.src} alt="stayfloww logo" className="h-10 w-auto object-contain" />
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="md:hidden p-1 rounded-md hover:bg-slate-100 text-slate-500"

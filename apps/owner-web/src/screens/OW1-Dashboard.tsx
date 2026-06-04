@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from '@stayflo/ui';
 import { Badge } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Card } from '@stayflo/ui';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Booking {
   name: string;
@@ -484,7 +484,7 @@ export function OwnerWebDashboard({
               </div>
               <div className="h-[350px] px-2 py-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
+                  <LineChart data={chartData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                     <XAxis dataKey="month" tick={{ fill: '#94A3B8' }} tickLine={false} axisLine={false} style={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }} />
                     <YAxis tick={{ fill: '#94A3B8' }} tickLine={false} axisLine={false} style={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }} />
@@ -492,10 +492,11 @@ export function OwnerWebDashboard({
                       contentStyle={{ background: '#0F172A', border: 'none', borderRadius: '12px', color: '#FFF', fontSize: '11px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} 
                       itemStyle={{ color: '#94A3B8' }}
                     />
-                    <Bar dataKey="Rent" name="Rent Collected" fill="#14b8a6" stackId="a" radius={[6, 6, 0, 0]} maxBarSize={45} />
-                    <Bar dataKey="Utilities" name="Utility Bills" fill="#6366f1" stackId="b" radius={[6, 6, 0, 0]} maxBarSize={45} />
-                    <Bar dataKey="Food" name="Food Sourcing" fill="#94a3b8" stackId="b" radius={[6, 6, 0, 0]} maxBarSize={45} />
-                  </BarChart>
+                    <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px', fontFamily: 'var(--font-sans)', paddingBottom: '10px' }} />
+                    <Line type="monotone" dataKey="Rent" name="Rent Collected" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, stroke: '#14b8a6', strokeWidth: 1, fill: '#fff' }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="Utilities" name="Utility Bills" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, stroke: '#6366f1', strokeWidth: 1, fill: '#fff' }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="Food" name="Food Sourcing" stroke="#94a3b8" strokeWidth={3} dot={{ r: 4, stroke: '#94a3b8', strokeWidth: 1, fill: '#fff' }} activeDot={{ r: 6 }} />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             </Card>

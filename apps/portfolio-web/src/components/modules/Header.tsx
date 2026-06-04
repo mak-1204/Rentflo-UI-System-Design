@@ -1,6 +1,7 @@
 'use client';
 
 import { Phone, Star } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface HeaderProps {
   pgName?: string;
@@ -35,9 +36,7 @@ export function Header({
           <div className="flex items-center gap-3 md:gap-5">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 md:w-9 md:h-9 bg-[#14b8a6] rounded-full flex items-center justify-center text-white font-black text-sm select-none">
-                S
-              </div>
+              <img src={logoImg.src} alt="logo" className="h-8 md:h-9 w-auto object-contain" />
               <span className="text-lg md:text-xl font-bold text-gray-900 select-none">
                 {pgName}
               </span>
@@ -45,14 +44,12 @@ export function Header({
 
             {/* Badges - Hidden on mobile, visible on tablet/desktop */}
             <div className="hidden lg:flex items-center gap-3">
-              {/* Powered by Stayflo */}
+              {/* Powered by stayfloww */}
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md text-[10px] text-slate-500 font-semibold select-none">
                 <span>Powered by</span>
-                <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold">
-                  <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[8px] font-black">
-                    S
-                  </span>
-                  Stayflo.
+                <span className="text-[#14b8a6] flex items-center gap-1 font-bold">
+                  <img src={logoImg.src} alt="logo" className="w-4 h-4 object-contain" />
+                  stayfloww.
                 </span>
               </div>
 

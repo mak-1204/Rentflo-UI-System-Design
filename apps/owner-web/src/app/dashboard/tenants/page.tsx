@@ -1,22 +1,19 @@
 import type { Metadata } from 'next';
-import { TenantsClient } from '@/components/modules/TenantsClient';
-import { ownerApiClient } from '@/services/api-client';
-import React from 'react';
+import { fetchTenants, fetchPGProperties } from './actions';
+import { TenantsPageClient } from './TenantsPageClient';
 
 export const metadata: Metadata = {
   title: 'Tenants Directory',
   description: 'Manage tenant profiles, room assignments, and KYC documents.',
 };
 
+// ISR: re-fetch from Supabase every 30 seconds
 export const revalidate = 30;
 
 export default async function TenantsPage() {
-  let tenants: NonNullable<React.ComponentProps<typeof TenantsClient>>['initialTenants'] = [];
-  try {
-    const data = await ownerApiClient.getTenants();
-    tenants = data as unknown as NonNullable<React.ComponentProps<typeof TenantsClient>>['initialTenants'];
-  } catch (err) {
-    console.log('[TenantsPage] Server API offline (client fallback enabled)');
-  }
-  return <TenantsClient initialTenants={tenants} />;
+  const [tenants, pgProperties] = await Promise.all([
+    fetchTenants(),
+    fetchPGProperties()
+  ]);
+  return <TenantsPageClient initialTenants={tenants} pgProperties={pgProperties} />;
 }

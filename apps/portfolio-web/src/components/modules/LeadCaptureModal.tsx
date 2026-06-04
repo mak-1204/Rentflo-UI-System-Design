@@ -1,323 +1,346 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, User, Phone, Compass, X } from 'lucide-react';
-import { Button } from '@stayflo/ui';
+import { MapPin } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface SuggestionItem {
   bold: string;
   normal: string;
 }
 
-export function LeadCaptureModal({ 
+export function LeadCaptureModal({
   onClose,
   isHardGate = false,
-}: { 
+}: {
   onClose?: () => void;
   isHardGate?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [leadForm, setLeadForm] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    type: 'Single',
+    roomPreference: 'Single Occupancy',
+    officeLocation: '',
   });
-  const [addressSearch, setAddressSearch] = useState('');
+
+  // Address autocomplete state
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedOfficeAddress, setSelectedOfficeAddress] = useState('');
-  const [showPGMap, setShowPGMap] = useState(false);
-  
-  const pgName = 'Sunrise PG';
-  const mapCoords = { lat: 12.9345, lng: 77.6269 };
-
   const mockSuggestions: SuggestionItem[] = [
-    { bold: 'Periyar', normal: ' medu, Choolai, Chennai, Tamil Nadu, India' },
-    { bold: 'Periyar', normal: 'palayam, Tamil Nadu, India' },
-    { bold: 'Periyar', normal: ' met, Chennai, Tamil Nadu, India' },
-    { bold: 'Periyar', normal: ' Nagar, Perambur, Chennai, Tamil Nadu, India' }
+    { bold: 'Manyata Tech Park', normal: ', Outer Ring Road, Bangalore, Karnataka' },
+    { bold: 'Koramangala', normal: ', Bangalore, Karnataka, India' },
+    { bold: 'Whitefield', normal: ', Bangalore, Karnataka, India' },
+    { bold: 'Electronic City', normal: ', Bangalore, Karnataka, India' },
   ];
-
   const [dynamicSuggestions, setDynamicSuggestions] = useState<SuggestionItem[]>(mockSuggestions);
 
-  useEffect(() => {
-    if (!addressSearch) {
-      setDynamicSuggestions(mockSuggestions);
-      return;
-    }
-    if (addressSearch.length < 3) return;
-
-    const delayDebounceFn = setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearch)}&limit=5`
-        );
-        const data = await response.json();
-        if (data && Array.isArray(data)) {
-          const formatted = data.map((item: any) => {
-            const displayName = item.display_name;
-            const commaIndex = displayName.indexOf(',');
-            let bold = displayName;
-            let normal = '';
-            if (commaIndex !== -1) {
-              bold = displayName.substring(0, commaIndex);
-              normal = displayName.substring(commaIndex);
-            }
-            return { bold, normal };
-          });
-          setDynamicSuggestions(formatted);
-        }
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-      }
-    }, 450);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [addressSearch]);
+  const TOTAL_STEPS = 4;
+  const pgName = 'Sunrise PG';
 
   // Lock scroll when open
   useEffect(() => {
-    if (isOpen) {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
     return () => {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, []);
 
-  const handleLeadSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Debounced address search via Nominatim
+  useEffect(() => {
+    if (!formData.officeLocation || formData.officeLocation.length < 3) {
+      setDynamicSuggestions(mockSuggestions);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.officeLocation)}&limit=5`
+        );
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setDynamicSuggestions(
+            data.map((item: any) => {
+              const name = item.display_name as string;
+              const idx = name.indexOf(',');
+              return idx !== -1
+                ? { bold: name.slice(0, idx), normal: name.slice(idx) }
+                : { bold: name, normal: '' };
+            })
+          );
+        }
+      } catch {/* ignore */}
+    }, 450);
+    return () => clearTimeout(delay);
+  }, [formData.officeLocation]);
+
+  const canProceed = () => {
+    if (step === 1) return formData.name.trim().length > 0;
+    if (step === 2) return formData.phone.trim().length >= 10;
+    if (step === 3) return true; // room preference always has a default
+    if (step === 4) return formData.officeLocation.trim().length > 0;
+    return false;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && canProceed() && step < TOTAL_STEPS) {
+      setStep((s) => s + 1);
+    }
+  };
+
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    
     if (typeof window !== 'undefined') {
       localStorage.setItem('stayflo_lead_submitted', 'true');
     }
-    
     try {
       await fetch('http://localhost:3000/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pgId: 'prop-1',
-          name: leadForm.name,
-          phone: leadForm.phone,
-          preferredSharing: leadForm.type === 'Single' ? 1 : leadForm.type === 'Double' ? 2 : leadForm.type === 'Quad' ? 4 : 3,
+          name: formData.name,
+          phone: formData.phone,
+          preferredSharing:
+            formData.roomPreference === 'Single Occupancy' ? 1
+            : formData.roomPreference === 'Double Sharing' ? 2
+            : 3,
           source: 'portfolio-web',
-          officeLocation: addressSearch
-        })
+          officeLocation: formData.officeLocation,
+        }),
       });
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch { /* ignore */ } finally {
       setIsSubmitting(false);
-      setIsOpen(false);
       onClose?.();
     }
   };
 
-  if (!isOpen) return null;
+  const firstName = formData.name.split(' ')[0] || 'there';
 
   return (
-    <div 
-      className={isHardGate 
-        ? "fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4 overflow-y-auto"
-        : "fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+    <div
+      className={
+        isHardGate
+          ? 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 to-slate-950'
+          : 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm'
       }
       onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >
-      {/* Decorative glowing gradient elements - only for hard gate mode */}
+      {/* Ambient glows for hard-gate */}
       {isHardGate && (
         <>
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-teal-500/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-550/10 rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-[-10%] left-[-10%] w-[55%] h-[55%] bg-teal-500/10 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[55%] h-[55%] bg-indigo-500/10 rounded-full blur-[130px] pointer-events-none" />
         </>
       )}
 
-      <div 
-        className="relative max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl p-5 md:p-6 text-left space-y-3.5 max-h-[92vh] overflow-y-auto overscroll-contain transition-colors duration-200 z-10"
+      <div
+        className="relative w-full max-w-lg bg-white rounded-3xl p-8 shadow-2xl min-h-[440px] flex flex-col justify-between z-10"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
       >
-        {/* Close Button - Only visible in overlay mode */}
-        {!isHardGate && (
-          <button
-            type="button"
-            onClick={() => {
-              setIsOpen(false);
-              onClose?.();
-            }}
-            className="absolute top-4 right-4 p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-650 dark:hover:text-slate-300 transition-colors cursor-pointer z-20"
-            aria-label="Close modal"
-          >
-            <X size={18} />
-          </button>
-        )}
-        
-        {/* Header info */}
-        <div>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Unlock Co-living Explore
-            </h2>
-            <span className="text-[10px] text-slate-450 dark:text-slate-550 font-bold flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2.5 py-0.5 rounded-md transition-colors duration-200">
-              by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[8.5px] font-black">S</span> Stayflo.</span>
+        {/* Top: progress */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-2">
+            <img src={logoImg.src} alt="logo" className="h-6 w-auto object-contain" />
+            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">
+              Step {step} of {TOTAL_STEPS}
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
-            Enter your details to view rooms blueprint and vacancies at {pgName}
-          </p>
+          <div className="flex gap-1.5">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
+              <div
+                key={s}
+                className={`h-1.5 w-8 rounded-full transition-all duration-500 ${
+                  s <= step ? 'bg-teal-500' : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleLeadSubmit} className="space-y-4 text-left">
-          {/* Name */}
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1.5 text-slate-500 dark:text-slate-400">
-              FULL NAME
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Akshay Kumar"
-              value={leadForm.name}
-              onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-[#f8fafc] dark:bg-slate-800 text-xs text-slate-800 dark:text-white font-semibold transition-colors duration-200 shadow-inner"
-            />
-          </div>
+        {/* Step Content */}
+        <div className="flex-grow flex flex-col justify-center">
 
-          {/* Phone */}
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1.5 text-slate-500 dark:text-slate-400">
-              PHONE NUMBER
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-xs text-slate-500 dark:text-slate-400 font-bold transition-colors shadow-inner">
-                +91
-              </span>
+          {/* Step 1 – Name */}
+          {step === 1 && (
+            <div className="space-y-5" style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
+              <label className="text-2xl font-extrabold text-slate-800 tracking-tight block leading-snug">
+                Hey there,{' '}
+                <span className="text-teal-600">what do we call you?</span>
+              </label>
+              <p className="text-sm text-slate-400">We'll personalise your room search at {pgName}.</p>
               <input
-                type="tel"
-                required
-                maxLength={10}
-                placeholder="98765 43210"
-                value={leadForm.phone}
-                onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-r-xl border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-[#f8fafc] dark:bg-slate-800 text-xs text-slate-800 dark:text-white font-semibold transition-colors duration-200 shadow-inner"
+                type="text"
+                autoFocus
+                placeholder="Type your full name…"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onKeyDown={handleKeyDown}
+                className="w-full text-xl p-3 border-b-2 border-slate-200 focus:border-teal-500 outline-none transition-colors placeholder-slate-300 bg-transparent text-slate-800 font-semibold"
               />
             </div>
-          </div>
+          )}
 
-          {/* Look for sharing */}
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider block mb-1.5 text-slate-500 dark:text-slate-400">
-              LOOKING FOR SHARING?
-            </label>
-            <select
-              value={leadForm.type}
-              onChange={(e) => setLeadForm({ ...leadForm, type: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-[#f8fafc] dark:bg-slate-800 text-xs text-slate-800 dark:text-white font-semibold cursor-pointer transition-colors duration-200 shadow-inner"
-            >
-              <option value="Single">Single Occupancy</option>
-              <option value="Double">Double Sharing</option>
-              <option value="Triple">Triple Sharing</option>
-              <option value="Quad">Quad Sharing (4 Sharing)</option>
-            </select>
-          </div>
-
-          {/* Autocomplete Office Search */}
-          <div className="relative pt-2">
-            <div className="relative border-2 border-blue-500 rounded-xl bg-white dark:bg-slate-900 px-4 py-2.5 transition-colors duration-200 shadow-sm">
-              <span className="absolute -top-2 left-3 bg-white dark:bg-slate-900 px-1.5 text-[9px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-wide">
-                Your Office Location
-              </span>
-              <div className="flex items-center justify-between">
+          {/* Step 2 – Phone */}
+          {step === 2 && (
+            <div className="space-y-5" style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
+              <label className="text-2xl font-extrabold text-slate-800 tracking-tight block leading-snug">
+                Hey {firstName},{' '}
+                <span className="text-teal-600">what's your phone number?</span>
+              </label>
+              <p className="text-sm text-slate-400">We'll send you room availability on WhatsApp.</p>
+              <div className="flex gap-3 border-b-2 border-slate-200 focus-within:border-teal-500 transition-colors py-2 items-center">
+                <span className="text-xl text-slate-400 font-semibold pl-1 select-none">+91</span>
                 <input
-                  type="text"
-                  required
-                  placeholder="Type office address..."
-                  value={addressSearch}
-                  onChange={(e) => {
-                    setAddressSearch(e.target.value);
-                    setShowSuggestions(e.target.value.length > 0);
-                  }}
-                  className="w-full bg-transparent focus:outline-none text-xs text-slate-800 dark:text-white font-semibold pr-6"
+                  type="tel"
+                  autoFocus
+                  maxLength={10}
+                  placeholder="98765 43210"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+                  onKeyDown={handleKeyDown}
+                  className="w-full text-xl py-2 outline-none placeholder-slate-300 bg-transparent text-slate-800 font-semibold"
                 />
-                <span className="absolute right-3 text-blue-500 dark:text-blue-450">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </span>
               </div>
             </div>
-            
-            {showSuggestions && (
-              <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-xl z-50 overflow-hidden text-slate-800 dark:text-white transition-colors duration-200 rounded-xl">
-                <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">
-                  <span>SUGGESTIONS</span>
-                  <button type="button" onClick={() => setShowSuggestions(false)} className="text-slate-400 dark:text-slate-555 hover:text-slate-600 dark:hover:text-slate-350">✕</button>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
-                  {dynamicSuggestions.map((item, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => {
-                        setAddressSearch(item.bold + item.normal);
-                        setShowSuggestions(false);
-                        setSelectedOfficeAddress(item.bold + item.normal);
-                      }}
-                      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60 px-4 py-2.5 text-left transition-colors"
-                    >
-                      <strong className="text-slate-800 dark:text-white font-bold">{item.bold}</strong>
-                      <span className="text-slate-550 dark:text-slate-400 font-normal">{item.normal}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900 px-4 py-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-start text-[9px] text-slate-400 dark:text-slate-500 font-medium">
-                  <span>powered by OpenStreetMap</span>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
-          {/* Option to look the PG location in maps */}
-          <div className="pt-2">
+          {/* Step 3 – Room Preference */}
+          {step === 3 && (
+            <div className="space-y-5" style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
+              <label className="text-2xl font-extrabold text-slate-800 tracking-tight block leading-snug">
+                Hey {firstName},{' '}
+                <span className="text-teal-600">what's your room preference?</span>
+              </label>
+              <div className="grid grid-cols-1 gap-3 pt-1">
+                {['Single Occupancy', 'Double Sharing', 'Triple Sharing'].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, roomPreference: option })}
+                    className={`w-full p-4 text-left text-base font-semibold rounded-2xl border-2 transition-all duration-200 cursor-pointer ${
+                      formData.roomPreference === option
+                        ? 'border-teal-500 bg-teal-50 text-teal-700 shadow-sm'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="mr-2">
+                      {option === 'Single Occupancy' ? '🛏️' : option === 'Double Sharing' ? '🛏️🛏️' : '🛏️🛏️🛏️'}
+                    </span>
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4 – Office Location */}
+          {step === 4 && (
+            <div className="space-y-5" style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
+              <label className="text-2xl font-extrabold text-slate-800 tracking-tight block leading-snug">
+                Almost there {firstName},{' '}
+                <span className="text-teal-600">where's your office?</span>
+              </label>
+              <p className="text-sm text-slate-400">We'll find the closest PG to your workplace.</p>
+
+              <div className="relative">
+                <div className="relative border-b-2 border-slate-200 focus-within:border-teal-500 transition-colors py-2 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Type office address…"
+                    value={formData.officeLocation}
+                    onChange={(e) => {
+                      setFormData({ ...formData, officeLocation: e.target.value });
+                      setShowSuggestions(e.target.value.length > 0);
+                    }}
+                    className="w-full text-lg py-1 outline-none placeholder-slate-300 bg-transparent text-slate-800 font-semibold"
+                  />
+                </div>
+
+                {showSuggestions && dynamicSuggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+                    <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex justify-between">
+                      <span>Suggestions</span>
+                      <button type="button" onClick={() => setShowSuggestions(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                    </div>
+                    {dynamicSuggestions.map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, officeLocation: item.bold + item.normal });
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm hover:bg-teal-50 transition-colors border-b border-slate-50 last:border-0 cursor-pointer"
+                      >
+                        <strong className="text-slate-800 font-bold">{item.bold}</strong>
+                        <span className="text-slate-500 font-normal">{item.normal}</span>
+                      </button>
+                    ))}
+                    <div className="px-4 py-2 bg-slate-50 text-[9px] text-slate-400 font-medium">
+                      Powered by OpenStreetMap
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-slate-400 italic">⚡ We'll show commute time from your office to the PG</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+          {step > 1 ? (
             <button
               type="button"
-              onClick={() => setShowPGMap(!showPGMap)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#e6fbf7] hover:bg-[#d1f9f0] dark:bg-teal-950/20 dark:hover:bg-teal-900/30 border border-teal-200/50 dark:border-teal-800/30 rounded-xl text-xs font-bold text-[#14b8a6] dark:text-teal-400 transition-all cursor-pointer shadow-sm"
+              onClick={() => setStep((s) => s - 1)}
+              className="text-slate-500 font-bold hover:text-slate-800 transition-colors px-4 py-2 cursor-pointer"
             >
-              <MapPin className="w-3.5 h-3.5" />
-              {showPGMap ? 'Close PG Map View' : 'View PG Locations in Google Maps'}
+              ← Back
             </button>
-            
-            {showPGMap && (
-              <div className="mt-2.5 h-40 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner transition-all">
-                <iframe
-                  title="Google Map PG location"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  src={`https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`}
-                />
-              </div>
-            )}
-          </div>
+          ) : (
+            <div />
+          )}
 
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="w-full h-12 mt-4 text-xs font-bold uppercase tracking-wider hover:opacity-95 active:scale-98 transition-all rounded-xl shadow-md border-none shadow-teal-500/10 cursor-pointer text-white flex items-center justify-center" 
-            style={{ background: '#14b8a6' }}
-          >
-            {isSubmitting ? 'Unlocking Explore...' : 'EXPLORE PROPERTIES NOW →'}
-          </Button>
-        </form>
+          {step < TOTAL_STEPS ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={!canProceed()}
+              className="bg-teal-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-teal-500/20 hover:bg-teal-600 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center gap-2 cursor-pointer"
+            >
+              Next
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canProceed() || isSubmitting}
+              className="bg-teal-500 text-white font-extrabold px-7 py-3.5 rounded-xl shadow-lg shadow-teal-500/20 hover:bg-teal-600 disabled:opacity-40 disabled:pointer-events-none transition-all uppercase tracking-wider text-sm flex items-center gap-2 cursor-pointer"
+            >
+              {isSubmitting ? 'Loading…' : 'Explore Properties ➔'}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Keyframe animation injected globally */}
+      <style>{`
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+      `}</style>
     </div>
   );
 }
