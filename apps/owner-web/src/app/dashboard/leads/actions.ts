@@ -51,13 +51,16 @@ export async function createLeadAction(formData: FormData) {
   else if (validated.data.room.includes('Double')) sharingType = 'double';
   else if (validated.data.room.includes('Triple')) sharingType = 'triple';
 
+  const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
   const { error } = await supabase.from('leads').insert([{
     owner_id: '00000000-0000-0000-0000-000000000001', // Dummy owner until Auth is implemented
     name: validated.data.name || 'Unnamed Prospect',
     phone_number: phoneWithPrefix,
     pg_type: 'co-living',
     sharing_type: sharingType,
-    status: 'contacted'
+    status: 'contacted',
+    invite_code: inviteCode
   }]);
 
   if (error) {
@@ -66,5 +69,5 @@ export async function createLeadAction(formData: FormData) {
   }
 
   revalidatePath('/dashboard/leads');
-  return { success: true };
+  return { success: true, inviteCode };
 }

@@ -2,7 +2,7 @@
 
 import { NewPortfolioPageLayout } from './NewPortfolioPageLayout';
 
-export const PortfolioClient = () => {
+export const PortfolioClient = ({ layoutData, leadData }: { layoutData?: any, leadData?: any }) => {
   return (
     <NewPortfolioPageLayout
       pgName="Sunrise PG"
@@ -10,6 +10,8 @@ export const PortfolioClient = () => {
       tagline="Your home away from home in Koramangala"
       price="₹15,000"
       images={[]}
+      layoutData={layoutData}
+      leadData={leadData}
     />
   );
 };

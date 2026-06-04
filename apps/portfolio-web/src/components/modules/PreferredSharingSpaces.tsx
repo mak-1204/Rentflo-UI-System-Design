@@ -16,6 +16,7 @@ interface RoomType {
 
 interface PreferredSharingSpacesProps {
   rooms?: RoomType[];
+  leadData?: any;
 }
 
 export function PreferredSharingSpaces({
@@ -51,8 +52,13 @@ export function PreferredSharingSpaces({
       vacancy: 0,
     },
   ],
+  leadData,
 }: PreferredSharingSpacesProps) {
-  const [selectedOccupancy, setSelectedOccupancy] = useState<'Single' | 'Double' | '3 Sharing' | 'All'>('All');
+  const defaultOccupancy = leadData?.sharing_type === 'single' ? 'Single' 
+    : leadData?.sharing_type === 'double' ? 'Double' 
+    : leadData?.sharing_type === 'triple' ? '3 Sharing' 
+    : 'All';
+  const [selectedOccupancy, setSelectedOccupancy] = useState<'Single' | 'Double' | '3 Sharing' | 'All'>(defaultOccupancy);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const filteredRooms =
@@ -70,10 +76,14 @@ export function PreferredSharingSpaces({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Preferred Sharing Spaces
+              {leadData?.sharing_type && leadData.sharing_type !== 'other' 
+                ? `Your Preferred Sharing Spaces` 
+                : `Preferred Sharing Spaces`}
             </h2>
             <p className="text-base md:text-lg text-gray-600">
-              Explore room galleries and video walkthroughs by occupancy preferences
+              {leadData?.sharing_type && leadData.sharing_type !== 'other' 
+                ? `Based on your interest, we've highlighted the best ${defaultOccupancy} rooms for you.` 
+                : `Explore room galleries and video walkthroughs by occupancy preferences`}
             </p>
           </div>
           {vacancyCount > 0 && (

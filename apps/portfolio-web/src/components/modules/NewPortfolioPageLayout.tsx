@@ -21,6 +21,8 @@ interface PortfolioPageProps {
   tagline?: string;
   price?: string;
   images?: string[];
+  layoutData?: any;
+  leadData?: any;
 }
 
 export function NewPortfolioPageLayout({
@@ -29,6 +31,8 @@ export function NewPortfolioPageLayout({
   tagline = 'Your home away from home in Koramangala',
   price = '₹15,000',
   images = [],
+  layoutData,
+  leadData,
 }: PortfolioPageProps) {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
@@ -111,17 +115,18 @@ export function NewPortfolioPageLayout({
             price={price}
             images={images}
             onLeadCaptureClick={handleReserveClick}
+            leadData={leadData}
           />
         </section>
 
         {/* Preferred Sharing Spaces */}
         <section id="rooms">
-          <PreferredSharingSpaces />
+          <PreferredSharingSpaces leadData={leadData} />
         </section>
 
         {/* Interactive Floor Plans */}
         <section id="floorplans">
-          <InteractiveFloorPlans />
+          <InteractiveFloorPlans layoutData={layoutData} />
         </section>
 
         {/* Location & Commute */}

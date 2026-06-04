@@ -48,7 +48,7 @@ const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: 
   return [];
 };
 
-export function InteractiveFloorPlans() {
+export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
   const [isDark, setIsDark] = useState(false);
   const [floors, setFloors] = useState<string[]>(['Ground floor', '1st floor', '2nd floor']);
   const [activeFloor, setActiveFloor] = useState<string>('Ground floor');
@@ -127,13 +127,30 @@ export function InteractiveFloorPlans() {
     };
   }, []);
 
-  // Load state from localStorage on load & list for updates
+  // Load state from DB layoutData on load
   const loadState = () => {
-    const saved = localStorage.getItem('stayflo_builder_state');
-    if (saved) {
+    if (layoutData && Object.keys(layoutData).length > 0) {
       try {
-        const parsed = JSON.parse(saved);
-        if (parsed.roomsData) setRoomsData(parsed.roomsData);
+        const parsed = layoutData;
+        if (parsed.roomsData) {
+          const normalized: Record<string, RoomRectangle[]> = {};
+          Object.keys(parsed.roomsData).forEach(floorKey => {
+            const list = parsed.roomsData[floorKey];
+            if (Array.isArray(list)) {
+              normalized[floorKey] = list.map((r: any) => ({
+                ...r,
+                doors: r.doors || [],
+                windows: r.windows || [],
+                bedPositions: r.bedPositions || (r.beds > 0 ? getDefaultBedPositions(r.beds) : []),
+                bedStatuses: r.bedStatuses || (r.beds > 0 ? Array(r.beds).fill('Vacant') : []),
+                roomAmenities: r.roomAmenities || [],
+              }));
+            } else {
+              normalized[floorKey] = [];
+            }
+          });
+          setRoomsData(normalized);
+        }
         if (parsed.canvasCols) setCanvasCols(parsed.canvasCols);
         if (parsed.canvasRows) setCanvasRows(parsed.canvasRows);
         if (parsed.floors) {
@@ -150,11 +167,7 @@ export function InteractiveFloorPlans() {
 
   useEffect(() => {
     loadState();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('stayflo_website_update', loadState);
-      return () => window.removeEventListener('stayflo_website_update', loadState);
-    }
-  }, [activeFloor]);
+  }, [layoutData]);
 
   // Determine responsive cell size based on window width
   const mobileCellSize = Math.max(12, Math.min(32, Math.floor((Math.min(windowWidth - 48, 600)) / canvasCols)));

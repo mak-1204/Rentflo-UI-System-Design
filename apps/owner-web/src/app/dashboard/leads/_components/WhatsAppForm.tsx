@@ -16,23 +16,36 @@ export function WhatsAppForm() {
 
   const ownerName = 'Rajan Kumar';
   const pgName = 'Sunrise PG';
-  const portfolioLink = typeof window !== 'undefined' ? `${window.location.origin}/portfolio/sunrise-pg/explore` : '';
+  const previewPortfolioLink = typeof window !== 'undefined' ? `${window.location.origin}/portfolio/sunrise-pg?invite=XXXXXX` : '';
 
-  const messageText = `Hello ${inputName || 'there'},\n\nThis is ${ownerName} from ${pgName}. Thank you for your interest! We are located at ${landmark}.\n\nYou can explore our PG details, interactive rooms layout, and amenities at our website:\n${portfolioLink}\n\n*Note*: Please put your office location in the map section on our website to see rooms closest to your office!\n\nLet me know if you would like to schedule a visit.`;
+  const messageText = `Hello ${inputName || 'there'},\n\nThis is ${ownerName} from ${pgName}. Thank you for your interest! We are located at ${landmark}.\n\nYou can explore our PG details, interactive rooms layout, and amenities at our website:\n${previewPortfolioLink}\n\n*Note*: Please put your office location in the map section on our website to see rooms closest to your office!\n\nLet me know if you would like to schedule a visit.`;
 
   const handleAction = (formData: FormData) => {
-    // 1. Open WhatsApp in new tab immediately
-    let formattedPhone = inputPhone.replace(/\D/g, '');
-    if (formattedPhone.length === 10) formattedPhone = '91' + formattedPhone;
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(messageText)}`;
-    window.open(whatsappUrl, '_blank');
+    // 1. Open a blank window synchronously to prevent popup blockers
+    const popup = window.open('about:blank', '_blank');
 
     // 2. Execute Server Action in background
     startTransition(async () => {
       const result = await createLeadAction(formData);
       if (result.error) {
+        if (popup) popup.close();
         alert('Failed to save lead to database: ' + result.error);
       } else {
+        const inviteCode = result.inviteCode;
+        const actualPortfolioLink = `${window.location.origin}/portfolio/sunrise-pg?invite=${inviteCode}`;
+        
+        const finalMessageText = `Hello ${inputName || 'there'},\n\nThis is ${ownerName} from ${pgName}. Thank you for your interest! We are located at ${landmark}.\n\nYou can explore our PG details, interactive rooms layout, and amenities at our website:\n${actualPortfolioLink}\n\n*Note*: Please put your office location in the map section on our website to see rooms closest to your office!\n\nLet me know if you would like to schedule a visit.`;
+
+        let formattedPhone = inputPhone.replace(/\D/g, '');
+        if (formattedPhone.length === 10) formattedPhone = '91' + formattedPhone;
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(finalMessageText)}`;
+        
+        if (popup) {
+          popup.location.href = whatsappUrl;
+        } else {
+          window.location.href = whatsappUrl;
+        }
+
         // Reset local form state on success
         setInputPhone('');
         setInputName('');

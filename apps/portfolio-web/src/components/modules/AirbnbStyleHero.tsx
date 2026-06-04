@@ -23,7 +23,8 @@ export function AirbnbStyleHero({
   reviews = 150,
   images,
   onLeadCaptureClick,
-}: AirbnbStyleHeroProps) {
+  leadData,
+}: AirbnbStyleHeroProps & { leadData?: any }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
@@ -90,7 +91,7 @@ export function AirbnbStyleHero({
         {/* Title with Share/Save */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl md:text-4xl font-bold text-gray-900 max-w-3xl" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            {pgName}
+            Hello {leadData?.name && leadData.name !== 'Unnamed Prospect' ? leadData.name : 'there'}, welcome to {pgName}
           </h1>
           <div className="flex gap-4">
             <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold transition-colors cursor-pointer bg-transparent border-none">
