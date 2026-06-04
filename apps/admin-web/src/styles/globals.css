@@ -1,0 +1,11 @@
+@import "../../../../packages/ui/src/styles/index.css";
+
+@source "../../../../packages/ui/src/components/**/*.{js,ts,jsx,tsx}";
+@source "../../src/**/*.{js,ts,jsx,tsx}";
+@source "../../app/screens/**/*.{js,ts,jsx,tsx}";
+
+body {
+  background-color: #F8F9FA;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}

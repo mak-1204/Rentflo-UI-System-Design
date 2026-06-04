@@ -1,7 +1,7 @@
 
-  # Rentflo UI System Design
+  # Stayflo UI System Design
 
-  This is a code bundle for Rentflo UI System Design. The original project is available at https://www.figma.com/design/5JiWlYCn4F2wdvgpldNVSR/Rentflo-UI-System-Design.
+  This is a code bundle for Stayflo UI System Design. The original project is available at https://www.figma.com/design/5JiWlYCn4F2wdvgpldNVSR/Stayflo-UI-System-Design.
 
   ## Running the code
 

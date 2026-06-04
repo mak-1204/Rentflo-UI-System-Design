@@ -1,27 +1,27 @@
-import { Tenant, PGProperty, Complaint, Lead, Invoice, MealMenu, MealBooking } from '@rentflo/types';
+import { Tenant, PGProperty, Complaint, Lead, Invoice, MealMenu, MealBooking } from '@stayflo/types';
 
-class RentfloApiClient {
+class StayfloApiClient {
   private baseUrl: string;
   private token: string | null = null;
 
   constructor(baseUrl: string = 'http://localhost:3000/api') {
     this.baseUrl = baseUrl;
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('rentflo_token');
+      this.token = localStorage.getItem('stayflo_token');
     }
   }
 
   setToken(token: string) {
     this.token = token;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('rentflo_token', token);
+      localStorage.setItem('stayflo_token', token);
     }
   }
 
   clearToken() {
     this.token = null;
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('rentflo_token');
+      localStorage.removeItem('stayflo_token');
     }
   }
 
@@ -92,5 +92,5 @@ class RentfloApiClient {
   }
 }
 
-export const apiClient = new RentfloApiClient();
-export default RentfloApiClient;
+export const apiClient = new StayfloApiClient();
+export default StayfloApiClient;
