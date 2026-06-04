@@ -16,7 +16,7 @@ export default async function TenantsPage() {
     const data = await ownerApiClient.getTenants();
     tenants = data as unknown as NonNullable<React.ComponentProps<typeof TenantsClient>>['initialTenants'];
   } catch (err) {
-    console.warn('[TenantsPage] API fetch failed, client will use localStorage:', err);
+    console.log('[TenantsPage] Server API offline (client fallback enabled)');
   }
   return <TenantsClient initialTenants={tenants} />;
 }

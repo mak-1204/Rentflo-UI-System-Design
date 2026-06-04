@@ -16,7 +16,7 @@ export default async function OperationsPage() {
     const data = await ownerApiClient.getComplaints();
     complaints = data as unknown as NonNullable<React.ComponentProps<typeof OperationsClient>>['initialComplaints'];
   } catch (err) {
-    console.warn('[OperationsPage] API fetch failed:', err);
+    console.log('[OperationsPage] Server API offline (client fallback enabled)');
   }
   return <OperationsClient initialComplaints={complaints} />;
 }
