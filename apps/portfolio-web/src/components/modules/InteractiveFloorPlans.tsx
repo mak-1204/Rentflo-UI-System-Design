@@ -390,7 +390,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                       }}
                       className={`px-5 py-2 rounded-lg font-bold text-xs border transition-all cursor-pointer ${
                         activeFloor === floor
-                          ? 'bg-teal-600 text-white border-teal-600 shadow'
+                          ? 'bg-stayflow-teal text-white border-stayflow-teal shadow'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -413,7 +413,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                       }}
                       className={`px-3 py-1.5 rounded-full font-bold text-[10px] border transition-all cursor-pointer ${
                         occupancyFilter === opt
-                          ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                          ? 'bg-stayflow-teal text-white border-stayflow-teal shadow-sm'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -567,11 +567,11 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
           {/* Right Column: Room Details Inspector Card */}
           <div className="lg:col-span-1 flex flex-col h-full">
             {selectedRoomDetails ? (
-              <div className="p-6 border border-[#14b8a6] bg-teal-50/25 dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl space-y-4 shadow-md text-left transition-all h-full flex flex-col justify-between min-h-[360px] animate-in fade-in slide-in-from-right-5 duration-200">
+              <div className="p-6 border border-stayflow-teal bg-stayflow-teal/5 dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl space-y-4 shadow-md text-left transition-all h-full flex flex-col justify-between min-h-[360px] animate-in fade-in slide-in-from-right-5 duration-200">
                 <div className="space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="flex justify-between items-center border-b border-teal-200/50 dark:border-white/5 pb-2">
+                  <div className="flex justify-between items-center border-b border-stayflow-teal/20 dark:border-white/5 pb-2">
                     <div>
-                      <p className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">Room Inspector</p>
+                      <p className="text-[10px] font-bold text-stayflow-teal uppercase tracking-wider">Room Inspector</p>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white">Room {selectedRoomDetails.customName}</h3>
                     </div>
                     <button 
@@ -597,7 +597,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
 
                     <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                       <span className="text-slate-400 dark:text-slate-500 font-medium">Ventilation & View:</span>
-                      <span className="font-bold text-teal-700 dark:text-teal-400">
+                      <span className="font-bold text-stayflow-teal-dark dark:text-stayflow-teal">
                         🛣️ Road Facing (Good ventilation)
                       </span>
                     </div>
@@ -613,7 +613,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                   {selectedRoomDetails.beds > 0 && (
                     <div className="pt-2">
                       <a href="#contact" className="w-full">
-                        <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold uppercase tracking-wider text-xs py-3 rounded-lg shadow border-none active:scale-98 transition-all cursor-pointer">
+                        <button className="w-full bg-stayflow-teal hover:bg-stayflow-teal-dark text-white font-bold uppercase tracking-wider text-xs py-3 rounded-lg shadow border-none active:scale-98 transition-all cursor-pointer">
                           Reserve Room {selectedRoomDetails.customName} →
                         </button>
                       </a>
@@ -623,7 +623,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
               </div>
             ) : (
               <div className="p-6 border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-450 rounded-xl space-y-4 shadow-sm text-center h-full flex flex-col justify-center items-center min-h-[360px] py-12 transition-colors">
-                <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mx-auto text-teal-600">
+                <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mx-auto text-stayflow-teal">
                   <Compass className="w-6 h-6 animate-spin" style={{ animationDuration: '8s' }} />
                 </div>
                 <div>

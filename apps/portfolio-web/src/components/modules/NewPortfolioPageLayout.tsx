@@ -105,66 +105,132 @@ export function NewPortfolioPageLayout({
       />
 
       {/* Main Content */}
-      <main className="pt-20 pb-32 bg-white">
-        {/* Hero Section with Airbnb-style layout */}
-        <section id="hero" className="bg-white border-b border-gray-100">
-          <AirbnbStyleHero
-            pgName={pgName}
-            tagline={tagline}
-            location={location}
-            price={price}
-            images={images}
-            onLeadCaptureClick={handleReserveClick}
-            leadData={leadData}
-          />
-        </section>
+      <main className="pt-24 pb-32 bg-surface dark:bg-navy-deep transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            
+            {/* Left Content Area (Columns 1-8) */}
+            <div className="lg:col-span-8 space-y-16">
+              {/* Hero Section */}
+              <section id="hero">
+                <AirbnbStyleHero
+                  pgName={pgName}
+                  tagline={tagline}
+                  location={location}
+                  price={price}
+                  images={images}
+                  onLeadCaptureClick={handleReserveClick}
+                  leadData={leadData}
+                />
+              </section>
 
-        {/* Preferred Sharing Spaces */}
-        <section id="rooms">
-          <PreferredSharingSpaces leadData={leadData} />
-        </section>
+              {/* Commute Optimizer */}
+              <section id="commute">
+                <LocationCommute />
+              </section>
 
-        {/* Interactive Floor Plans */}
-        <section id="floorplans">
-          <InteractiveFloorPlans layoutData={layoutData} />
-        </section>
+              {/* Preferred Sharing Spaces / Living Options */}
+              <section id="rooms">
+                <PreferredSharingSpaces leadData={leadData} />
+              </section>
 
-        {/* Location & Commute */}
-        <section id="location">
-          <LocationCommute />
-        </section>
+              {/* Interactive Floor Plans */}
+              <section id="floorplans">
+                <InteractiveFloorPlans layoutData={layoutData} />
+              </section>
 
-        {/* Weekly Food Menu */}
-        <section id="food">
-          <WeeklyFoodMenu />
-        </section>
+              {/* Weekly Food Menu */}
+              <section id="food">
+                <WeeklyFoodMenu />
+              </section>
 
-        {/* Guest Favourite Rating */}
-        <section id="rating">
-          <GuestFavourite rating={4.78} reviews={18} />
-        </section>
+              {/* Amenities */}
+              <section id="amenities">
+                <AmenitiesShowcase />
+              </section>
 
-        {/* Amenities */}
-        <section className="bg-gray-50">
-          <AmenitiesShowcase />
-        </section>
+              {/* Guest Favourite Rating */}
+              <section id="rating">
+                <GuestFavourite rating={4.78} reviews={18} />
+              </section>
 
-        {/* Features & FAQ */}
-        <section className="bg-gray-50">
-          <FeaturesAndFAQ />
-        </section>
+              {/* Features & FAQ */}
+              <section id="faq">
+                <FeaturesAndFAQ />
+              </section>
+            </div>
 
-        {/* CTA Section */}
-        <section id="contact" ref={ctaRef}>
-          <CTASection 
-            onScheduleVisitClick={() => setShowLeadModal(true)}
-            onRequestCallbackClick={() => setShowLeadModal(true)}
-          />
-        </section>
+            {/* Right Sticky Sidebar (Columns 9-12) */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-28 space-y-8 text-left">
+                {/* Booking Sidebar Box */}
+                <div className="bg-white dark:bg-navy-deep rounded-3xl p-8 border border-border-subtle dark:border-outline-variant shadow-xl transition-colors duration-200">
+                  <div className="space-y-8">
+                    <div>
+                      <p className="text-xs text-stayflow-teal font-bold uppercase tracking-widest mb-2">Starting from</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black text-navy-deep dark:text-white">₹12,500</span>
+                        <span className="text-on-surface-variant dark:text-outline-variant font-bold text-sm">/mo</span>
+                      </div>
+                    </div>
+                    
+                    <hr className="border-border-subtle dark:border-outline-variant/30" />
+                    
+                    <div className="space-y-5">
+                      <h3 className="text-lg font-bold text-navy-deep dark:text-white">Schedule a Visit</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => setShowLeadModal(true)}
+                          className="py-3.5 px-4 rounded-xl border border-border-subtle dark:border-outline-variant hover:bg-stayflow-teal hover:text-white hover:border-stayflow-teal dark:hover:bg-stayflow-teal dark:hover:text-white text-navy-deep dark:text-white font-bold transition-all shadow-sm cursor-pointer bg-transparent"
+                        >
+                          Today
+                        </button>
+                        <button 
+                          onClick={() => setShowLeadModal(true)}
+                          className="py-3.5 px-4 rounded-xl border border-border-subtle dark:border-outline-variant hover:bg-stayflow-teal hover:text-white hover:border-stayflow-teal dark:hover:bg-stayflow-teal dark:hover:text-white text-navy-deep dark:text-white font-bold transition-all shadow-sm cursor-pointer bg-transparent"
+                        >
+                          Tomorrow
+                        </button>
+                      </div>
+                      <button 
+                        onClick={() => setShowLeadModal(true)}
+                        className="w-full bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed py-4 rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md text-sm cursor-pointer border-none"
+                      >
+                        <span className="material-symbols-outlined">calendar_month</span>
+                        Book a Physical Tour
+                      </button>
+                      <button 
+                        onClick={() => setShowLeadModal(true)}
+                        className="w-full border-2 border-stayflow-teal text-stayflow-teal py-4 rounded-xl font-bold hover:bg-stayflow-teal/5 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer bg-transparent"
+                      >
+                        <span className="material-symbols-outlined">phone_callback</span>
+                        Request Callback
+                      </button>
+                    </div>
+                    
+                    <div className="bg-surface-container-low dark:bg-navy-deep/40 rounded-xl p-4 flex items-center gap-3">
+                      <span className="text-xl">⚡️</span>
+                      <p className="text-xs text-navy-deep dark:text-white font-semibold">
+                        Popular: 14 people booked a tour in last 24h
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trust Badge Card */}
+                <div className="bg-stayflow-teal text-white rounded-3xl p-8 flex items-center gap-6 shadow-lg">
+                  <span className="material-symbols-outlined text-5xl bg-white/20 p-4 rounded-full">verified_user</span>
+                  <div>
+                    <p className="font-bold text-lg mb-1">StayFloww Verified</p>
+                    <p className="text-xs opacity-90 leading-snug">Managed directly by the platform for 100% security.</p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+          </div>
+        </div>
       </main>
-
-      {/* Stagnant Price & Availability Banner */}
-      <PriceAvailabilityBanner startingPrice="₹6,500" vacantRooms={2} />
 
       {/* Footer */}
       <Footer />
@@ -181,3 +247,4 @@ export function NewPortfolioPageLayout({
     </>
   );
 }
+

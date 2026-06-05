@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Card } from '@stayflo/ui';
 import type { Tenant } from '../types';
@@ -19,6 +20,21 @@ export function TenantsList({
   selectedIndex,
   onSelectTenant,
 }: TenantsListProps) {
+  const [localSearch, setLocalSearch] = useState(search);
+
+  // Sync external search value changes
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  // Debounce input updates to parent search state
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearchChange(localSearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [localSearch, onSearchChange]);
+
   const filtered = tenants.filter(
     (t) =>
       t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -33,8 +49,8 @@ export function TenantsList({
         <input
           type="text"
           placeholder="Search by resident name or room number..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           className="w-full pl-11 pr-4 py-3 border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 rounded-xl bg-[#f8fafc] transition-all shadow-inner"
         />
       </div>

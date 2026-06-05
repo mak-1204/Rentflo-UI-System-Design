@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Grid3x3, X, Share2, Heart } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AirbnbStyleHeroProps {
   pgName: string;
@@ -28,14 +28,12 @@ export function AirbnbStyleHero({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
-  const displayImages = images.length > 0
+  const displayImages = images && images.length > 0
     ? images
     : [
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1551632786-7b1c4a1eb2cb?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuDwxc8Nn2Nqe7Z_8tukEe0IbVeBoKuYXAZnVTeXNN2NcM2MWQKjXoo_zl6LApMXCjqDZmBO6bsgYL4H_eBXNLXmfRUsbbOrQaPnC8E2ikSY3fWQMWURWs1Ho9pub995Z2MlfxL6db_44p3_WmNjFua0-PwToCjIa1BzipRhTuWP1eqCK2xMXGRWVCSOkUZ8S_6V-FRZG3jNJHejgFHo_aMOfbYQM87LMAaGwXCbaor0XY4E_aH_9dbcjeYiqza24-UyO6CXRLIs2g',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuDG3ua1v5SAXtrTzdS9hSglsRzjzD7qFxR6SrnJ2wR9a_z3Fqr4NZFkpFm40VygCGSRW58Jd0mOWX0ewD9NoE4UHMe2qEXrubrJIW0CdXgotiRWSQ5YmZk1EmPPNWh-m8NnOqXXHRav8ccRm3bPLV5wPHAQ3FzE9a-LpJYK2LECiNEIJGLpf8FhP8HjnnG91x31oaYW0qeFcBzEOujOFgEotd0E6HffMrncYRjt3y0A9AJBh_N10o4d48SlXhSPrSU1n5t9l_1xsw',
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBwQepmnsrI9sP06xEhrimem512i0_M00RRnQugYw4I2vZjAxbNC-dYJwqeWz3yRCGQtzZ_aeFdhSMRjZeGym6KBNK1WVaDBKUwfPHtPAdbvv8Z4Sgqgd_Zf95MwoPmJoVo8b32Un_MivpVrwkZUjlaVLLSOUFGtC478xNvgi1g6bD63VKioBaUSi_lyD_m__-oEklGWe29v4la-pUH45BDq59dUWdIT4TaRgkjmq7COUqJo7wUYjLVtn7CMP8cg9Sdl0eGzVQSc-A',
       ];
 
   const nextImage = () => {
@@ -48,6 +46,8 @@ export function AirbnbStyleHero({
     );
   };
 
+  const greetingName = leadData?.name && leadData.name !== 'Unnamed Prospect' ? leadData.name : 'there';
+
   return (
     <>
       {/* Full Screen Gallery Modal */}
@@ -56,7 +56,7 @@ export function AirbnbStyleHero({
           <div className="flex items-center justify-between p-4">
             <button
               onClick={() => setShowAllPhotos(false)}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer"
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
             >
               <X size={28} />
             </button>
@@ -86,166 +86,141 @@ export function AirbnbStyleHero({
         </div>
       )}
 
-      {/* Main Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 text-left">
-        {/* Title with Share/Save */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 max-w-3xl" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Hello {leadData?.name && leadData.name !== 'Unnamed Prospect' ? leadData.name : 'there'}, welcome to {pgName}
-          </h1>
-          <div className="flex gap-4">
-            <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold transition-colors cursor-pointer bg-transparent border-none">
-              <Share2 size={20} />
-              <span>Share</span>
-            </button>
-            <button className="flex items-center gap-2 text-gray-700 hover:text-teal-600 font-semibold transition-colors cursor-pointer bg-transparent border-none">
-              <Heart size={20} />
-              <span>Save</span>
-            </button>
+      {/* Main Hero Gallery Section */}
+      <section className="space-y-6 text-left">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-5xl font-black text-navy-deep dark:text-white tracking-tight">
+              Hello {greetingName}, welcome to {pgName}
+            </h1>
+            <p className="text-base md:text-lg text-on-surface-variant dark:text-outline-variant flex items-center gap-2">
+              <span className="material-symbols-outlined text-stayflow-teal">location_on</span>
+              {location}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <span className="px-4 py-1.5 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-wider">
+              Available
+            </span>
+            <span className="px-4 py-1.5 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider">
+              Premium Tier
+            </span>
           </div>
         </div>
 
-        {/* Gallery Section */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-8 rounded-xl overflow-hidden">
-          {/* Main Large Image - Left Side (Full width on mobile, 60% on desktop) */}
-          <div
-            className="col-span-1 md:col-span-3 relative h-64 md:h-96 bg-gray-200 overflow-hidden group cursor-pointer"
+        {/* Airbnb style Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[320px] sm:h-[450px] md:h-[550px] lg:h-[600px] rounded-2xl overflow-hidden shadow-lg">
+          {/* Main image */}
+          <div 
+            className="md:col-span-3 md:row-span-2 relative overflow-hidden group cursor-pointer"
             onClick={() => setShowAllPhotos(true)}
           >
-            <img
-              src={displayImages[currentImageIndex]}
-              alt={pgName}
-              className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+            <img 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={displayImages[0]} 
+              alt="Common Area"
             />
-
-            {/* Image Counter */}
-            <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1.5 rounded-lg text-sm font-medium">
-              {currentImageIndex + 1} / {displayImages.length}
+            <div className="absolute bottom-6 left-6 flex gap-2">
+              <span className="bg-black/75 backdrop-blur-md text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider shadow">
+                Common Area
+              </span>
             </div>
-
-            {/* Navigation Buttons */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                prevImage();
-              }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer border-none"
-            >
-              <ChevronLeft size={20} className="text-gray-900" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                nextImage();
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer border-none"
-            >
-              <ChevronRight size={20} className="text-gray-900" />
-            </button>
           </div>
 
-          {/* Right Side Image Grid - Hidden on mobile, visible on desktop (40% width) */}
-          <div className="hidden md:grid md:col-span-2 grid-cols-2 gap-2">
-            {displayImages.slice(1, 5).map((img, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setCurrentImageIndex(index + 1);
-                  setShowAllPhotos(false);
-                }}
-                className="relative h-[188px] bg-gray-200 overflow-hidden cursor-pointer group"
-              >
-                <img
-                  src={img}
-                  alt={`Gallery ${index + 2}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {index === 3 && displayImages.length > 5 && (
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowAllPhotos(true);
-                    }}
-                    className="absolute inset-0 bg-black/40 flex items-center justify-center hover:bg-black/50 transition-colors"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Grid3x3 size={24} className="text-white" />
-                      <span className="text-white font-semibold text-sm">
-                        Show all
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+          {/* Side Image 1 */}
+          <div 
+            className="hidden md:block relative overflow-hidden group cursor-pointer"
+            onClick={() => {
+              setCurrentImageIndex(1 % displayImages.length);
+              setShowAllPhotos(true);
+            }}
+          >
+            <img 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={displayImages[1] || displayImages[0]} 
+              alt="Corridor"
+            />
+            <div className="absolute bottom-4 left-4">
+              <span className="bg-black/75 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow">
+                Corridor
+              </span>
+            </div>
+          </div>
+
+          {/* Side Image 2 */}
+          <div 
+            className="hidden md:block relative overflow-hidden group cursor-pointer"
+            onClick={() => {
+              setCurrentImageIndex(2 % displayImages.length);
+              setShowAllPhotos(true);
+            }}
+          >
+            <img 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={displayImages[2] || displayImages[0]} 
+              alt="Play Area"
+            />
+            <div className="absolute bottom-4 left-4">
+              <span className="bg-black/75 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow">
+                Play Area
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Content Section: Info Pane */}
-        <div className="max-w-4xl border-t border-gray-100 pt-8">
-          <div>
-            {/* Property Type and Info */}
-            <div className="mb-8 pb-8 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Premium Paying Guest Accommodation
-              </h2>
-              <p className="text-lg text-gray-650 mb-4">{tagline}</p>
-              <div className="text-sm text-gray-700 space-y-1">
-                <p>📍 {location}</p>
-                <p>🏠 Multiple rooms • Fully furnished</p>
-                <p>👥 35+ beds • 500+ satisfied residents</p>
+        {/* Detailed Property Description */}
+        <div className="max-w-4xl border-t border-border-subtle dark:border-outline-variant pt-8 mt-4 space-y-6">
+          <div className="pb-6 border-b border-border-subtle dark:border-outline-variant">
+            <h2 className="text-xl md:text-2xl font-bold text-navy-deep dark:text-white mb-2">
+              Premium paying guest accommodation managed directly by StayFloww
+            </h2>
+            <p className="text-base text-on-surface-variant dark:text-outline-variant leading-relaxed">
+              {tagline || 'Experience custom designed living spaces for working professionals and students.'}
+            </p>
+          </div>
+
+          {/* What this place offers */}
+          <div className="grid grid-cols-2 gap-6 pb-6 border-b border-border-subtle dark:border-outline-variant">
+            <div className="flex items-start gap-4">
+              <span className="material-symbols-outlined text-3xl text-stayflow-teal">bed</span>
+              <div>
+                <p className="font-bold text-navy-deep dark:text-white">Premium Single Rooms</p>
+                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Well designed layouts with work desks</p>
               </div>
             </div>
-
-            {/* Key Features */}
-            <div className="mb-8 pb-8 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                What this place offers
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🛏️</span>
-                  <div>
-                    <p className="font-semibold text-gray-900">Spacious Rooms</p>
-                    <p className="text-sm text-gray-600">Well-designed & modern</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">📶</span>
-                  <div>
-                    <p className="font-semibold text-gray-900">Gigabit WiFi</p>
-                    <p className="text-sm text-gray-600">150+ Mbps guaranteed</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🛡️</span>
-                  <div>
-                    <p className="font-semibold text-gray-900">24/7 Security</p>
-                    <p className="text-sm text-gray-600">CCTV & trained staff</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🍽️</span>
-                  <div>
-                    <p className="font-semibold text-gray-900">Healthy Meals</p>
-                    <p className="text-sm text-gray-600">Fresh daily prepared</p>
-                  </div>
-                </div>
+            <div className="flex items-start gap-4">
+              <span className="material-symbols-outlined text-3xl text-stayflow-teal">wifi</span>
+              <div>
+                <p className="font-bold text-navy-deep dark:text-white">High Speed WiFi</p>
+                <p className="text-xs text-on-surface-variant dark:text-outline-variant">1 Gbps connection for remote working</p>
               </div>
             </div>
-
-            {/* Description */}
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-gray-900 mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                About this place
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Located in the heart of a vibrant neighborhood, our PG provides premium accommodation for young professionals and students. We offer a blend of comfort, security, and community with well-maintained facilities and a supportive atmosphere. Each room is carefully designed with modern amenities and comes with flexible lease terms.
-              </p>
+            <div className="flex items-start gap-4">
+              <span className="material-symbols-outlined text-3xl text-stayflow-teal">verified_user</span>
+              <div>
+                <p className="font-bold text-navy-deep dark:text-white">24/7 Gate Security</p>
+                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Smart CCTV & security verified access</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <span className="material-symbols-outlined text-3xl text-stayflow-teal">restaurant</span>
+              <div>
+                <p className="font-bold text-navy-deep dark:text-white">Chef Cooked Meals</p>
+                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Breakfast, Lunch and Dinner daily</p>
+              </div>
             </div>
           </div>
+
+          {/* About this place */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-navy-deep dark:text-white">About Sunrise Living</h3>
+            <p className="text-on-surface-variant dark:text-outline-variant leading-relaxed text-sm md:text-base">
+              Located in the heart of Prestige Tech Park area, Sunrise Living offers custom-built spaces designed to foster comfort, collaboration, and focus. Redefining the standard of traditional PG accommodations, we provide zero-maintenance premium suites, interactive check-ins, fully-loaded amenities, and direct platform management for absolute peace of mind.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
     </>
   );
 }
+

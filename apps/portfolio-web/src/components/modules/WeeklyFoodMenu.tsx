@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ChefHat } from 'lucide-react';
 
 interface MealPlan {
@@ -8,6 +7,7 @@ interface MealPlan {
   breakfast: string;
   lunch: string;
   dinner: string;
+  isSpecial?: boolean;
 }
 
 interface WeeklyFoodMenuProps {
@@ -18,113 +18,109 @@ export function WeeklyFoodMenu({
   meals = [
     {
       day: 'Mon',
-      breakfast: 'Idli, Vada, Sambar',
-      lunch: 'Rice, Dal Fry, Potato Roast, Papad',
-      dinner: 'Chapati, Paneer Butter Masala, Salad',
+      breakfast: 'Aloo Paratha & Curd',
+      lunch: 'Dal Makhani, Rice, Paneer',
+      dinner: 'Veg Pulao & Raita',
     },
     {
       day: 'Tue',
-      breakfast: 'Poha, Upma, Chutney',
-      lunch: 'Biryani, Raita, Pickle',
-      dinner: 'Rice, Chole Curry, Carrot Salad',
+      breakfast: 'Poha & Tea',
+      lunch: 'Mix Veg, Chapatis, Curd',
+      dinner: 'Pasta Arrabiata & Garlic Bread',
     },
     {
       day: 'Wed',
-      breakfast: 'Dosa, Sambar, Coconut Chutney',
-      lunch: 'Roti, Paneer Tikka Masala, Mixed Veg',
-      dinner: 'Pulao, Raita, Cucumber Salad',
+      breakfast: 'Idli Sambar & Chutney',
+      lunch: 'Chicken/Paneer Biryani',
+      dinner: 'Dosa & Masala Chai',
+      isSpecial: true,
     },
     {
       day: 'Thu',
-      breakfast: 'Puri, Aloo, Pickle',
-      lunch: 'Rice, Rajma, Potato Curry',
-      dinner: 'Naan, Butter Chicken, Green Salad',
+      breakfast: 'Omelette & Toast',
+      lunch: 'Chole Bhature & Lassi',
+      dinner: 'Rajma Chawal',
     },
     {
       day: 'Fri',
-      breakfast: 'Dhokla, Green Chutney',
-      lunch: 'Rice, Egg Curry, Brinjal Fry',
-      dinner: 'Roti, Chole Masala, Lemon Pickle',
+      breakfast: 'Dhokla & Chutney',
+      lunch: 'Rice, Egg Curry, Veg Fry',
+      dinner: 'Roti, Chole Masala',
     },
     {
       day: 'Sat',
-      breakfast: 'Parathe, Pickle, Curd',
-      lunch: 'Biryani, Raita, Salad',
-      dinner: 'Chapati, Paneer Tikka, Mixed Veg',
+      breakfast: 'Parathe & Curd',
+      lunch: 'Veg Biryani & Raita',
+      dinner: 'Pasta / Noodles & Soup',
     },
     {
       day: 'Sun',
-      breakfast: 'Waffles, Honey, Berries',
-      lunch: 'Rice, Tandoori Chicken, Naan',
-      dinner: 'Dal Makhani, Basmati Rice, Salad',
+      breakfast: 'Waffles & Honey',
+      lunch: 'Special Chicken Curry / Paneer, Rice',
+      dinner: 'Dal Makhani & Basmati Rice',
     },
   ],
 }: WeeklyFoodMenuProps) {
-  const [selectedDay, setSelectedDay] = useState(2); // Wednesday
-
-  const currentMeal = meals[selectedDay];
-
   return (
-    <div className="w-full bg-gray-50 py-12 md:py-16 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <div className="w-full bg-white dark:bg-navy-deep/20 py-12 md:py-16 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-6 text-left space-y-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Structured Weekly Food Menu
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white mb-2">
+            Chef's Curated Weekly Menu
           </h2>
-          <p className="text-lg text-gray-600">
-            We serve fresh, nutritious meals daily. View this week's menu preview below.
+          <p className="text-base text-on-surface-variant dark:text-outline-variant">
+            Fresh, healthy, and locally-sourced meals prepared daily in our centralized kitchen.
           </p>
         </div>
 
-        {/* Day Selector */}
-        <div className="flex gap-2 mb-8 justify-center flex-wrap">
-          {meals.map((meal, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedDay(index)}
-              className={`px-6 py-2.5 rounded-full font-semibold transition-all ${
-                selectedDay === index
-                  ? 'bg-teal-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-teal-300'
-              }`}
-            >
-              {meal.day}
-            </button>
-          ))}
-        </div>
-
-        {/* Meal Plan */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {/* Breakfast */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
-            <h3 className="text-sm font-bold text-teal-600 mb-4 uppercase">BREAKFAST - 8:00 AM</h3>
-            <p className="text-gray-900 font-semibold leading-relaxed">{currentMeal.breakfast}</p>
-          </div>
-
-          {/* Lunch */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
-            <h3 className="text-sm font-bold text-teal-600 mb-4 uppercase">LUNCH - 12:30 PM</h3>
-            <p className="text-gray-900 font-semibold leading-relaxed">{currentMeal.lunch}</p>
-          </div>
-
-          {/* Dinner */}
-          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
-            <h3 className="text-sm font-bold text-teal-600 mb-4 uppercase">DINNER - 7:30 PM</h3>
-            <p className="text-gray-900 font-semibold leading-relaxed">{currentMeal.dinner}</p>
-          </div>
+        {/* Food Table */}
+        <div className="overflow-x-auto hide-scrollbar rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm bg-white dark:bg-navy-deep transition-colors duration-200">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-navy-deep text-white text-left">
+                <th className="p-5 text-xs font-bold uppercase tracking-wider border-b border-white/10">Day</th>
+                <th className="p-5 text-xs font-bold uppercase tracking-wider border-b border-white/10">Breakfast (8-10 AM)</th>
+                <th className="p-5 text-xs font-bold uppercase tracking-wider border-b border-white/10">Lunch (1-3 PM)</th>
+                <th className="p-5 text-xs font-bold uppercase tracking-wider border-b border-white/10">Dinner (8-10 PM)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {meals.map((meal, idx) => (
+                <tr 
+                  key={idx}
+                  className={`border-b border-border-subtle dark:border-outline-variant/30 hover:bg-surface-container-low dark:hover:bg-navy-deep/50 transition-colors ${
+                    meal.isSpecial ? 'bg-stayflow-teal/5 dark:bg-stayflow-teal/10' : ''
+                  }`}
+                >
+                  <td className={`p-5 font-bold ${meal.isSpecial ? 'text-stayflow-teal text-lg' : 'text-navy-deep dark:text-white'}`}>
+                    {meal.day}
+                  </td>
+                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                    {meal.breakfast}
+                  </td>
+                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                    {meal.lunch}
+                  </td>
+                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                    {meal.dinner}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Info Box */}
-        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-xl p-6 md:p-8">
+        <div className="bg-surface-container-low dark:bg-navy-deep/30 border border-stayflow-teal/20 rounded-2xl p-6 sm:p-8">
           <div className="flex items-start gap-4">
-            <div className="bg-teal-100 p-3 rounded-lg flex-shrink-0">
-              <ChefHat size={28} className="text-teal-600" />
+            <div className="bg-stayflow-teal/10 p-3 rounded-lg flex-shrink-0 text-stayflow-teal">
+              <ChefHat size={28} />
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 mb-1">StayFlo Food Tech System</h4>
-              <p className="text-gray-700 text-sm">
-                We minimize food waste to keep your rent affordable. Book/skip meals effortlessly via our tenant app before 6 PM cutoff once you move in!
+              <h4 className="font-bold text-navy-deep dark:text-white mb-1">StayFlo Smart Food Planning</h4>
+              <p className="text-on-surface-variant dark:text-outline-variant text-sm leading-relaxed">
+                Enjoy hassle-free meal management. Once onboarded, residents can easily view, select preferences, or skip daily meals directly via the StayFlo Mobile App to help us ensure high quality and minimize food waste.
               </p>
             </div>
           </div>
@@ -133,3 +129,4 @@ export function WeeklyFoodMenu({
     </div>
   );
 }
+

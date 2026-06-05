@@ -5,6 +5,7 @@ import { Check, AlertCircle, Loader2 } from 'lucide-react';
 import { TenantsHeader } from './_components/TenantsHeader';
 import { TenantsList } from './_components/TenantsList';
 import { TenantDetailPanel } from './_components/TenantDetailPanel';
+import { AddTenantModal } from './_components/AddTenantModal';
 import { addTenant, updateTenant, deleteTenant } from './actions';
 import { DEFAULT_TENANTS, type Tenant } from './types';
 
@@ -17,12 +18,12 @@ type ToastType = 'success' | 'error' | 'loading';
 interface Toast { message: string; type: ToastType }
 
 export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageClientProps) {
-  // Use Supabase data if available; fall back to defaults
   const [tenants, setTenants] = useState<Tenant[]>(
     initialTenants.length > 0 ? initialTenants : DEFAULT_TENANTS
   );
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -31,50 +32,55 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
     if (type !== 'loading') setTimeout(() => setToast(null), 3500);
   }, []);
 
-  // ── Add ──────────────────────────────────────────────────────────────────
-  const handleAddTenant = () => {
-    const draft: Tenant = {
-      name: 'New Resident',
-      room: 'Room TBD',
-      floor: 'Ground Floor',
-      rent: 8500,
-      phone: '',
-      email: '',
-      status: 'Paid',
-      moveIn: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      activeMonths: 0,
-      pg_id: pgProperties[0]?.id,
-      pg_name: pgProperties[0]?.name,
+  // ── Onboard new tenant from modal ──────────────────────────────────────────
+  const handleConfirmAddTenant = (newTenantData: Omit<Tenant, 'id' | 'pg_name'> & { pgId?: string }) => {
+    setShowAddModal(false);
+
+    // Find PG name for local UI update
+    const pg = pgProperties.find(p => p.id === newTenantData.pg_id);
+    const newTenant: Tenant = {
+      ...newTenantData,
+      pg_name: pg?.name,
     };
+
+    // Optimistic addition
     setTenants((prev) => {
-      const next = [...prev, draft];
+      const next = [...prev, newTenant];
       setSelectedIndex(next.length - 1);
       return next;
     });
-    showToast('Draft tenant added — save to persist to Supabase.', 'success');
+
+    startTransition(async () => {
+      showToast('Onboarding tenant…', 'loading');
+      const result = await addTenant(newTenantData, newTenantData.pg_id);
+      if (result.success) {
+        showToast('Tenant onboarded successfully ✓', 'success');
+      } else {
+        showToast(`Onboarding failed: ${result.error}`, 'error');
+      }
+    });
   };
 
-  // ── Save (create or update) ───────────────────────────────────────────────
+  // ── Save existing tenant profile edits ─────────────────────────────────────
   const handleSaveTenant = (updated: Tenant) => {
     if (selectedIndex === null) return;
 
-    // Optimistic update in local state
+    // Optimistic update
     setTenants((prev) => prev.map((t, i) => (i === selectedIndex ? updated : t)));
 
     startTransition(async () => {
-      showToast('Saving…', 'loading');
+      showToast('Saving profile updates…', 'loading');
       let result: { success: boolean; error?: string };
 
       if (updated.id) {
         result = await updateTenant(updated.id, updated);
       } else {
-        // New tenant without an id → INSERT into Supabase
-        const { id: _id, ...rest } = updated; // strip undefined id
-        result = await addTenant(rest);
+        const { id: _id, ...rest } = updated;
+        result = await addTenant(rest, updated.pg_id);
       }
 
       if (result.success) {
-        showToast('Tenant saved to Supabase ✓', 'success');
+        showToast('Tenant profile saved ✓', 'success');
       } else {
         showToast(`Save failed: ${result.error}`, 'error');
       }
@@ -110,15 +116,15 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
 
   return (
     <div
-      className="p-8 space-y-8 max-w-7xl mx-auto relative min-h-screen text-left"
+      className="p-8 space-y-8 max-w-7xl mx-auto relative min-h-screen text-left animate-in fade-in duration-300"
       style={{ fontFamily: 'var(--font-sans)' }}
     >
-      {/* Toast */}
+      {/* Toast notifications */}
       {toast && (
         <div
           className={`fixed bottom-6 right-6 px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 transition-all ${
             toast.type === 'error'
-              ? 'bg-red-600 text-white'
+              ? 'bg-red-650 text-white'
               : 'bg-slate-900 text-white'
           }`}
         >
@@ -129,31 +135,48 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
         </div>
       )}
 
-      {/* Global pending overlay indicator */}
+      {/* Syncing loader */}
       {isPending && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs text-slate-600 font-semibold">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs text-slate-650 font-semibold">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-500" /> Syncing with Supabase…
         </div>
       )}
 
-      <TenantsHeader onAddTenant={handleAddTenant} />
+      {/* Header */}
+      <TenantsHeader onAddTenant={() => setShowAddModal(true)} />
 
-      <TenantsList
-        tenants={tenants}
-        search={search}
-        onSearchChange={setSearch}
-        selectedIndex={selectedIndex}
-        onSelectTenant={setSelectedIndex}
-      />
+      {/* Side-by-side layout: Tenants list + Edit detail panel */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+        <div className={`transition-all duration-300 w-full ${selectedTenant ? 'lg:w-[calc(100%-440px)]' : 'w-full'}`}>
+          <TenantsList
+            tenants={tenants}
+            search={search}
+            onSearchChange={setSearch}
+            selectedIndex={selectedIndex}
+            onSelectTenant={setSelectedIndex}
+          />
+        </div>
 
-      {selectedTenant && (
-        <TenantDetailPanel
-          key={selectedIndex}
-          tenant={selectedTenant}
+        {selectedTenant && (
+          <div className="w-full lg:w-[400px] shrink-0 border border-slate-200 rounded-2xl shadow-lg bg-white overflow-hidden sticky top-8 animate-in slide-in-from-right-4 duration-300">
+            <TenantDetailPanel
+              key={selectedIndex}
+              tenant={selectedTenant}
+              pgProperties={pgProperties}
+              onClose={() => setSelectedIndex(null)}
+              onSave={handleSaveTenant}
+              onDelete={handleDeleteTenant}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Add Tenant Modal */}
+      {showAddModal && (
+        <AddTenantModal
           pgProperties={pgProperties}
-          onClose={() => setSelectedIndex(null)}
-          onSave={handleSaveTenant}
-          onDelete={handleDeleteTenant}
+          onClose={() => setShowAddModal(false)}
+          onSave={handleConfirmAddTenant}
         />
       )}
     </div>

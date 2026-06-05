@@ -54,7 +54,7 @@ export function TenantDetailPanel({
   );
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[460px] bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col transition-transform duration-300">
+    <div className="w-full bg-white flex flex-col">
       {/* Panel header */}
       <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
         <h3 className="text-sm font-bold text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -95,7 +95,7 @@ export function TenantDetailPanel({
                   {tenant.name}
                 </h4>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Active stay since {tenant.activeMonths} months · Moved in on {tenant.moveIn}
+                  Moved in on {tenant.moveIn}
                 </p>
                 {tenant.pg_name && (
                   <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-teal-50 text-teal-700 text-[10px] font-bold rounded-md border border-teal-100">
@@ -195,21 +195,18 @@ export function TenantDetailPanel({
             {field('Phone Number', draft.phone, (v) => setDraft({ ...draft, phone: v }))}
             {field('Email Address', draft.email, (v) => setDraft({ ...draft, email: v }))}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                  Rent Status
-                </label>
-                <select
-                  value={draft.status}
-                  onChange={(e) => setDraft({ ...draft, status: e.target.value as 'Paid' | 'Overdue' })}
-                  className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner cursor-pointer"
-                >
-                  <option value="Paid">Paid</option>
-                  <option value="Overdue">Overdue</option>
-                </select>
-              </div>
-              {field('Active Months', draft.activeMonths, (v) => setDraft({ ...draft, activeMonths: +v }), 'number')}
+            <div>
+              <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
+                Rent Status
+              </label>
+              <select
+                value={draft.status}
+                onChange={(e) => setDraft({ ...draft, status: e.target.value as 'Paid' | 'Overdue' })}
+                className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner cursor-pointer"
+              >
+                <option value="Paid">Paid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Phone, Star } from 'lucide-react';
+import { Star, Phone } from 'lucide-react';
 import logoImg from '../../../logo.png';
 
 interface HeaderProps {
@@ -29,61 +29,68 @@ export function Header({
   const handleScheduleClick = onScheduleVisitClick || onGetStartedClick;
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full bg-white shadow-sm z-40 border-b border-gray-100 h-16 md:h-20 flex items-center">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
-        <div className="flex items-center justify-between">
-          {/* Left: Logo & PG Name + Badges */}
-          <div className="flex items-center gap-3 md:gap-5">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img src={logoImg.src} alt="logo" className="h-8 md:h-9 w-auto object-contain" />
-              <span className="text-lg md:text-xl font-bold text-gray-900 select-none">
-                {pgName}
-              </span>
-            </div>
+    <header className="fixed top-0 left-0 right-0 w-full h-20 bg-surface/90 backdrop-blur-md dark:bg-navy-deep/90 border-b border-border-subtle dark:border-outline-variant z-50 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
+        {/* Left Brand Area */}
+        <div className="flex items-center gap-8">
+          <a className="flex items-center gap-3 relative cursor-pointer" href="#hero">
+            <img 
+              alt="StayFloww Logo" 
+              className="h-10 w-auto object-contain object-left" 
+              src={logoImg.src} 
+            />
+            <span className="text-xl font-bold text-navy-deep dark:text-white uppercase tracking-wider">
+              {pgName}
+            </span>
+          </a>
+          
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8">
+            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#hero">Properties</a>
+            <a className="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed text-base" href="#rooms">Living Experience</a>
+            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#food">Weekly Menu</a>
+            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#location">Location</a>
+          </nav>
+        </div>
 
-            {/* Badges - Hidden on mobile, visible on tablet/desktop */}
-            <div className="hidden lg:flex items-center gap-3">
-              {/* Powered by stayfloww */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md text-[10px] text-slate-500 font-semibold select-none">
-                <span>Powered by</span>
-                <span className="text-[#14b8a6] flex items-center gap-1 font-bold">
-                  <img src={logoImg.src} alt="logo" className="w-4 h-4 object-contain" />
-                  stayfloww.
-                </span>
-              </div>
-
-              {/* Resident Rated */}
-              <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md text-[10px] text-emerald-700 font-bold select-none">
-                <Star size={12} className="fill-emerald-500 text-emerald-550" />
-                <span>{rating.toFixed(1)} Resident Rated</span>
-              </div>
-            </div>
+        {/* Right Actions Area */}
+        <div className="flex items-center gap-6">
+          {/* Rating Badge - Desktop */}
+          <div className="hidden lg:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs text-emerald-700 font-bold select-none">
+            <Star size={14} className="fill-emerald-500 text-emerald-550" />
+            <span>{rating.toFixed(1)} Rating</span>
           </div>
 
-          {/* Right: Conversion Action Buttons */}
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* Phone Call Icon Button */}
-            <button
-              onClick={handleCallClick}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-teal-600 text-teal-600 flex items-center justify-center hover:bg-teal-50 transition-all cursor-pointer shadow-sm"
-              title="Call PG Owner"
-              aria-label="Call PG Owner"
-            >
-              <Phone size={16} className="md:w-[18px] md:h-[18px]" />
-            </button>
+          {/* Phone Action */}
+          <button
+            onClick={handleCallClick}
+            className="w-10 h-10 rounded-full border border-stayflow-teal text-stayflow-teal flex items-center justify-center hover:bg-stayflow-teal/5 transition-all cursor-pointer shadow-sm"
+            title="Call Owner"
+            aria-label="Call Owner"
+          >
+            <Phone size={16} />
+          </button>
 
-            {/* SCHEDULE VISIT CTA Button */}
-            <button
-              onClick={handleScheduleClick}
-              className="px-3.5 py-2 md:px-5 md:py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold text-[10px] md:text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg active:scale-98 cursor-pointer"
-            >
-              Schedule Visit
-            </button>
+          {/* Book Visit CTA */}
+          <button
+            onClick={handleScheduleClick}
+            className="hidden sm:block bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed px-8 py-2.5 rounded-full font-bold hover:opacity-90 transition-all duration-200 shadow-md cursor-pointer"
+          >
+            Book a Visit
+          </button>
+
+          {/* Profile Picture */}
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
+            <img 
+              alt="User Profile" 
+              className="w-full h-full object-cover" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8WDx9eCdsAvGJKyR-pA9Znwt5NWTcYCESU0fyGtGakYN3as7V0rK7ZQHon1saHiQKnIMXxgyZsn-6q2R0QrJlpw5ntgHIpJ-a0k___hbVanVhwOcKmkGOzZfRwsvosv_xf0Cf4enUgF49petBrI3v6nYzb7gPxpWWiboPr9FqiVkzSUM2PJtl3v-_CF98-HB8BYeNxqafN4TTm-tq6xjAM2C1_-EPrDI3VBvfCHVSO4dbfKqamt3K3lKyG6vkXFGOkBeq2WARcA"
+            />
           </div>
         </div>
       </div>
     </header>
   );
 }
+
 
