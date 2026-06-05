@@ -31,9 +31,12 @@ export function AirbnbStyleHero({
   const displayImages = images && images.length > 0
     ? images
     : [
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDwxc8Nn2Nqe7Z_8tukEe0IbVeBoKuYXAZnVTeXNN2NcM2MWQKjXoo_zl6LApMXCjqDZmBO6bsgYL4H_eBXNLXmfRUsbbOrQaPnC8E2ikSY3fWQMWURWs1Ho9pub995Z2MlfxL6db_44p3_WmNjFua0-PwToCjIa1BzipRhTuWP1eqCK2xMXGRWVCSOkUZ8S_6V-FRZG3jNJHejgFHo_aMOfbYQM87LMAaGwXCbaor0XY4E_aH_9dbcjeYiqza24-UyO6CXRLIs2g',
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDG3ua1v5SAXtrTzdS9hSglsRzjzD7qFxR6SrnJ2wR9a_z3Fqr4NZFkpFm40VygCGSRW58Jd0mOWX0ewD9NoE4UHMe2qEXrubrJIW0CdXgotiRWSQ5YmZk1EmPPNWh-m8NnOqXXHRav8ccRm3bPLV5wPHAQ3FzE9a-LpJYK2LECiNEIJGLpf8FhP8HjnnG91x31oaYW0qeFcBzEOujOFgEotd0E6HffMrncYRjt3y0A9AJBh_N10o4d48SlXhSPrSU1n5t9l_1xsw',
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBwQepmnsrI9sP06xEhrimem512i0_M00RRnQugYw4I2vZjAxbNC-dYJwqeWz3yRCGQtzZ_aeFdhSMRjZeGym6KBNK1WVaDBKUwfPHtPAdbvv8Z4Sgqgd_Zf95MwoPmJoVo8b32Un_MivpVrwkZUjlaVLLSOUFGtC478xNvgi1g6bD63VKioBaUSi_lyD_m__-oEklGWe29v4la-pUH45BDq59dUWdIT4TaRgkjmq7COUqJo7wUYjLVtn7CMP8cg9Sdl0eGzVQSc-A',
+        'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=80',
       ];
 
   const nextImage = () => {
@@ -98,11 +101,11 @@ export function AirbnbStyleHero({
               {location}
             </p>
           </div>
-          <div className="flex gap-3">
-            <span className="px-4 py-1.5 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-wider">
+          <div className="flex gap-3 shrink-0">
+            <span className="px-4 py-1.5 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap">
               Available
             </span>
-            <span className="px-4 py-1.5 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider">
+            <span className="px-4 py-1.5 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap">
               Premium Tier
             </span>
           </div>
@@ -113,17 +116,49 @@ export function AirbnbStyleHero({
           {/* Main image */}
           <div 
             className="md:col-span-3 md:row-span-2 relative overflow-hidden group cursor-pointer"
-            onClick={() => setShowAllPhotos(true)}
+            onClick={() => {
+              setShowAllPhotos(true);
+            }}
           >
             <img 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-              src={displayImages[0]} 
-              alt="Common Area"
+              className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105" 
+              src={displayImages[currentImageIndex]} 
+              alt={currentImageIndex === 0 ? 'Common Area' : currentImageIndex === 1 ? 'Corridor' : 'Play Area'}
             />
+            {/* Mobile Carousel Navigation Arrows */}
+            <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage();
+                }}
+                className="w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-center pointer-events-auto hover:bg-white dark:hover:bg-slate-800 shadow border-none cursor-pointer"
+                aria-label="Previous Image"
+              >
+                <ChevronLeft size={16} className="text-gray-900 dark:text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage();
+                }}
+                className="w-8 h-8 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-center pointer-events-auto hover:bg-white dark:hover:bg-slate-800 shadow border-none cursor-pointer"
+                aria-label="Next Image"
+              >
+                <ChevronRight size={16} className="text-gray-900 dark:text-white" />
+              </button>
+            </div>
+            {/* Category tag overlay */}
             <div className="absolute bottom-6 left-6 flex gap-2">
               <span className="bg-black/75 backdrop-blur-md text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider shadow">
-                Common Area
+                {currentImageIndex === 0 ? 'Common Area' : currentImageIndex === 1 ? 'Corridor' : currentImageIndex === 2 ? 'Play Area' : `Image ${currentImageIndex + 1}`}
               </span>
+            </div>
+            {/* Dot Indicator Overlay for Mobile */}
+            <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider">
+              {currentImageIndex + 1} / {displayImages.length}
             </div>
           </div>
 
@@ -172,7 +207,7 @@ export function AirbnbStyleHero({
         <div className="max-w-4xl border-t border-border-subtle dark:border-outline-variant pt-8 mt-4 space-y-6">
           <div className="pb-6 border-b border-border-subtle dark:border-outline-variant">
             <h2 className="text-xl md:text-2xl font-bold text-navy-deep dark:text-white mb-2">
-              Premium paying guest accommodation managed directly by StayFloww
+              Premium paying guest accommodation managed directly by stayfloww
             </h2>
             <p className="text-base text-on-surface-variant dark:text-outline-variant leading-relaxed">
               {tagline || 'Experience custom designed living spaces for working professionals and students.'}

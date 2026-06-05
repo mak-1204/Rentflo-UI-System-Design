@@ -354,10 +354,19 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
   return (
     <div className="w-full bg-gray-50 dark:bg-slate-900/40 py-12 md:py-16 border-b border-gray-100 dark:border-white/5 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* Header */}
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          Interactive Blueprint & Floor Plans
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Interactive Blueprint & Floor Plans
+          </h2>
+          {/* Powered by stayfloww */}
+          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
+            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
+            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
+              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
+              <span>stayfloww</span>
+            </div>
+          </div>
+        </div>
         <p className="text-lg text-gray-600 dark:text-slate-400 mb-8">
           Tap room boxes to inspect real-time bed vacancies, ventilation and orientation
         </p>

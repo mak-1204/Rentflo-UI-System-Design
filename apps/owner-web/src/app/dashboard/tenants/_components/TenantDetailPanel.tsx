@@ -30,7 +30,29 @@ export function TenantDetailPanel({
   };
 
   const handleSave = () => {
-    onSave(draft);
+    const getFloorName = (num: number) => {
+      if (num === 0) return '0th floor';
+      if (num === 1) return '1st floor';
+      if (num === 2) return '2nd floor';
+      if (num === 3) return '3rd floor';
+      return `${num}th floor`;
+    };
+
+    let formattedFloor = draft.floor;
+    if (/^\d+$/.test(draft.floor.trim())) {
+      formattedFloor = getFloorName(parseInt(draft.floor.trim(), 10));
+    }
+
+    let formattedRoom = draft.room;
+    if (/^\d+$/.test(draft.room.trim())) {
+      formattedRoom = `Room ${draft.room.trim()}`;
+    }
+
+    onSave({
+      ...draft,
+      floor: formattedFloor,
+      room: formattedRoom
+    });
     setIsEditing(false);
   };
 
@@ -39,7 +61,7 @@ export function TenantDetailPanel({
     setIsEditing(false);
   };
 
-  const field = (label: string, value: string | number, onChange: (v: string) => void, type = 'text') => (
+  const field = (label: string, value: string | number, onChange: (v: string) => void, type = 'text', hint?: string) => (
     <div>
       <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
         {label}
@@ -50,6 +72,7 @@ export function TenantDetailPanel({
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
       />
+      {hint && <span className="text-[10px] text-slate-400 font-semibold block mt-1">{hint}</span>}
     </div>
   );
 
@@ -183,8 +206,8 @@ export function TenantDetailPanel({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {field('Room', draft.room, (v) => setDraft({ ...draft, room: v }))}
-              {field('Floor', draft.floor, (v) => setDraft({ ...draft, floor: v }))}
+              {field('Room', draft.room, (v) => setDraft({ ...draft, room: v }), 'text', 'Note: Just add the number e.g. 8')}
+              {field('Floor', draft.floor, (v) => setDraft({ ...draft, floor: v }), 'text', 'Note: Enter floor number e.g. 0, 1')}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

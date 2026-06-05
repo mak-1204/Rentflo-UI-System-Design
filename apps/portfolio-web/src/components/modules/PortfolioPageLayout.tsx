@@ -52,7 +52,7 @@ export function PortfolioPageLayout({
       {showLeadModal && <LeadCaptureModal onClose={handleLeadModalClose} />}
 
       {/* Header */}
-      <Header onGetStartedClick={handleGetStartedClick} />
+      <Header />
 
       {/* Main Content */}
       <main className="pt-16 md:pt-20 bg-white">

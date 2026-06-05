@@ -182,10 +182,10 @@ export function OwnerWebDashboard({
   const foodVal = Math.max(0, cateringVal - 8700);
 
   const metrics = [
-    { label: 'Rent Collected', value: `₹${rentCollectedVal.toLocaleString()}`, change: '+12%', trend: 'up', color: '#f0fdfa', textColor: '#0f766e', icon: IndianRupee },
-    { label: 'Pending Dues', value: `₹${pendingDuesVal.toLocaleString()}`, change: '-8%', trend: 'down', color: '#fff7ed', textColor: '#c2410c', icon: IndianRupee },
-    { label: 'Electricity Charges', value: `₹${electricityVal.toLocaleString()}`, change: `${Math.round(electricityVal / 9.94)} units`, trend: 'up', color: '#eff6ff', textColor: '#1d4ed8', icon: Zap },
-    { label: 'Water Tanker Fees', value: `₹${waterVal.toLocaleString()}`, change: `${Math.round(waterVal / 700)} Tankers`, trend: 'up', color: '#f0fdfa', textColor: '#0f766e', icon: Droplets },
+    { label: 'Rent Collected', value: `₹${rentCollectedVal.toLocaleString()}`, change: '+12%', trend: 'up', color: '#ccfbf1', textColor: '#0f766e', icon: IndianRupee },
+    { label: 'Pending Dues', value: `₹${pendingDuesVal.toLocaleString()}`, change: '-8%', trend: 'down', color: '#ffedd5', textColor: '#c2410c', icon: IndianRupee },
+    { label: 'Electricity Charges', value: `₹${electricityVal.toLocaleString()}`, change: `${Math.round(electricityVal / 9.94)} units`, trend: 'up', color: '#dbeafe', textColor: '#1d4ed8', icon: Zap },
+    { label: 'Water Tanker Fees', value: `₹${waterVal.toLocaleString()}`, change: `${Math.round(waterVal / 700)} Tankers`, trend: 'up', color: '#ccfbf1', textColor: '#0f766e', icon: Droplets },
   ];
 
   const pendingDues = rentRecords

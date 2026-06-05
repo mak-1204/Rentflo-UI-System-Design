@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, CheckCircle, X, CreditCard, DollarSign, RefreshCw } from 'lucide-react'; import { Card } from '@stayflo/ui';
+import { useState, useEffect } from 'react'; import { Download, Bell, Check, Zap, Droplets, CheckCircle, X, CreditCard, DollarSign, RefreshCw, IndianRupee } from 'lucide-react'; import { Card } from '@stayflo/ui';
 import { Badge } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Input } from '@stayflo/ui';
@@ -155,28 +155,58 @@ export function OwnerWebRentCollection() {
           
           {/* Collection Status strip */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Collected Dues</p>
-              <p className="text-2xl font-extrabold text-teal-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
-                ₹{rentData.filter(r => r.status === 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
-              </p>
-              <span className="text-[10px] text-slate-400 font-semibold block mt-1">{rentData.filter(r => r.status === 'Paid').length} tenants cleared</span>
+            <Card className="p-5 border-none rounded-2xl relative overflow-hidden transition-all duration-300 hover:shadow-md text-left flex flex-col justify-between" style={{ backgroundColor: '#ccfbf1' }}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-extrabold text-[#0f766e] uppercase tracking-wider mb-1.5 opacity-85">Collected Dues</p>
+                  <p className="text-[9px] font-bold text-[#0f766e] opacity-60 mb-0.5 uppercase tracking-wide">for Jun 2026</p>
+                  <p className="text-3xl font-extrabold text-[#0f766e] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                    ₹{rentData.filter(r => r.status === 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                  <IndianRupee className="w-5 h-5 text-[#0f766e]" />
+                </div>
+              </div>
+              <div className="text-[10px] text-[#0f766e] font-bold opacity-90 mt-3">
+                {rentData.filter(r => r.status === 'Paid').length} tenants cleared (+12%)
+              </div>
             </Card>
 
-            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Pending Dues</p>
-              <p className="text-2xl font-extrabold text-amber-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
-                ₹{rentData.filter(r => r.status !== 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
-              </p>
-              <span className="text-[10px] text-slate-400 font-semibold block mt-1">{rentData.filter(r => r.status !== 'Paid').length} pending collection</span>
+            <Card className="p-5 border-none rounded-2xl relative overflow-hidden transition-all duration-300 hover:shadow-md text-left flex flex-col justify-between" style={{ backgroundColor: '#ffedd5' }}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-extrabold text-[#c2410c] uppercase tracking-wider mb-1.5 opacity-85">Pending Dues</p>
+                  <p className="text-[9px] font-bold text-[#c2410c] opacity-60 mb-0.5 uppercase tracking-wide">for Jun 2026</p>
+                  <p className="text-3xl font-extrabold text-[#c2410c] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                    ₹{rentData.filter(r => r.status !== 'Paid').reduce((acc, r) => acc + totalDues(r), 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                  <IndianRupee className="w-5 h-5 text-[#c2410c]" />
+                </div>
+              </div>
+              <div className="text-[10px] text-[#c2410c] font-bold opacity-90 mt-3">
+                {rentData.filter(r => r.status !== 'Paid').length} pending collection (-8%)
+              </div>
             </Card>
 
-            <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-              <p className="text-[10px] font-extrabold text-slate-455 uppercase tracking-wider mb-1.5">Accumulated Late Fees</p>
-              <p className="text-2xl font-extrabold text-rose-600 mt-1" style={{ fontFamily: 'var(--font-heading)' }}>
-                ₹{rentData.reduce((acc, r) => acc + r.lateFee, 0).toLocaleString()}
-              </p>
-              <span className="text-[10px] text-slate-400 font-semibold block mt-1">₹250 default applied past due date</span>
+            <Card className="p-5 border-none rounded-2xl relative overflow-hidden transition-all duration-300 hover:shadow-md text-left flex flex-col justify-between" style={{ backgroundColor: '#fee2e2' }}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-extrabold text-[#991b1b] uppercase tracking-wider mb-1.5 opacity-85">Accumulated Late Fees</p>
+                  <p className="text-[9px] font-bold text-[#991b1b] opacity-60 mb-0.5 uppercase tracking-wide">for Jun 2026</p>
+                  <p className="text-3xl font-extrabold text-[#991b1b] tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                    ₹{rentData.reduce((acc, r) => acc + r.lateFee, 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                  <IndianRupee className="w-5 h-5 text-[#991b1b]" />
+                </div>
+              </div>
+              <div className="text-[10px] text-[#991b1b] font-bold opacity-90 mt-3">
+                ₹250 default applied past due date
+              </div>
             </Card>
           </div>
 

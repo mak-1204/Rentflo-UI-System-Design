@@ -48,17 +48,27 @@ export function LocationCommute({
   }, []);
 
   return (
-    <section className="bg-surface-container-low dark:bg-navy-deep/40 rounded-3xl p-8 sm:p-12 border border-border-subtle dark:border-outline-variant shadow-sm transition-colors duration-200">
-      <div className="flex flex-col lg:flex-row gap-12 items-center text-left">
+    <section className="bg-surface-container-low dark:bg-navy-deep/40 rounded-3xl p-4 sm:p-8 md:p-12 border border-border-subtle dark:border-outline-variant shadow-sm transition-colors duration-200">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 items-center text-left">
         {/* Left: Input & Details */}
         <div className="flex-1 space-y-6 w-full">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-stayflow-teal/10 rounded-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-stayflow-teal">directions_car</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-stayflow-teal/10 rounded-full flex items-center justify-center">
+                <span className="material-symbols-outlined text-stayflow-teal">directions_car</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white">
+                Commute Optimizer
+              </h2>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white">
-              Commute Optimizer
-            </h2>
+            {/* Powered by stayfloww */}
+            <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
+              <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
+              <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
+                <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
+                <span>stayfloww</span>
+              </div>
+            </div>
           </div>
           <p className="text-base text-on-surface-variant dark:text-outline-variant">
             Check how far we are from your workspace.
@@ -81,14 +91,52 @@ export function LocationCommute({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-navy-deep p-6 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors">
-                <p className="text-[10px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider mb-1">Estimated Distance</p>
-                <p className="text-2xl font-black text-stayflow-teal">{commuteTransitTime}</p>
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-navy-deep p-6 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider mb-1">Office Distance</p>
+                  <p className="text-3xl font-black text-stayflow-teal">{commuteTransitTime}</p>
+                </div>
+                <div className="w-10 h-10 bg-stayflow-teal/10 rounded-full flex items-center justify-center text-stayflow-teal">
+                  <span className="material-symbols-outlined">map</span>
+                </div>
               </div>
-              <div className="bg-white dark:bg-navy-deep p-6 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors">
-                <p className="text-[10px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider mb-1">Travel Time</p>
-                <p className="text-2xl font-black text-navy-deep dark:text-white">{commuteBikeTime}</p>
+
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                {/* Walk */}
+                <div className="bg-white dark:bg-navy-deep p-2.5 sm:p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base sm:text-lg">directions_walk</span>
+                  </div>
+                  <div>
+                    <p className="text-[8px] sm:text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Walk</p>
+                    <p className="text-xs sm:text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">{commuteWalkTime}</p>
+                  </div>
+                </div>
+
+                {/* Bike/Car */}
+                <div className="bg-white dark:bg-navy-deep p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-lg">directions_bike</span>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Bike / Car</p>
+                    <p className="text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">{commuteBikeTime}</p>
+                  </div>
+                </div>
+
+                {/* Public Transit */}
+                <div className="bg-white dark:bg-navy-deep p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-lg">directions_bus</span>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Transit</p>
+                    <p className="text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">
+                      {parseInt(commuteBikeTime) ? `${Math.round(parseInt(commuteBikeTime) * 1.8)} mins` : '6 mins'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

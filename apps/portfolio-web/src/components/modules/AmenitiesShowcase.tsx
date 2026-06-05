@@ -18,28 +18,36 @@ export function AmenitiesShowcase({
   ],
 }: AmenitiesShowcaseProps) {
   return (
-    <div className="w-full bg-white dark:bg-navy-deep/20 py-12 md:py-16 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
+    <div className="w-full bg-surface dark:bg-navy-deep py-12 md:py-16 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-6 text-left space-y-8">
         {/* Header */}
-        <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white">
             World-Class Amenities
           </h2>
+          {/* Powered by stayfloww */}
+          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
+            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
+            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
+              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
+              <span>stayfloww</span>
+            </div>
+          </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Horizontal scroll list on mobile, grid on larger screens */}
+        <div className="flex overflow-x-auto lg:grid lg:grid-cols-4 gap-4 md:gap-6 pb-4 md:pb-0 snap-x snap-mandatory hide-scrollbar -mx-6 px-6 lg:mx-0 lg:px-0">
           {amenities.map((item, index) => (
             <div
               key={index}
-              className="p-8 bg-white dark:bg-navy-deep rounded-2xl border border-border-subtle dark:border-outline-variant/60 flex flex-col items-center text-center gap-4 hover:border-stayflow-teal dark:hover:border-stayflow-teal hover:shadow-md transition-all duration-300 group cursor-pointer"
+              className="min-w-[160px] md:min-w-0 flex-shrink-0 snap-start p-6 md:p-8 bg-white dark:bg-navy-deep rounded-2xl border border-border-subtle dark:border-outline-variant/60 flex flex-col items-center text-center gap-4 hover:border-stayflow-teal dark:hover:border-stayflow-teal hover:shadow-md transition-all duration-300 group cursor-pointer"
             >
               <span 
-                className="material-symbols-outlined text-stayflow-teal text-5xl group-hover:scale-110 transition-transform duration-300"
+                className="material-symbols-outlined text-primary dark:text-primary-fixed text-4xl md:text-5xl group-hover:scale-110 group-hover:text-stayflow-teal transition-all duration-300"
               >
                 {item.icon}
               </span>
-              <span className="text-base font-bold text-navy-deep dark:text-white group-hover:text-stayflow-teal transition-colors">
+              <span className="text-sm md:text-base font-bold text-navy-deep dark:text-white group-hover:text-stayflow-teal transition-colors">
                 {item.name}
               </span>
             </div>

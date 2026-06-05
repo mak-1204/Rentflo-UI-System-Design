@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useTransition, useCallback } from 'react';
+import { useState, useTransition, useCallback, useEffect } from 'react';
 import { Check, AlertCircle, Loader2 } from 'lucide-react';
 import { TenantsHeader } from './_components/TenantsHeader';
 import { TenantsList } from './_components/TenantsList';
 import { TenantDetailPanel } from './_components/TenantDetailPanel';
 import { AddTenantModal } from './_components/AddTenantModal';
-import { addTenant, updateTenant, deleteTenant } from './actions';
+import { addTenant, updateTenant, deleteTenant, fetchTenants } from './actions';
 import { DEFAULT_TENANTS, type Tenant } from './types';
 
 interface TenantsPageClientProps {
@@ -32,6 +32,14 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
     if (type !== 'loading') setTimeout(() => setToast(null), 3500);
   }, []);
 
+  // Backend search debouncing
+  useEffect(() => {
+    startTransition(async () => {
+      const results = await fetchTenants(search);
+      setTenants(results);
+    });
+  }, [search]);
+
   // ── Onboard new tenant from modal ──────────────────────────────────────────
   const handleConfirmAddTenant = (newTenantData: Omit<Tenant, 'id' | 'pg_name'> & { pgId?: string }) => {
     setShowAddModal(false);
@@ -45,8 +53,8 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
 
     // Optimistic addition
     setTenants((prev) => {
-      const next = [...prev, newTenant];
-      setSelectedIndex(next.length - 1);
+      const next = [newTenant, ...prev];
+      setSelectedIndex(0);
       return next;
     });
 
@@ -55,6 +63,8 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
       const result = await addTenant(newTenantData, newTenantData.pg_id);
       if (result.success) {
         showToast('Tenant onboarded successfully ✓', 'success');
+        const refreshed = await fetchTenants(search);
+        setTenants(refreshed);
       } else {
         showToast(`Onboarding failed: ${result.error}`, 'error');
       }
@@ -81,6 +91,8 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
 
       if (result.success) {
         showToast('Tenant profile saved ✓', 'success');
+        const refreshed = await fetchTenants(search);
+        setTenants(refreshed);
       } else {
         showToast(`Save failed: ${result.error}`, 'error');
       }
@@ -103,6 +115,8 @@ export function TenantsPageClient({ initialTenants, pgProperties }: TenantsPageC
         const result = await deleteTenant(tenant.id!);
         if (result.success) {
           showToast(`${tenant.name} removed from Supabase ✓`, 'success');
+          const refreshed = await fetchTenants(search);
+          setTenants(refreshed);
         } else {
           showToast(`Delete failed: ${result.error}`, 'error');
         }

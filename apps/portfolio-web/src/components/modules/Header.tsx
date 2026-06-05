@@ -1,23 +1,58 @@
 'use client';
 
-import { Star, Phone } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, Phone, Menu, X } from 'lucide-react';
 import logoImg from '../../../logo.png';
 
 interface HeaderProps {
   pgName?: string;
   rating?: number;
-  onGetStartedClick?: () => void;
-  onScheduleVisitClick?: () => void;
   onCallClick?: () => void;
+  onBookClick?: () => void;
 }
 
 export function Header({
   pgName = 'Sunrise PG',
   rating = 4.8,
-  onGetStartedClick,
-  onScheduleVisitClick,
   onCallClick,
+  onBookClick,
 }: HeaderProps) {
+  const [activeSection, setActiveSection] = useState('hero');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['hero', 'commute', 'rooms', 'food'];
+      const scrollPosition = window.scrollY + 120; // smaller offset closer to header height (80px)
+
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile menu on resize to desktop view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleCallClick = () => {
     if (onCallClick) {
       onCallClick();
@@ -26,71 +61,190 @@ export function Header({
     }
   };
 
-  const handleScheduleClick = onScheduleVisitClick || onGetStartedClick;
+  const navItems = [
+    { label: 'Properties', id: 'hero', href: '#hero' },
+    { label: 'Location', id: 'commute', href: '#commute' },
+    { label: 'Living Experience', id: 'rooms', href: '#rooms' },
+    { label: 'Weekly Menu', id: 'food', href: '#food' },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full h-20 bg-surface/90 backdrop-blur-md dark:bg-navy-deep/90 border-b border-border-subtle dark:border-outline-variant z-50 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
-        {/* Left Brand Area */}
-        <div className="flex items-center gap-8">
-          <a className="flex items-center gap-3 relative cursor-pointer" href="#hero">
-            <img 
-              alt="StayFloww Logo" 
-              className="h-10 w-auto object-contain object-left" 
-              src={logoImg.src} 
-            />
-            <span className="text-xl font-bold text-navy-deep dark:text-white uppercase tracking-wider">
-              {pgName}
-            </span>
-          </a>
-          
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#hero">Properties</a>
-            <a className="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed text-base" href="#rooms">Living Experience</a>
-            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#food">Weekly Menu</a>
-            <a className="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-base font-semibold" href="#location">Location</a>
+    <>
+      <header className="fixed top-0 left-0 right-0 w-full h-20 z-50 bg-white/95 dark:bg-navy-deep/95 backdrop-blur-md border-b border-border-subtle dark:border-outline-variant shadow-sm transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex justify-between items-center">
+          {/* Left Brand Area */}
+          <div className="flex items-center gap-8">
+            <a 
+              className="flex items-center gap-3 relative cursor-pointer" 
+              href="#hero"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsMobileMenuOpen(false);
+                window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+                });
+              }}
+            >
+              <div className="flex items-center gap-1.5 sm:gap-3">
+                <span className="text-sm sm:text-xl font-black uppercase tracking-wider text-navy-deep dark:text-white font-heading">
+                  {pgName}
+                </span>
+                <span className="hidden xs:inline text-slate-300 dark:text-outline-variant/30 text-lg font-light">|</span>
+                <div className="hidden xs:flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-slate-755 dark:text-slate-250 font-black whitespace-nowrap">
+                    POWERED BY
+                  </span>
+                  <img 
+                    alt="stayfloww Logo" 
+                    className="h-[10px] sm:h-[14px] w-auto object-contain dark:brightness-0 dark:invert"
+                    src={logoImg.src} 
+                  />
+                </div>
+              </div>
+            </a>
+          </div>
+
+          {/* Right Actions Area */}
+          <div className="flex items-center gap-2 sm:gap-5 h-full">
+            {/* Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-8 h-full">
+              {navItems.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const target = document.querySelector(item.href);
+                      if (target) {
+                        const headerOffset = 80;
+                        const elementPosition = target.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        window.scrollTo({
+                          top: offsetPosition,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={`flex flex-col text-left justify-center h-full border-b-2 transition-all duration-200 ${
+                      isActive
+                        ? 'text-navy-deep dark:text-white border-navy-deep dark:border-white font-extrabold'
+                        : 'text-slate-500 hover:text-navy-deep dark:text-slate-400 dark:hover:text-white border-transparent font-bold'
+                    }`}
+                  >
+                    <span className="text-xs uppercase tracking-wider whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  </a>
+                );
+              })}
+            </nav>
+
+            <div className="hidden lg:block w-px h-6 bg-border-subtle dark:bg-outline-variant/50"></div>
+
+            {/* Rating Pill */}
+            <div className="hidden md:flex items-center gap-1.5 bg-[#ECFDF5] dark:bg-emerald-950/20 text-[#047857] dark:text-emerald-450 px-3 py-1 rounded-full border border-[#D1FAE5] dark:border-emerald-900/30 shrink-0">
+              <Star className="w-3.5 h-3.5 fill-[#10B981] text-[#10B981]" />
+              <div className="flex flex-col text-[10px] font-extrabold leading-none">
+                <span>{rating.toFixed(1)}</span>
+                <span className="text-[7px] text-[#059669] dark:text-emerald-500 uppercase tracking-widest mt-0.5">Rating</span>
+              </div>
+            </div>
+
+            {/* Phone Action */}
+            <button
+              onClick={handleCallClick}
+              className="hidden sm:flex w-10 h-10 rounded-full border border-slate-200 dark:border-outline-variant text-stayflow-teal hover:bg-slate-50 dark:hover:bg-white/5 items-center justify-center transition-all cursor-pointer shadow-sm bg-white dark:bg-transparent shrink-0"
+              title="Call Owner"
+              aria-label="Call Owner"
+            >
+              <Phone size={16} />
+            </button>
+
+            {/* Book Now Button */}
+            <button
+              onClick={onBookClick}
+              className="bg-stayflow-teal hover:bg-stayflow-teal-dark text-white px-3 sm:px-5 py-2.5 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-wider shadow transition-all cursor-pointer whitespace-nowrap shrink-0 border-none"
+            >
+              Book Now
+            </button>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-navy-deep dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border-none bg-transparent cursor-pointer shrink-0"
+              aria-label="Toggle Mobile Menu"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Drawer Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-x-0 top-20 bottom-0 z-40 bg-white dark:bg-navy-deep border-t border-border-subtle dark:border-outline-variant/30 flex flex-col justify-between p-6 animate-in slide-in-from-right duration-250 lg:hidden overflow-y-auto">
+          <nav className="flex flex-col gap-6 pt-4">
+            {navItems.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsMobileMenuOpen(false);
+                    const target = document.querySelector(item.href);
+                    if (target) {
+                      const headerOffset = 80;
+                      const elementPosition = target.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                  className={`text-lg font-bold pb-2 border-b border-border-subtle/40 dark:border-outline-variant/15 flex items-center justify-between ${
+                    isActive ? 'text-stayflow-teal' : 'text-slate-655 dark:text-slate-350'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <span className="text-xs">➔</span>
+                </a>
+              );
+            })}
           </nav>
-        </div>
-
-        {/* Right Actions Area */}
-        <div className="flex items-center gap-6">
-          {/* Rating Badge - Desktop */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full text-xs text-emerald-700 font-bold select-none">
-            <Star size={14} className="fill-emerald-500 text-emerald-550" />
-            <span>{rating.toFixed(1)} Rating</span>
-          </div>
-
-          {/* Phone Action */}
-          <button
-            onClick={handleCallClick}
-            className="w-10 h-10 rounded-full border border-stayflow-teal text-stayflow-teal flex items-center justify-center hover:bg-stayflow-teal/5 transition-all cursor-pointer shadow-sm"
-            title="Call Owner"
-            aria-label="Call Owner"
-          >
-            <Phone size={16} />
-          </button>
-
-          {/* Book Visit CTA */}
-          <button
-            onClick={handleScheduleClick}
-            className="hidden sm:block bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed px-8 py-2.5 rounded-full font-bold hover:opacity-90 transition-all duration-200 shadow-md cursor-pointer"
-          >
-            Book a Visit
-          </button>
-
-          {/* Profile Picture */}
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
-            <img 
-              alt="User Profile" 
-              className="w-full h-full object-cover" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8WDx9eCdsAvGJKyR-pA9Znwt5NWTcYCESU0fyGtGakYN3as7V0rK7ZQHon1saHiQKnIMXxgyZsn-6q2R0QrJlpw5ntgHIpJ-a0k___hbVanVhwOcKmkGOzZfRwsvosv_xf0Cf4enUgF49petBrI3v6nYzb7gPxpWWiboPr9FqiVkzSUM2PJtl3v-_CF98-HB8BYeNxqafN4TTm-tq6xjAM2C1_-EPrDI3VBvfCHVSO4dbfKqamt3K3lKyG6vkXFGOkBeq2WARcA"
-            />
+          
+          <div className="space-y-6 pb-8">
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleCallClick();
+                }}
+                className="flex-1 py-3.5 border border-slate-200 dark:border-outline-variant rounded-xl text-navy-deep dark:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-slate-55 dark:hover:bg-white/5 cursor-pointer bg-transparent"
+              >
+                <Phone size={14} />
+                Call Owner
+              </button>
+            </div>
+            
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-[9px] uppercase tracking-widest text-slate-400 font-extrabold">
+                POWERED BY
+              </span>
+              <img 
+                alt="stayfloww Logo" 
+                className="h-[12px] w-auto object-contain dark:brightness-0 dark:invert"
+                src={logoImg.src} 
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
-
-

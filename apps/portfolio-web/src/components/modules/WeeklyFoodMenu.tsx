@@ -61,17 +61,31 @@ export function WeeklyFoodMenu({
     },
   ],
 }: WeeklyFoodMenuProps) {
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const todayIndex = new Date().getDay();
+  const todayDayName = daysOfWeek[todayIndex];
+
   return (
     <div className="w-full bg-white dark:bg-navy-deep/20 py-12 md:py-16 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-6 text-left space-y-8">
         {/* Header */}
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white mb-2">
-            Chef's Curated Weekly Menu
-          </h2>
-          <p className="text-base text-on-surface-variant dark:text-outline-variant">
-            Fresh, healthy, and locally-sourced meals prepared daily in our centralized kitchen.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white mb-2">
+              Chef's Curated Weekly Menu
+            </h2>
+            <p className="text-base text-on-surface-variant dark:text-outline-variant">
+              Fresh, healthy, and locally-sourced meals prepared daily in our centralized kitchen.
+            </p>
+          </div>
+          {/* Powered by stayfloww */}
+          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
+            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
+            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
+              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
+              <span>stayfloww</span>
+            </div>
+          </div>
         </div>
 
         {/* Food Table */}
@@ -86,27 +100,37 @@ export function WeeklyFoodMenu({
               </tr>
             </thead>
             <tbody>
-              {meals.map((meal, idx) => (
-                <tr 
-                  key={idx}
-                  className={`border-b border-border-subtle dark:border-outline-variant/30 hover:bg-surface-container-low dark:hover:bg-navy-deep/50 transition-colors ${
-                    meal.isSpecial ? 'bg-stayflow-teal/5 dark:bg-stayflow-teal/10' : ''
-                  }`}
-                >
-                  <td className={`p-5 font-bold ${meal.isSpecial ? 'text-stayflow-teal text-lg' : 'text-navy-deep dark:text-white'}`}>
-                    {meal.day}
-                  </td>
-                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
-                    {meal.breakfast}
-                  </td>
-                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
-                    {meal.lunch}
-                  </td>
-                  <td className={`p-5 text-sm ${meal.isSpecial ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
-                    {meal.dinner}
-                  </td>
-                </tr>
-              ))}
+              {meals.map((meal, idx) => {
+                const isToday = meal.day.toLowerCase() === todayDayName.toLowerCase();
+                return (
+                  <tr 
+                    key={idx}
+                    className={`border-b border-border-subtle dark:border-outline-variant/30 hover:bg-surface-container-low dark:hover:bg-navy-deep/50 transition-colors ${
+                      isToday ? 'bg-stayflow-teal/10 dark:bg-stayflow-teal/25 border-l-4 border-stayflow-teal' : ''
+                    }`}
+                  >
+                    <td className={`p-5 font-bold ${isToday ? 'text-stayflow-teal text-lg' : 'text-navy-deep dark:text-white'}`}>
+                      <div className="flex items-center gap-2">
+                        <span>{meal.day}</span>
+                        {isToday && (
+                          <span className="bg-stayflow-teal text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md shadow-sm">
+                            Today
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className={`p-5 text-sm ${isToday ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                      {meal.breakfast}
+                    </td>
+                    <td className={`p-5 text-sm ${isToday ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                      {meal.lunch}
+                    </td>
+                    <td className={`p-5 text-sm ${isToday ? 'text-navy-deep dark:text-white font-bold' : 'text-on-surface-variant dark:text-outline-variant'}`}>
+                      {meal.dinner}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -118,9 +142,9 @@ export function WeeklyFoodMenu({
               <ChefHat size={28} />
             </div>
             <div>
-              <h4 className="font-bold text-navy-deep dark:text-white mb-1">StayFlo Smart Food Planning</h4>
+              <h4 className="font-bold text-navy-deep dark:text-white mb-1">stayfloww Smart Food Planning</h4>
               <p className="text-on-surface-variant dark:text-outline-variant text-sm leading-relaxed">
-                Enjoy hassle-free meal management. Once onboarded, residents can easily view, select preferences, or skip daily meals directly via the StayFlo Mobile App to help us ensure high quality and minimize food waste.
+                Enjoy hassle-free meal management. Once onboarded, residents can easily view, select preferences, or skip daily meals directly via the stayfloww Mobile App to help us ensure high quality and minimize food waste.
               </p>
             </div>
           </div>

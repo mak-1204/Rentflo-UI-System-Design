@@ -9,7 +9,7 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Stayflow Property Explorer',
+  title: 'stayfloww Property Explorer',
   description: 'Explore active rooms, interactive floor blueprints, and live amenities.',
 };
 

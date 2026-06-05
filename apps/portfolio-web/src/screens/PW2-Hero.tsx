@@ -722,7 +722,7 @@ export function PortfolioHero() {
           </span>
           <div className="flex gap-3 items-center">
             <span className="text-[10px] text-slate-400 dark:text-slate-300 font-semibold md:flex items-center gap-1 hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2 py-1 rounded">
-              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black shadow-sm">R</span> Stayflo.</span>
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black shadow-sm">R</span> stayfloww.</span>
             </span>
             <span className="text-[10px] text-[#047857] dark:text-emerald-400 font-bold md:flex items-center gap-1 hidden bg-[#d1fae5] dark:bg-emerald-950/50 px-2.5 py-1 rounded border border-[#10b981]/20 dark:border-emerald-500/20">
               <Star className="w-3.5 h-3.5 fill-[#10b981] dark:fill-emerald-400 text-[#10b981] dark:text-emerald-400" /> 4.8 Resident Rated
@@ -1510,7 +1510,7 @@ export function PortfolioHero() {
               {activeRooms.filter(r => r.beds > 0 && r.vacancy !== 'Occupied').length} Rooms Vacant on Floor
             </p>
             <span className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold md:flex items-center gap-0.5 hidden mt-0.5">
-              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7.5px] font-black">S</span> Stayflo.</span>
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7.5px] font-black">S</span> stayfloww.</span>
             </span>
           </div>
           <div className="flex gap-2">
@@ -1544,7 +1544,7 @@ export function PortfolioHero() {
                   Unlock Co-living Explore
                 </h2>
                 <span className="text-[9px] text-slate-400 dark:text-slate-500 font-semibold flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-white/5 px-1.5 py-0.5 rounded transition-colors duration-200">
-                  by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> Stayflo.</span>
+                  by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> stayfloww.</span>
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -1719,7 +1719,7 @@ export function PortfolioHero() {
               </Button>
               <div className="flex items-center justify-center gap-1 text-[8.5px] text-slate-400 dark:text-slate-500 font-bold">
                 <span>Verified securely by</span>
-                <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> Stayflo.</span>
+                <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> stayfloww.</span>
               </div>
             </div>
           </Card>
@@ -1780,7 +1780,7 @@ export function PortfolioHero() {
 
             {/* Powered by Stayflo branding overlay */}
             <div className="text-[9.5px] text-slate-500 font-semibold flex items-center justify-center gap-0.5">
-              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> Stayflo.</span>
+              Powered by <span className="text-[#14b8a6] flex items-center gap-0.5 font-bold"><span className="w-3 h-3 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[7px] font-black">S</span> stayfloww.</span>
             </div>
           </div>
         </div>

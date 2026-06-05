@@ -9,8 +9,8 @@ const PAGE  = '/dashboard/tenants';
 
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
-export async function fetchTenants(): Promise<Tenant[]> {
-  const { data, error } = await supabase
+export async function fetchTenants(query?: string): Promise<Tenant[]> {
+  let dbQuery = supabase
     .from(TABLE)
     // Join pg_properties to get the PG name alongside each tenant
     .select(`
@@ -28,6 +28,12 @@ export async function fetchTenants(): Promise<Tenant[]> {
       pg_properties ( name )
     `)
     .order('created_at', { ascending: false });
+
+  if (query) {
+    dbQuery = dbQuery.or(`name.ilike.%${query}%,room.ilike.%${query}%`);
+  }
+
+  const { data, error } = await dbQuery;
 
   if (error) {
     console.error('[fetchTenants]', error.message);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useCallback } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, IndianRupee } from 'lucide-react';
 import { Button } from '@stayflo/ui';
 
 import { DuesTable } from './_components/DuesTable';
@@ -184,6 +184,8 @@ export function RentCollectionPageClient({
       r.room.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const selectedMonthLabel = MONTHS.find((m) => m.value === selectedMonth)?.label || selectedMonth;
+
   return (
     <div
       className="p-8 max-w-[1400px] mx-auto relative min-h-screen text-left flex flex-col"
@@ -212,10 +214,12 @@ export function RentCollectionPageClient({
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2"
         style={{ gap: '1rem' }}
       >
+        {/* Title */}
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Rent & Utility Bills</h1>
           <p className="text-xs text-slate-400 mt-1.5 font-medium">Track monthly rent collections, calculate utility bills, and manage dues</p>
         </div>
+        {/* Month Selector */}
         <div className="flex items-center" style={{ gap: '1rem' }}>
           <div>
             <select
@@ -237,7 +241,7 @@ export function RentCollectionPageClient({
         style={{ gap: '1.5rem' }}
       >
         {/* Main Tab Toggle */}
-        <div className="flex flex-1 w-full max-w-[440px] bg-slate-100 rounded-full p-2 border border-slate-200 shadow-sm">
+        <div className="flex flex-1 w-full max-w-[440px] bg-slate-100 rounded-full p-2 border border-slate-200 shadow-sm self-start lg:self-auto">
           <button
             onClick={() => { setActiveTab('ledger'); setSelectedTenant(null); }}
             className={`flex-1 py-3 text-[15px] font-bold rounded-full flex items-center justify-center transition-all ${
@@ -265,20 +269,56 @@ export function RentCollectionPageClient({
         </div>
 
         {/* Right: Metrics Grid */}
-        <div className="flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-4" style={{ gap: '2.5rem' }}>
-          <div className="text-left">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Collected Dues</p>
-            <p className="text-2xl font-black text-teal-600 leading-none">₹{collectedDues.toLocaleString('en-IN')}</p>
+        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto justify-end">
+          {/* Card 1: Collected Dues */}
+          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[220px] p-5 rounded-2xl bg-[#ccfbf1] text-[#0f766e] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Collected Dues</p>
+                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{collectedDues.toLocaleString('en-IN')}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#0f766e]" />
+              </div>
+            </div>
+            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+              <span>+12%</span>
+            </div>
           </div>
-          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-          <div className="text-left">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pending Dues</p>
-            <p className="text-2xl font-black text-amber-500 leading-none">₹{pendingDues.toLocaleString('en-IN')}</p>
+
+          {/* Card 2: Pending Dues */}
+          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[220px] p-5 rounded-2xl bg-[#ffedd5] text-[#c2410c] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Pending Dues</p>
+                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{pendingDues.toLocaleString('en-IN')}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#c2410c]" />
+              </div>
+            </div>
+            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+              <span>-8%</span>
+            </div>
           </div>
-          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-          <div className="text-left">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Late Fees</p>
-            <p className="text-2xl font-black text-rose-500 leading-none">₹{totalLateFees.toLocaleString('en-IN')}</p>
+
+          {/* Card 3: Late Fees */}
+          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[190px] p-5 rounded-2xl bg-[#fee2e2] text-[#991b1b] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Late Fees</p>
+                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{totalLateFees.toLocaleString('en-IN')}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#991b1b]" />
+              </div>
+            </div>
+            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+              <span>Accumulated</span>
+            </div>
           </div>
         </div>
       </div>

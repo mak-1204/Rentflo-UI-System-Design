@@ -12,12 +12,12 @@ export function Footer() {
         <div className="space-y-6 max-w-sm">
           <div className="flex items-center gap-3">
             <img 
-              alt="StayFloww Logo" 
+              alt="stayfloww Logo" 
               className="h-10 w-auto object-contain" 
               src={logoImg.src} 
             />
             <span className="text-xl font-bold text-navy-deep dark:text-white uppercase tracking-wider">
-              StayFloww
+              stayfloww
             </span>
           </div>
           <p className="text-sm text-on-surface-variant dark:text-outline-variant leading-relaxed">
@@ -59,10 +59,10 @@ export function Footer() {
       {/* Bottom Copyright */}
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-border-subtle dark:border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-xs text-on-surface-variant dark:text-outline-variant">
-          © {currentYear} StayFloww Coliving. All rights reserved.
+          © {currentYear} stayfloww Coliving. All rights reserved.
         </p>
         <p className="text-xs font-bold text-stayflow-teal uppercase tracking-widest">
-          Powered by StayFloww
+          Powered by stayfloww
         </p>
       </div>
     </footer>
