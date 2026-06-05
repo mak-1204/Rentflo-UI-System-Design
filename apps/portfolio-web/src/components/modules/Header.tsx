@@ -23,19 +23,25 @@ export function Header({
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['hero', 'commute', 'rooms', 'food'];
-      const scrollPosition = window.scrollY + 120; // smaller offset closer to header height (80px)
+      let currentSection = sections[0];
 
       for (const section of sections) {
         const el = document.getElementById(section);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(section);
-            break;
+          const rect = el.getBoundingClientRect();
+          // If the top of the element is above or close to the header (80px + buffer)
+          if (rect.top <= 150) {
+            currentSection = section;
           }
         }
       }
+
+      // Check if we've reached the bottom of the page
+      if (window.innerHeight + Math.round(window.scrollY) >= document.documentElement.scrollHeight - 50) {
+        currentSection = sections[sections.length - 1];
+      }
+
+      setActiveSection(currentSection);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
