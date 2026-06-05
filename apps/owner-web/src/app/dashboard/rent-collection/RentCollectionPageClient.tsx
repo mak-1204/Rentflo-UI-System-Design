@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useTransition, useCallback } from 'react';
-import { Download, Check, Loader2 } from 'lucide-react';
-import { Button, Card } from '@stayflo/ui';
+import { Check, Loader2 } from 'lucide-react';
+import { Button } from '@stayflo/ui';
 
 import { DuesTable } from './_components/DuesTable';
 import { BillCalculator } from './_components/BillCalculator';
 import { PaymentModal } from './_components/PaymentModal';
-import { SettingsCard } from './_components/SettingsCard';
 import {
   fetchRentRecords,
   approveDelayRequest,
@@ -36,10 +35,18 @@ export function RentCollectionPageClient({
 }: RentCollectionPageClientProps) {
   const [rentData, setRentData] = useState<RentRecord[]>(initialRentData);
   const [selectedMonth, setSelectedMonth] = useState<string>(initialMonth);
-  const [settings, setSettings] = useState(initialSettings);
   const [activeCollectTenant, setActiveCollectTenant] = useState<RentRecord | null>(null);
   const [notif, setNotif] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [settings, setSettings] = useState(initialSettings);
+  const [isEditingRules, setIsEditingRules] = useState(false);
+  const [editDueDay, setEditDueDay] = useState(initialSettings.due_day);
+  const [editLateFee, setEditLateFee] = useState(initialSettings.late_fee);
+
+  const [activeTab, setActiveTab] = useState<'ledger' | 'utilities'>('ledger');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTenant, setSelectedTenant] = useState<RentRecord | null>(null);
 
   const triggerToast = useCallback((msg: string) => {
     setNotif(msg);
@@ -48,7 +55,6 @@ export function RentCollectionPageClient({
 
   const totalDues = (r: RentRecord) => r.rent + r.utilities + r.lateFee;
 
-  // ── Month Toggle ──────────────────────────────────────────────────────────
   const handleMonthChange = (monthStr: string) => {
     setSelectedMonth(monthStr);
     startTransition(async () => {
@@ -57,53 +63,47 @@ export function RentCollectionPageClient({
     });
   };
 
-  const handleSaveSettings = async (dueDay: number, lateFee: number): Promise<boolean> => {
-    const result = await updatePGSettings(dueDay, lateFee);
-    if (result.success) {
-      setSettings({ due_day: dueDay, late_fee: lateFee });
-      startTransition(async () => {
-        const data = await fetchRentRecords(selectedMonth);
-        setRentData(data);
-      });
-      triggerToast(`Billing rules updated successfully!`);
-      return true;
-    } else {
-      triggerToast(`Error updating billing rules: ${result.error}`);
-      return false;
-    }
-  };
-
-  // ── Apply Utility Charges ──────────────────────────────────────────────────
-  const handleApplyUtilities = async (tenantId: string, charges: number) => {
-    const record = rentData.find((r) => r.tenant_id === tenantId);
-    if (!record) return;
-
-    const newUtilities = record.utilities + charges;
+  const handleApplyUtilities = async (roomId: string, charges: number) => {
+    const tenantsInRoom = rentData.filter((r) => r.room === roomId);
+    if (tenantsInRoom.length === 0) return;
+    const splitCharge = Math.round(charges / tenantsInRoom.length);
 
     startTransition(async () => {
-      const result = await saveRentBill({
-        tenant_id: tenantId,
-        month: selectedMonth,
-        rent: record.rent,
-        utilities: newUtilities,
-        lateFee: record.lateFee,
-        status: record.status,
-      });
+      const updatedTenants: RentRecord[] = [];
+      let successCount = 0;
+      let errorMsg = '';
 
-      if (result.success) {
-        setRentData((prev) =>
-          prev.map((item) =>
-            item.tenant_id === tenantId ? { ...item, utilities: newUtilities } : item
-          )
-        );
-        triggerToast(`Added ₹${charges} utility charges for ${record.name}!`);
-      } else {
-        triggerToast(`Error applying utilities: ${result.error}`);
+      for (const record of tenantsInRoom) {
+        const newUtilities = record.utilities + splitCharge;
+        const result = await saveRentBill({
+          tenant_id: record.tenant_id,
+          month: selectedMonth,
+          rent: record.rent,
+          utilities: newUtilities,
+          lateFee: record.lateFee,
+          status: record.status,
+        });
+        if (result.success) {
+          successCount++;
+          updatedTenants.push({ ...record, utilities: newUtilities });
+        } else {
+          errorMsg = result.error || 'Unknown error';
+        }
       }
+
+      if (successCount > 0) {
+        setRentData((prev) =>
+          prev.map((item) => {
+            const updated = updatedTenants.find((u) => u.tenant_id === item.tenant_id);
+            return updated ?? item;
+          })
+        );
+        triggerToast(`Applied ₹${splitCharge} to ${successCount} resident(s) in Room ${roomId}!`);
+      }
+      if (errorMsg) triggerToast(`Error: ${errorMsg}`);
     });
   };
 
-  // ── Approve Late Fee Delay ─────────────────────────────────────────────────
   const handleApproveDelay = async (tenantId: string) => {
     startTransition(async () => {
       const result = await approveDelayRequest(tenantId, selectedMonth);
@@ -113,14 +113,13 @@ export function RentCollectionPageClient({
             item.tenant_id === tenantId ? { ...item, status: 'Delay Approved', lateFee: 0 } : item
           )
         );
-        triggerToast(`Delay request approved and late fees waived.`);
+        triggerToast('Delay request approved and late fees waived.');
       } else {
         triggerToast(`Error approving delay: ${result.error}`);
       }
     });
   };
 
-  // ── Collect Rent Payment ───────────────────────────────────────────────────
   const handleConfirmPayment = async (
     tenantId: string,
     rent: number,
@@ -130,194 +129,342 @@ export function RentCollectionPageClient({
   ) => {
     const record = rentData.find((r) => r.tenant_id === tenantId);
     if (!record) return;
-
     const formattedToday = new Date().toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+      day: '2-digit', month: 'short', year: 'numeric',
     });
-
     const result = await collectRentPayment(tenantId, selectedMonth, rent, utilities, lateFee, method);
-    
     if (result.success) {
       setRentData((prev) =>
         prev.map((item) =>
           item.tenant_id === tenantId
-            ? {
-                ...item,
-                status: 'Paid',
-                paymentDate: formattedToday,
-                paymentMethod: method,
-              }
+            ? { ...item, status: 'Paid', paymentDate: formattedToday, paymentMethod: method }
             : item
         )
       );
       setActiveCollectTenant(null);
-      triggerToast(`Payment processed successfully for ${record.name}!`);
+      triggerToast(`Payment processed for ${record.name}!`);
     } else {
-      triggerToast(`Error processing payment: ${result.error}`);
+      triggerToast(`Error: ${result.error}`);
     }
   };
 
-  // ── Send WhatsApp Reminder ─────────────────────────────────────────────────
   const handleSendReminder = (name: string, phone: string) => {
     const formattedPhone = phone.replace(/\D/g, '') || '919876543210';
-    const msg = `Hi ${name}, this is a gentle reminder that your PG rent & utilities due for ${
-      MONTHS.find((m) => m.value === selectedMonth)?.label
-    } is pending. Please pay inside the Stayflo app. Thanks!`;
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msg)}`;
-    window.open(whatsappUrl, '_blank');
-    triggerToast(`Sent WhatsApp Rent reminder to ${name}!`);
+    const msg = `Hi ${name}, your PG rent & utilities for ${MONTHS.find((m) => m.value === selectedMonth)?.label} is pending. Please pay in the Stayflo app. Thanks!`;
+    window.open(`https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+    triggerToast(`WhatsApp reminder sent to ${name}!`);
   };
 
-  // ── Metrics Computations ───────────────────────────────────────────────────
-  const collectedDues = rentData
-    .filter((r) => r.status === 'Paid')
-    .reduce((acc, r) => acc + totalDues(r), 0);
+  const handleSaveSettings = () => {
+    startTransition(async () => {
+      const res = await updatePGSettings(editDueDay, editLateFee);
+      if (res.success) {
+        setSettings({ due_day: editDueDay, late_fee: editLateFee });
+        setIsEditingRules(false);
+        triggerToast('Billing rules updated successfully!');
+        const data = await fetchRentRecords(selectedMonth);
+        setRentData(data);
+      } else {
+        triggerToast(`Error: ${res.error}`);
+      }
+    });
+  };
 
-  const pendingDues = rentData
-    .filter((r) => r.status !== 'Paid')
-    .reduce((acc, r) => acc + totalDues(r), 0);
-
+  // ── Metrics ────────────────────────────────────────────────────────────────
+  const collectedDues = rentData.filter((r) => r.status === 'Paid').reduce((acc, r) => acc + totalDues(r), 0);
+  const pendingDues = rentData.filter((r) => r.status !== 'Paid').reduce((acc, r) => acc + totalDues(r), 0);
   const totalLateFees = rentData.reduce((acc, r) => acc + r.lateFee, 0);
 
-  const clearedCount = rentData.filter((r) => r.status === 'Paid').length;
-  const pendingCount = rentData.filter((r) => r.status !== 'Paid').length;
+  const totalDuesExpected = collectedDues + pendingDues;
+  const progressPercent = totalDuesExpected > 0 ? Math.round((collectedDues / totalDuesExpected) * 100) : 0;
+
+  const filteredRentData = rentData.filter(
+    (r) =>
+      r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.room.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div
-      className="p-8 space-y-8 max-w-7xl mx-auto relative text-left min-h-screen"
-      style={{ fontFamily: 'var(--font-sans)' }}
+      className="p-8 max-w-[1400px] mx-auto relative min-h-screen text-left flex flex-col"
+      style={{ fontFamily: 'var(--font-sans)', gap: '1.5rem' }}
     >
-      {/* Toast Notification */}
+      {/* Toast */}
       {notif && (
-        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold z-50 animate-in fade-in duration-300">
-          <Check className="w-4 h-4 text-[#14b8a6]" /> {notif}
+        <div
+          className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center text-xs font-semibold z-50 animate-in fade-in duration-300"
+          style={{ gap: '0.5rem' }}
+        >
+          <Check className="w-4 h-4 text-teal-400" /> {notif}
         </div>
       )}
-
-      {/* Syncing Overlay */}
       {isPending && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs text-slate-600 font-semibold">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-500" /> Updating ledger records...
+        <div
+          className="fixed top-4 right-4 z-50 flex items-center bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg text-xs text-slate-600 font-semibold"
+          style={{ gap: '0.5rem' }}
+        >
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-500" /> Syncing records...
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Page Header */}
+      <div
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2"
+        style={{ gap: '1rem' }}
+      >
         <div>
-          <h1
-            className="text-3xl font-extrabold tracking-tight text-slate-900"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            Rent & Utility Bills
-          </h1>
-          <p className="text-xs text-slate-400 mt-1.5 font-medium">
-            Track monthly rent collections, calculate utility bills, and authorize payment delay waivers
-          </p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Rent & Utility Bills</h1>
+          <p className="text-xs text-slate-400 mt-1.5 font-medium">Track monthly rent collections, calculate utility bills, and manage dues</p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 whitespace-nowrap rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 text-slate-750 h-10 px-4 transition-all shadow-sm cursor-pointer"
-            onClick={() => triggerToast('CSV exported!')}
-          >
-            <Download className="w-4 h-4" /> Export CSV
-          </Button>
+        <div className="flex items-center" style={{ gap: '1rem' }}>
+          <div>
+            <select
+              value={selectedMonth}
+              onChange={(e) => handleMonthChange(e.target.value)}
+              className="bg-white border border-slate-200 focus:border-teal-500 focus:outline-none text-sm font-medium text-slate-800 h-10 px-4 rounded-xl cursor-pointer transition-colors shadow-sm"
+            >
+              {MONTHS.map((m) => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Month Filter */}
-      <div className="flex gap-2">
-        {MONTHS.map((m) => (
+      {/* ── HEADER ROW: Metrics & Tabs ── */}
+      <div
+        className="flex flex-col lg:flex-row justify-between items-start lg:items-end pb-2"
+        style={{ gap: '1.5rem' }}
+      >
+        {/* Main Tab Toggle */}
+        <div className="flex flex-1 w-full max-w-[440px] bg-slate-100 rounded-full p-2 border border-slate-200 shadow-sm">
           <button
-            key={m.value}
-            onClick={() => handleMonthChange(m.value)}
-            className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer"
-            style={{
-              background: selectedMonth === m.value ? '#f0fdfa' : '#FFFFFF',
-              color: selectedMonth === m.value ? '#14b8a6' : '#6B7280',
-              borderColor: selectedMonth === m.value ? 'rgba(20,184,166,0.2)' : '#E5E7EB',
-            }}
+            onClick={() => { setActiveTab('ledger'); setSelectedTenant(null); }}
+            className={`flex-1 py-3 text-[15px] font-bold rounded-full flex items-center justify-center transition-all ${
+              activeTab === 'ledger'
+                ? 'bg-white text-slate-900 shadow-md border border-slate-200/50 scale-[1.02]'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+            }`}
+            style={{ gap: '0.5rem' }}
           >
-            {m.label}
+            <span className={`w-2.5 h-2.5 rounded-full ${activeTab === 'ledger' ? 'bg-[#14b8a6]' : 'bg-slate-400'}`} />
+            <span>Rent Ledger</span>
           </button>
-        ))}
-      </div>
-
-      {/* Settings Card */}
-      <SettingsCard initialSettings={settings} onSave={handleSaveSettings} />
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-            Collected Dues
-          </p>
-          <p
-            className="text-2xl font-extrabold text-teal-600 mt-1"
-            style={{ fontFamily: 'var(--font-heading)' }}
+          <button
+            onClick={() => { setActiveTab('utilities'); setSelectedTenant(null); }}
+            className={`flex-1 py-3 text-[15px] font-bold rounded-full flex items-center justify-center transition-all ${
+              activeTab === 'utilities'
+                ? 'bg-white text-slate-900 shadow-md border border-slate-200/50 scale-[1.02]'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+            }`}
+            style={{ gap: '0.5rem' }}
           >
-            ₹{collectedDues.toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-            {clearedCount} tenants cleared
-          </span>
-        </Card>
-
-        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-            Pending Dues
-          </p>
-          <p
-            className="text-2xl font-extrabold text-amber-600 mt-1"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            ₹{pendingDues.toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-            {pendingCount} pending collection
-          </span>
-        </Card>
-
-        <Card className="p-6 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
-            Accumulated Late Fees
-          </p>
-          <p
-            className="text-2xl font-extrabold text-rose-600 mt-1"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            ₹{totalLateFees.toLocaleString('en-IN')}
-          </p>
-          <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-            ₹{settings.late_fee} default applied past day {settings.due_day} of month
-          </span>
-        </Card>
-      </div>
-
-      {/* Main Grid: Dues List + Calculator */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <DuesTable
-            rentData={rentData}
-            onApproveDelay={handleApproveDelay}
-            onCollect={setActiveCollectTenant}
-            onSendReminder={handleSendReminder}
-          />
+            <span className={`w-2.5 h-2.5 rounded-full ${activeTab === 'utilities' ? 'bg-[#14b8a6]' : 'bg-slate-400'}`} />
+            <span>Utility Billing</span>
+          </button>
         </div>
-        <div>
+
+        {/* Right: Metrics Grid */}
+        <div className="flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-4" style={{ gap: '2.5rem' }}>
+          <div className="text-left">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Collected Dues</p>
+            <p className="text-2xl font-black text-teal-600 leading-none">₹{collectedDues.toLocaleString('en-IN')}</p>
+          </div>
+          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
+          <div className="text-left">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pending Dues</p>
+            <p className="text-2xl font-black text-amber-500 leading-none">₹{pendingDues.toLocaleString('en-IN')}</p>
+          </div>
+          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
+          <div className="text-left">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Late Fees</p>
+            <p className="text-2xl font-black text-rose-500 leading-none">₹{totalLateFees.toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── BILLING RULES SECTION ── */}
+      <div
+        className="flex flex-col sm:flex-row justify-between items-center bg-white border border-slate-200 rounded-2xl p-4 shadow-sm animate-in fade-in zoom-in-95 duration-500"
+        style={{ gap: '1.25rem' }}
+      >
+        <div className="flex items-center flex-wrap sm:flex-nowrap" style={{ gap: '1.5rem' }}>
+          <div className="flex items-center" style={{ gap: '0.75rem' }}>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rent Due Date</span>
+            <span className="text-[14px] font-extrabold text-slate-800 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-100/80 shadow-sm">
+              {settings.due_day}{settings.due_day === 1 ? 'st' : settings.due_day === 2 ? 'nd' : settings.due_day === 3 ? 'rd' : 'th'} of month
+            </span>
+          </div>
+          <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+          <div className="flex items-center" style={{ gap: '0.75rem' }}>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Late Fee</span>
+            <span className="text-[14px] font-extrabold text-rose-600 bg-rose-50/60 px-3.5 py-1.5 rounded-xl border border-rose-100/80 shadow-sm">
+              ₹{settings.late_fee} / month
+            </span>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          className="text-slate-600 border-slate-200 hover:bg-slate-50 rounded-xl font-bold mt-4 sm:mt-0 transition-all shadow-sm"
+          onClick={() => {
+            setEditDueDay(settings.due_day);
+            setEditLateFee(settings.late_fee);
+            setIsEditingRules(true);
+          }}
+        >
+          Edit Rules
+        </Button>
+      </div>
+
+      {/* ── MAIN CONTENT AREA ── */}
+      {activeTab === 'ledger' ? (
+        <div className="flex items-start" style={{ gap: '1.5rem' }}>
+          {/* LEFT: Search + Table */}
+          <div className="flex flex-col min-w-0 transition-all duration-300" style={{ width: selectedTenant ? '60%' : '100%' }}>
+            <DuesTable
+              rentData={filteredRentData}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onApproveDelay={handleApproveDelay}
+              onCollect={setActiveCollectTenant}
+              onSendReminder={handleSendReminder}
+              onSelectTenant={(t) =>
+                setSelectedTenant(t?.tenant_id === selectedTenant?.tenant_id ? null : t)
+              }
+              selectedTenantId={selectedTenant?.tenant_id}
+            />
+          </div>
+
+          {/* RIGHT: Detail Panel */}
+          {selectedTenant && (
+            <div
+              className="flex flex-col min-w-0 animate-in fade-in duration-300"
+              style={{ width: '40%', flexShrink: 0, gap: '1.25rem' }}
+            >
+              {/* Tenant Breakdown Card */}
+              <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-5">
+                {/* Header of Breakdown Card */}
+                <div className="flex justify-between items-start pb-4 border-b border-slate-100 mb-4">
+                  <div>
+                    <h3 className="text-[15px] font-semibold text-slate-900 leading-tight mb-1">
+                      {selectedTenant.name}
+                    </h3>
+                    <p className="text-[13px] font-medium text-slate-500">
+                      Room {selectedTenant.room.replace(/^Room\s*/i, '')} Breakdown
+                    </p>
+                  </div>
+                  <div className="flex items-center" style={{ gap: '0.75rem' }}>
+                    <Button
+                      variant="outline"
+                      className="text-slate-600 border-slate-200 bg-white hover:bg-slate-50 px-3 rounded-lg font-medium text-[13px] h-8 shadow-sm transition-all"
+                      onClick={() => triggerToast('Edit feature coming soon')}
+                    >
+                      Edit
+                    </Button>
+                    {selectedTenant.status !== 'Paid' && (
+                      <Button
+                        className="bg-[#14b8a6] hover:bg-teal-600 text-white border-none px-4 rounded-lg font-medium text-[13px] h-8 shadow-sm transition-all"
+                        onClick={() => setActiveCollectTenant(selectedTenant)}
+                      >
+                        Collect
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Flex row of numbers */}
+                <div className="flex items-start justify-between">
+                  <div className="text-left">
+                    <p className="text-[13px] font-medium text-slate-800 mb-1">Rent</p>
+                    <p className="text-lg font-semibold text-teal-600">₹{selectedTenant.rent.toLocaleString()}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[13px] font-medium text-slate-800 mb-1">Utilities</p>
+                    <p className="text-lg font-semibold text-rose-500">₹{selectedTenant.utilities.toLocaleString()}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[13px] font-medium text-slate-800 mb-1">Late Fee</p>
+                    <p className="text-lg font-semibold text-rose-500">₹{selectedTenant.lateFee.toLocaleString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[13px] font-medium text-slate-800 mb-1">Total Due</p>
+                    <p className="text-lg font-semibold text-slate-900">₹{totalDues(selectedTenant).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {selectedTenant.status === 'Paid' && selectedTenant.paymentMethod && (
+                  <p className="text-[11px] text-slate-500 font-medium mt-4 pt-4 border-t border-slate-100">
+                    Paid via {selectedTenant.paymentMethod} {selectedTenant.paymentDate ? `on ${selectedTenant.paymentDate}` : ''}
+                  </p>
+                )}
+              </div>
+
+              {/* Utility Bill Calculator locked to this room */}
+              <BillCalculator
+                rentData={rentData}
+                onApplyUtilities={handleApplyUtilities}
+                lockedRoom={selectedTenant.room}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="max-w-lg mx-auto animate-in fade-in zoom-in-95 duration-300">
           <BillCalculator rentData={rentData} onApplyUtilities={handleApplyUtilities} />
         </div>
-      </div>
+      )}
 
-      {/* Counter Collect Modal */}
+      {/* Payment Modal */}
       {activeCollectTenant && (
         <PaymentModal
           tenant={activeCollectTenant}
           onClose={() => setActiveCollectTenant(null)}
           onConfirmPayment={handleConfirmPayment}
         />
+      )}
+
+      {/* Settings Modal */}
+      {isEditingRules && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 bg-slate-50/50 text-left">
+              <h2 className="text-xl font-black text-slate-900">Edit Billing Rules</h2>
+              <p className="text-xs text-slate-500 font-medium mt-1">Updates will dynamically recalculate late fees for all pending dues.</p>
+            </div>
+            <div className="p-6 flex flex-col text-left" style={{ gap: '1.25rem' }}>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Due Date (Day of Month)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={1} max={31}
+                    value={editDueDay}
+                    onChange={(e) => setEditDueDay(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-3 font-semibold text-slate-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all outline-none"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">th</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Flat Late Fee</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-base">₹</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={editLateFee}
+                    onChange={(e) => setEditLateFee(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-3 font-semibold text-slate-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-6 pt-2 flex justify-end" style={{ gap: '0.75rem' }}>
+              <Button variant="outline" className="rounded-xl font-bold" onClick={() => setIsEditingRules(false)}>Cancel</Button>
+              <Button className="bg-[#14b8a6] hover:bg-teal-600 text-white border-none rounded-xl font-bold shadow-md shadow-teal-500/20" onClick={handleSaveSettings}>Save Rules</Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

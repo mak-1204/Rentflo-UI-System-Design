@@ -1,190 +1,201 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap } from 'lucide-react';
-import { Card, Button, Input } from '@stayflo/ui';
+import { Card, Button } from '@stayflo/ui';
 import type { RentRecord } from '../types';
 
 interface BillCalculatorProps {
   rentData: RentRecord[];
-  onApplyUtilities: (tenantId: string, charges: number) => Promise<void>;
+  onApplyUtilities: (roomId: string, charges: number) => Promise<void>;
+  lockedRoom?: string;
 }
 
-export function BillCalculator({ rentData, onApplyUtilities }: BillCalculatorProps) {
-  const [calcRoom, setCalcRoom] = useState('');
+export function BillCalculator({ rentData, onApplyUtilities, lockedRoom }: BillCalculatorProps) {
+  const [calcRoom, setCalcRoom] = useState(lockedRoom || '');
   const [calcType, setCalcType] = useState<'electricity' | 'water'>('electricity');
-  
-  // Electricity states
+
+  // Electricity
   const [prevReading, setPrevReading] = useState(1240);
   const [currReading, setCurrReading] = useState(1325);
   const [unitRate, setUnitRate] = useState(8);
 
-  // Water states
+  // Water
   const [waterLiters, setWaterLiters] = useState(100);
   const [waterRatePerLiter, setWaterRatePerLiter] = useState(2);
 
   const [calculatedCharges, setCalculatedCharges] = useState(0);
 
-  // Set default calcRoom if data exists
+  const uniqueRooms = Array.from(new Set(rentData.map((r) => r.room))).sort();
+
   useEffect(() => {
-    if (rentData.length > 0 && !calcRoom) {
+    if (lockedRoom) {
+      setCalcRoom(lockedRoom);
+    } else if (rentData.length > 0 && !calcRoom) {
       setCalcRoom(rentData[0].room);
     }
-  }, [rentData, calcRoom]);
+  }, [rentData, calcRoom, lockedRoom]);
 
-  // Recalculate charges dynamically
   useEffect(() => {
     if (calcType === 'electricity') {
-      const units = Math.max(0, currReading - prevReading);
-      setCalculatedCharges(units * unitRate);
+      setCalculatedCharges(Math.max(0, currReading - prevReading) * unitRate);
     } else {
       setCalculatedCharges(waterLiters * waterRatePerLiter);
     }
   }, [prevReading, currReading, unitRate, waterLiters, waterRatePerLiter, calcType]);
 
+  const tenantsInRoom = rentData.filter((r) => r.room === calcRoom);
+  const splitPerTenant = tenantsInRoom.length > 0
+    ? Math.round(calculatedCharges / tenantsInRoom.length)
+    : calculatedCharges;
+
   const handleApply = async () => {
-    const target = rentData.find((r) => r.room === calcRoom);
-    if (!target) return;
-    await onApplyUtilities(target.tenant_id, calculatedCharges);
+    if (!calcRoom) return;
+    await onApplyUtilities(calcRoom, calculatedCharges);
   };
 
+  const inputClass = "w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-sm text-slate-800 font-semibold h-10 px-3 rounded-xl transition-all shadow-inner";
+
   return (
-    <Card className="p-8 space-y-5 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm">
-      <h3
-        className="text-base font-bold text-slate-900 flex items-center gap-2"
-        style={{ fontFamily: 'var(--font-heading)' }}
-      >
-        <Zap className="w-5 h-5 text-amber-500" /> Utility Bill Calculator
-      </h3>
-      <p className="text-xs text-slate-400 leading-relaxed font-medium">
-        Calculate electricity and water charges floor-wise and apply directly to resident ledgers
-      </p>
+    <Card className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-5 space-y-4">
+        <h3 className="text-base font-bold text-slate-900">Utility Bill Calculator</h3>
 
-      <div className="flex border border-slate-150 rounded-xl overflow-hidden p-0.5 bg-slate-50">
-        <button
-          onClick={() => setCalcType('electricity')}
-          className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all cursor-pointer ${
-            calcType === 'electricity'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-100'
-              : 'text-slate-400 hover:text-slate-600'
-          }`}
-        >
-          Electricity
-        </button>
-        <button
-          onClick={() => setCalcType('water')}
-          className={`flex-1 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg transition-all cursor-pointer ${
-            calcType === 'water'
-              ? 'bg-white text-slate-900 shadow-sm border border-slate-100'
-              : 'text-slate-400 hover:text-slate-600'
-          }`}
-        >
-          Water Bill
-        </button>
-      </div>
+        {/* Electricity / Water toggle */}
+        <div className="flex border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setCalcType('electricity')}
+            className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              calcType === 'electricity'
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            Electricity
+          </button>
+          <button
+            onClick={() => setCalcType('water')}
+            className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              calcType === 'water'
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            Water Bill
+          </button>
+        </div>
 
-      <div className="space-y-4 text-xs">
+        {/* Target Room */}
         <div>
-          <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-            Target Resident Room
+          <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+            Target Room
           </label>
           <select
             value={calcRoom}
             onChange={(e) => setCalcRoom(e.target.value)}
-            className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner cursor-pointer"
+            disabled={!!lockedRoom}
+            className={`${inputClass} cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
           >
-            {rentData.map((r) => (
-              <option key={r.room} value={r.room}>
-                {r.room} - {r.name}
-              </option>
-            ))}
+            {uniqueRooms.map((room) => {
+              const tenants = rentData.filter((r) => r.room === room).map((r) => r.name).join(', ');
+              return (
+                <option key={room} value={room}>
+                  {room} - {tenants || 'Empty'}
+                </option>
+              );
+            })}
           </select>
-        </div>
-
-        {calcType === 'electricity' ? (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                  Previous Unit
-                </label>
-                <Input
-                  type="number"
-                  value={prevReading}
-                  onChange={(e) => setPrevReading(+e.target.value)}
-                  className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                  Current Unit
-                </label>
-                <Input
-                  type="number"
-                  value={currReading}
-                  onChange={(e) => setCurrReading(+e.target.value)}
-                  className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                Unit Rate (BESCOM ₹)
-              </label>
-              <Input
-                type="number"
-                value={unitRate}
-                onChange={(e) => setUnitRate(+e.target.value)}
-                className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
-              />
-            </div>
-          </>
-        ) : (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                Water Consumed (Liters)
-              </label>
-              <Input
-                type="number"
-                value={waterLiters}
-                onChange={(e) => setWaterLiters(+e.target.value)}
-                className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-extrabold text-slate-400 mb-1.5 uppercase tracking-wider">
-                Rate per Liter (₹)
-              </label>
-              <Input
-                type="number"
-                value={waterRatePerLiter}
-                onChange={(e) => setWaterRatePerLiter(+e.target.value)}
-                className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-left">
-          <div className="flex justify-between font-bold text-slate-800 text-sm">
-            <span>Calculated Due:</span>
-            <span className="text-[#14b8a6] text-base">₹{calculatedCharges.toLocaleString('en-IN')}</span>
-          </div>
-          {calcType === 'electricity' ? (
-            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">
-              ({currReading - prevReading} units consumed at ₹{unitRate}/unit)
-            </p>
-          ) : (
-            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">
-              ({waterLiters} Liters consumed at ₹{waterRatePerLiter}/Liter)
+          {calcRoom && (
+            <p className="text-[10px] text-slate-400 font-medium mt-1.5">
+              Shared Room Indicator: {calcRoom} — {tenantsInRoom.length} Tenant(s)
             </p>
           )}
         </div>
 
+        {/* Inputs */}
+        {calcType === 'electricity' ? (
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Previous Unit
+              </label>
+              <input
+                type="number"
+                value={prevReading}
+                onChange={(e) => setPrevReading(+e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Current Unit
+              </label>
+              <input
+                type="number"
+                value={currReading}
+                onChange={(e) => setCurrReading(+e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Unit Rate
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">₹</span>
+                <input
+                  type="number"
+                  value={unitRate}
+                  onChange={(e) => setUnitRate(+e.target.value)}
+                  className={`${inputClass} pl-7`}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Water Consumed (Liters)
+              </label>
+              <input
+                type="number"
+                value={waterLiters}
+                onChange={(e) => setWaterLiters(+e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Rate per Liter
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">₹</span>
+                <input
+                  type="number"
+                  value={waterRatePerLiter}
+                  onChange={(e) => setWaterRatePerLiter(+e.target.value)}
+                  className={`${inputClass} pl-7`}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Calculated Due */}
+        <div className="pt-1">
+          <p className="text-sm font-bold text-slate-900">
+            Calculated Due: ₹{calculatedCharges.toLocaleString('en-IN')}
+          </p>
+          <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+            {tenantsInRoom.length > 1
+              ? `₹${splitPerTenant.toLocaleString()} per tenant · split between ${tenantsInRoom.length} residents`
+              : `Total Bill will be applied to 1 tenant`}
+          </p>
+        </div>
+
+        {/* Apply button */}
         <Button
-          style={{ background: '#14b8a6', color: '#FFFFFF' }}
-          className="w-full font-bold uppercase tracking-wider text-xs h-11 hover:opacity-95 rounded-xl border-none shadow-md shadow-teal-500/10 cursor-pointer"
+          className="w-full bg-[#14b8a6] hover:bg-teal-600 text-white border-none font-bold text-xs h-10 rounded-xl cursor-pointer shadow-sm shadow-teal-500/20 transition-all"
           onClick={handleApply}
         >
           Apply Utility Charges
