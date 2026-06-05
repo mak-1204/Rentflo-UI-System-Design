@@ -31,10 +31,9 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@stayflo/ui';
 import logoImg from '../../../logo.png';
+import { fetchOwnerProperties } from '@/app/dashboard/actions';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
-
-const ALL_PROPERTIES = ['Sunrise PG', 'Starlight Co-Living', 'Elite Mansion'];
 
 interface NavItem {
   href: string;
@@ -61,10 +60,23 @@ export function OwnerSidebar() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPgDropdownOpen, setIsPgDropdownOpen] = useState(false);
+  const [allProperties, setAllProperties] = useState<string[]>(['Sunrise PG', 'Starlight Co-Living', 'Elite Mansion']);
+
+  // Fetch properties from database dynamically on mount
+  useEffect(() => {
+    async function loadProperties() {
+      const pgs = await fetchOwnerProperties();
+      if (pgs && pgs.length > 0) {
+        setAllProperties(pgs);
+      }
+    }
+    loadProperties();
+  }, []);
 
   // ── PG multi-select state (persisted in localStorage) ───────────────────────
   const [selectedPgs, setSelectedPgs] = useState<string[]>(() => {
-    if (typeof window === 'undefined') return [ALL_PROPERTIES[0]];
+    const fallback = 'Sunrise PG';
+    if (typeof window === 'undefined') return [fallback];
     const saved = localStorage.getItem('stayflo_selected_pgs');
     if (saved) {
       try {
@@ -74,14 +86,14 @@ export function OwnerSidebar() {
         // fall through to default
       }
     }
-    return [localStorage.getItem('stayflo_selected_pg') ?? ALL_PROPERTIES[0]];
+    return [localStorage.getItem('stayflo_selected_pg') ?? fallback];
   });
 
   const handlePgsChange = (nextPgs: string[]) => {
     setSelectedPgs(nextPgs);
     localStorage.setItem('stayflo_selected_pgs', JSON.stringify(nextPgs));
 
-    const primaryPg = nextPgs[0] ?? ALL_PROPERTIES[0];
+    const primaryPg = nextPgs[0] ?? (allProperties[0] || 'Sunrise PG');
     localStorage.setItem('stayflo_selected_pg', primaryPg);
 
     // Sync PG name to builder state if it exists
@@ -109,10 +121,10 @@ export function OwnerSidebar() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedPgs.length === ALL_PROPERTIES.length) {
-      handlePgsChange([ALL_PROPERTIES[0]]);
+    if (selectedPgs.length === allProperties.length) {
+      handlePgsChange([allProperties[0] || 'Sunrise PG']);
     } else {
-      handlePgsChange([...ALL_PROPERTIES]);
+      handlePgsChange([...allProperties]);
     }
   };
 
@@ -131,11 +143,11 @@ export function OwnerSidebar() {
           // ignore
         }
       }
-      setSelectedPgs([localStorage.getItem('stayflo_selected_pg') ?? ALL_PROPERTIES[0]]);
+      setSelectedPgs([localStorage.getItem('stayflo_selected_pg') ?? (allProperties[0] || 'Sunrise PG')]);
     };
     window.addEventListener('stayflo_website_update', handleUpdate);
     return () => window.removeEventListener('stayflo_website_update', handleUpdate);
-  }, []);
+  }, [allProperties]);
 
   // Close drawer on navigation
   useEffect(() => {
@@ -171,7 +183,7 @@ export function OwnerSidebar() {
           <img src={logoImg.src} alt="stayfloww logo" className="h-8 w-auto object-contain" />
         </div>
         <span className="text-xs font-semibold px-2 py-1 rounded bg-[#f0fdfa] text-[#14b8a6] truncate max-w-[150px]">
-          {selectedPgs.length === ALL_PROPERTIES.length ? 'All PGs' : selectedPgs[0]}
+          {selectedPgs.length === allProperties.length ? 'All PGs' : selectedPgs[0]}
         </span>
       </header>
 
@@ -222,7 +234,7 @@ export function OwnerSidebar() {
               aria-expanded={isPgDropdownOpen}
             >
               <span className="truncate pr-1 text-left text-xs">
-                {selectedPgs.length === ALL_PROPERTIES.length
+                {selectedPgs.length === allProperties.length
                   ? 'All Properties'
                   : selectedPgs.join(', ')}
               </span>
@@ -248,15 +260,15 @@ export function OwnerSidebar() {
                   <label className="flex items-center gap-2.5 px-3.5 py-2 hover:bg-slate-50 cursor-pointer text-xs font-semibold border-b border-slate-100 pb-2">
                     <input
                       type="checkbox"
-                      checked={selectedPgs.length === ALL_PROPERTIES.length}
+                      checked={selectedPgs.length === allProperties.length}
                       onChange={toggleSelectAll}
                       className="rounded border-slate-300 text-[#14b8a6] focus:ring-[#14b8a6] h-3.5 w-3.5"
                       aria-label="Select all properties"
                     />
-                    <span style={{ color: '#111827' }}>Select All ({ALL_PROPERTIES.length})</span>
+                    <span style={{ color: '#111827' }}>Select All ({allProperties.length})</span>
                   </label>
 
-                  {ALL_PROPERTIES.map((pg) => (
+                  {allProperties.map((pg) => (
                     <label
                       key={pg}
                       className="flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-50 cursor-pointer text-xs font-medium"

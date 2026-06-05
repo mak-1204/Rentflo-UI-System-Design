@@ -83,7 +83,7 @@ export default async function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 bg-white text-sm">
-              {safeLeads.map((lead) => {
+              {safeLeads.map((lead: any) => {
                 const roomString = lead.sharing_type === 'single' ? 'Single Room' : lead.sharing_type === 'double' ? 'Double Sharing' : lead.sharing_type === 'triple' ? 'Triple Sharing' : 'Any Room';
                 
                 return (

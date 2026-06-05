@@ -34,3 +34,19 @@ export async function fetchDashboardData(monthStr: string, dateStr: string): Pro
     bookings: bookings ?? [],
   };
 }
+
+export async function fetchOwnerProperties(ownerId: string = '00000000-0000-0000-0000-000000000001'): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('pg_properties')
+    .select('name')
+    .eq('owner_id', ownerId)
+    .order('name');
+
+  if (error) {
+    console.error('[fetchOwnerProperties] Error:', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row: any) => row.name);
+}
+
