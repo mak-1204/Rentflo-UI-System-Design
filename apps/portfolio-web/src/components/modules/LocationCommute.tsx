@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import logoImg from '../../../logo.png';
 
 interface LocationCommuteProps {
   location?: string;
@@ -61,13 +62,9 @@ export function LocationCommute({
                 Commute Optimizer
               </h2>
             </div>
-            {/* Powered by stayfloww */}
-            <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
-              <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
-              <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
-                <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
-                <span>stayfloww</span>
-              </div>
+            <div className="flex items-center gap-1 opacity-70">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+              <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
             </div>
           </div>
           <p className="text-base text-on-surface-variant dark:text-outline-variant">
@@ -115,24 +112,24 @@ export function LocationCommute({
                 </div>
 
                 {/* Bike/Car */}
-                <div className="bg-white dark:bg-navy-deep p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
-                  <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-lg">directions_bike</span>
+                <div className="bg-white dark:bg-navy-deep p-2.5 sm:p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base sm:text-lg">directions_bike</span>
                   </div>
                   <div>
-                    <p className="text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Bike / Car</p>
-                    <p className="text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">{commuteBikeTime}</p>
+                    <p className="text-[8px] sm:text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Bike / Car</p>
+                    <p className="text-xs sm:text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">{commuteBikeTime}</p>
                   </div>
                 </div>
 
                 {/* Public Transit */}
-                <div className="bg-white dark:bg-navy-deep p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
-                  <div className="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-lg">directions_bus</span>
+                <div className="bg-white dark:bg-navy-deep p-2.5 sm:p-4 rounded-2xl border border-border-subtle dark:border-outline-variant shadow-sm transition-colors text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-base sm:text-lg">directions_bus</span>
                   </div>
                   <div>
-                    <p className="text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Transit</p>
-                    <p className="text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">
+                    <p className="text-[8px] sm:text-[9px] text-on-surface-variant dark:text-outline-variant uppercase font-bold tracking-wider">Transit</p>
+                    <p className="text-xs sm:text-sm font-extrabold text-navy-deep dark:text-white mt-0.5">
                       {parseInt(commuteBikeTime) ? `${Math.round(parseInt(commuteBikeTime) * 1.8)} mins` : '6 mins'}
                     </p>
                   </div>

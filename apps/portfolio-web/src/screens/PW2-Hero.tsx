@@ -49,7 +49,7 @@ const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: 
 
 export function PortfolioHero() {
   const router = useRouter();
-  
+
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export function PortfolioHero() {
       document.documentElement.classList.remove('dark');
     }
   };
-  
+
   // Custom states that synchronize with builder
   const [pgName, setPgName] = useState('Sunrise PG');
   const [tagline, setTagline] = useState('Your home away from home in Koramangala');
@@ -103,7 +103,7 @@ export function PortfolioHero() {
     'Parking Space': true,
     'Gym / Play Room': true
   });
-  
+
   const [categoryMedia, setCategoryMedia] = useState<Record<string, string[]>>({
     '1 Sharing': [
       'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
@@ -385,11 +385,11 @@ export function PortfolioHero() {
   }, [showLeadPopup, lightbox.show, customAlert.show]);
 
   const openLightbox = (initialType: 'photo' | 'video') => {
-    const photos = categoryMedia[`${prefSharing} Sharing`] || 
-                   (prefSharing === 1 ? ['https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80'] :
-                    prefSharing === 2 ? ['https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80'] :
-                    ['https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80']);
-    
+    const photos = categoryMedia[`${prefSharing} Sharing`] ||
+      (prefSharing === 1 ? ['https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80'] :
+        prefSharing === 2 ? ['https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80'] :
+          ['https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80']);
+
     const mediaList: { url: string; type: 'photo' | 'video'; tag?: string }[] = [];
     photos.forEach(p => {
       mediaList.push({ url: p, type: 'photo', tag: photoTags[p] || `${prefSharing} Sharing Room` });
@@ -441,7 +441,7 @@ export function PortfolioHero() {
   };
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
+
   const menu: Record<string, { breakfast: string, lunch: string, dinner: string }> = {
     Mon: { breakfast: 'Poha, Sev, Chutney', lunch: 'Rice, Dal, Cabbage Sabzi', dinner: 'Chapati, Aloo Jeera, Salad' },
     Tue: { breakfast: 'Uttapam, Sambar', lunch: 'Jeera Rice, Chole Masala', dinner: 'Chapati, Bhindi Fry, Curd' },
@@ -486,14 +486,13 @@ export function PortfolioHero() {
     const positions = room.bedPositions && room.bedPositions.length === bedsCount
       ? room.bedPositions
       : getDefaultBedPositions(bedsCount);
-    
+
     const beds = [];
     const getBedStyle = (isVacant: boolean) => {
-      return `absolute border-[2px] rounded flex items-center justify-center shadow z-15 transition-all text-white ${
-        isVacant 
-          ? 'bg-[#1D9E75] border-[#085041]' 
+      return `absolute border-[2px] rounded flex items-center justify-center shadow z-15 transition-all text-white ${isVacant
+          ? 'bg-[#1D9E75] border-[#085041]'
           : 'bg-[#993C1D] border-[#791F1F]'
-      }`;
+        }`;
     };
 
     const isBedVacant = (idx: number) => {
@@ -507,23 +506,23 @@ export function PortfolioHero() {
       const isRotated = pos.rotated;
       const bedW = isRotated ? (pos.h || 26) : (pos.w || 70);
       const bedH = isRotated ? (pos.w || 70) : (pos.h || 26);
-      
+
       beds.push(
-        <div 
-          key={`bed-${i}`} 
-          className={getBedStyle(vacant)} 
-          style={{ 
-            left: `${pos.x}%`, 
-            top: `${pos.y}%`, 
-            width: `${bedW}%`, 
-            height: `${bedH}%` 
+        <div
+          key={`bed-${i}`}
+          className={getBedStyle(vacant)}
+          style={{
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            width: `${bedW}%`,
+            height: `${bedH}%`
           }}
           title={`Bed ${i + 1} (${vacant ? 'Vacant' : 'Occupied'})`}
         >
           {isRotated ? (
             <>
               <div className="absolute top-1 left-1 right-1 h-[18%] bg-white border-b border-slate-700/20 rounded-[1px]" />
-              <span 
+              <span
                 className="text-[6.5px] font-bold text-white uppercase tracking-widest mt-[18%] truncate px-0.5 py-1 pointer-events-none select-none flex items-center justify-center leading-none text-center h-full w-full"
                 style={{
                   writingMode: 'vertical-rl',
@@ -636,16 +635,16 @@ export function PortfolioHero() {
   const allPhotos: { url: string; category: string }[] = heroImages.length > 0
     ? heroImages.map(url => ({ url, category: 'Hero' }))
     : (() => {
-        const list: { url: string; category: string }[] = [];
-        Object.keys(categoryMedia).forEach(cat => {
-          if (Array.isArray(categoryMedia[cat])) {
-            categoryMedia[cat].forEach(url => {
-              list.push({ url, category: cat });
-            });
-          }
-        });
-        return list;
-      })();
+      const list: { url: string; category: string }[] = [];
+      Object.keys(categoryMedia).forEach(cat => {
+        if (Array.isArray(categoryMedia[cat])) {
+          categoryMedia[cat].forEach(url => {
+            list.push({ url, category: cat });
+          });
+        }
+      });
+      return list;
+    })();
 
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -707,12 +706,12 @@ export function PortfolioHero() {
   ];
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 font-sans pb-28 relative text-left transition-colors duration-200"
       style={{ fontFamily: 'Inter, sans-serif' }}
     >
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-      
+
       {/* SECTION 1: STICKY TOP NAVIGATION BAR */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-200">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-3.5 flex justify-between items-center">
@@ -728,15 +727,15 @@ export function PortfolioHero() {
               <Star className="w-3.5 h-3.5 fill-[#10b981] dark:fill-emerald-400 text-[#10b981] dark:text-emerald-400" /> 4.8 Resident Rated
             </span>
             <div className="flex gap-1.5 items-center">
-              <button 
+              <button
                 onClick={toggleTheme}
                 className="inline-flex items-center justify-center p-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-350 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm cursor-pointer"
                 title="Toggle Theme"
               >
                 {theme === 'light' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
                 )}
               </button>
               <a href="tel:9876543210" className="inline-flex items-center justify-center p-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm" title="Call PG Owner">
@@ -755,13 +754,13 @@ export function PortfolioHero() {
         {allPhotos.length > 0 ? (
           <div className="absolute inset-0 w-full h-full">
             {allPhotos.map((slide, idx) => (
-              <div 
+              <div
                 key={idx}
                 className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${activeSlide === idx ? (theme === 'light' ? 'opacity-30' : 'opacity-50') : 'opacity-0'}`}
               >
-                <img 
-                  src={slide.url} 
-                  alt={slide.category} 
+                <img
+                  src={slide.url}
+                  alt={slide.category}
                   className="w-full h-full object-cover"
                 />
                 {photoTags[slide.url] && (
@@ -773,40 +772,40 @@ export function PortfolioHero() {
             ))}
           </div>
         ) : (
-          <img 
-            src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80" 
-            alt="Sunrise PG Room" 
+          <img
+            src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80"
+            alt="Sunrise PG Room"
             className="absolute inset-0 w-full h-full object-cover brightness-75 dark:brightness-50 opacity-60"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-teal-50/85 via-teal-50/50 to-transparent dark:from-slate-950 dark:via-slate-950/70 dark:to-transparent transition-colors duration-200" />
-        
+
         {/* Carousel indicators */}
         {allPhotos.length > 1 && (
           <div className="absolute bottom-4 right-6 z-20 flex gap-1">
             {allPhotos.map((_, i) => (
-              <button 
-                key={i} 
+              <button
+                key={i}
                 onClick={() => setActiveSlide(i)}
-                className={`w-2 h-2 rounded-full transition-all ${activeSlide === i ? 'bg-[#14b8a6] w-4' : 'bg-white/40'}`} 
+                className={`w-2 h-2 rounded-full transition-all ${activeSlide === i ? 'bg-[#14b8a6] w-4' : 'bg-white/40'}`}
               />
             ))}
           </div>
         )}
- 
+
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 space-y-5 w-full">
           <Badge className="bg-[#14b8a6] text-white py-1 px-3.5 text-[10px] font-extrabold uppercase tracking-wider rounded border-none shadow-sm">PREMIUM CO-LIVING</Badge>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
             {pgName}
           </h1>
           <p className="text-sm md:text-lg text-slate-700 dark:text-slate-200 max-w-lg italic font-medium">"{tagline}"</p>
- 
-          
+
+
           <div className="flex items-center gap-3 flex-wrap pt-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/10 dark:bg-white/10 backdrop-blur-md border border-slate-900/10 dark:border-white/15 text-xs text-slate-800 dark:text-white font-medium">
               <MapPin className="w-4 h-4 text-[#14b8a6]" /> Koramangala 4th Block, Bengaluru
             </span>
- 
+
             <a href="#map-commute-section" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d1fae5] dark:bg-emerald-950/30 border border-[#10b981]/20 dark:border-emerald-500/20 text-xs text-[#047857] dark:text-emerald-400 font-bold hover:bg-[#10b981]/15 transition-all">
               <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
               <span>{commuteWalkTime} away from your office ({commuteDestination})</span>
@@ -836,9 +835,9 @@ export function PortfolioHero() {
           </div>
         </div>
       </div>
- 
+
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 space-y-16">
- 
+
         {/* SECTION: PREFERRED SHARING SPACE SHOWCASE */}
         <section className="space-y-6 bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm text-left transition-colors duration-200">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 dark:border-white/5 pb-4">
@@ -853,7 +852,7 @@ export function PortfolioHero() {
                   let textClass = '';
                   let borderClass = '';
                   let indicatorColor = '';
-                  
+
                   if (vac === 0) {
                     bgClass = 'bg-rose-50 dark:bg-rose-950/20';
                     textClass = 'text-rose-700 dark:text-rose-400';
@@ -870,7 +869,7 @@ export function PortfolioHero() {
                     borderClass = 'border-emerald-200 dark:border-emerald-800/30';
                     indicatorColor = 'bg-emerald-500';
                   }
- 
+
                   return (
                     <Badge className={`${bgClass} ${textClass} ${borderClass} border font-extrabold text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm transition-all duration-300`}>
                       <span className={`w-2 h-2 rounded-full ${indicatorColor} animate-pulse`} />
@@ -881,17 +880,16 @@ export function PortfolioHero() {
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Explore room galleries and video walkthroughs by occupancy preferences</p>
             </div>
-            
+
             <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-white/5">
               {([1, 2, 3, 4] as const).map(num => (
                 <button
                   key={num}
                   onClick={() => setPrefSharing(num)}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                    prefSharing === num 
-                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow' 
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${prefSharing === num
+                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
+                    }`}
                 >
                   {num === 1 ? 'Single' : num === 2 ? 'Double' : num === 3 ? '3 Sharing' : '4 Sharing'}
                 </button>
@@ -906,18 +904,18 @@ export function PortfolioHero() {
               <div className={`grid grid-cols-1 ${videoUrl ? 'md:grid-cols-2' : ''} gap-4 w-full`}>
                 {/* Photo Gallery Card */}
                 {(() => {
-                  const photos = categoryMedia[`${prefSharing} Sharing`] || 
-                                 (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
-                                  prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
-                                  prefSharing === 4 ? ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80'] :
-                                  ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
+                  const photos = categoryMedia[`${prefSharing} Sharing`] ||
+                    (prefSharing === 1 ? ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] :
+                      prefSharing === 2 ? ['https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=600&q=80'] :
+                        prefSharing === 4 ? ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80'] :
+                          ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80']);
                   return (
-                    <div 
+                    <div
                       className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[300px] max-h-[360px] cursor-pointer group shadow-sm hover:shadow-md hover:border-primary-500/40 dark:hover:border-primary-400/40 transition-all duration-300"
                       onClick={() => openLightbox('photo')}
                     >
-                      <img 
-                        src={photos[0]} 
+                      <img
+                        src={photos[0]}
                         alt={`${prefSharing} sharing room`}
                         className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                       />
@@ -934,15 +932,15 @@ export function PortfolioHero() {
                     </div>
                   );
                 })()}
- 
+
                 {/* Video Tour Card */}
                 {videoUrl && (
-                  <div 
+                  <div
                     className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[300px] max-h-[360px] cursor-pointer group shadow-sm hover:shadow-md hover:border-primary-500/40 dark:hover:border-primary-400/40 transition-all duration-300"
                     onClick={() => openLightbox('video')}
                   >
-                    <video 
-                      src={videoUrl} 
+                    <video
+                      src={videoUrl}
                       className="w-full h-full object-cover bg-black pointer-events-none"
                     />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300" />
@@ -956,26 +954,26 @@ export function PortfolioHero() {
                 )}
               </div>
             </div>
- 
+
             {/* Right: details, pricing and booking quick card (4 cols) */}
             <div className="lg:col-span-4 flex flex-col justify-between p-6 rounded-xl border border-slate-200 dark:border-white/10 bg-[#f8fafc] dark:bg-slate-800/50 transition-colors">
               <div className="space-y-4">
                 <Badge className="bg-[#14b8a6] text-white border-none py-1 px-3 text-[9px] font-bold uppercase tracking-wider rounded">
                   {prefSharing === 1 ? 'Private Suite' : prefSharing === 2 ? 'Double Comfort' : prefSharing === 3 ? 'Triple Shared' : 'Quad Shared'}
                 </Badge>
-                
+
                 <div>
                   <h3 className="text-xl font-extrabold text-slate-800 dark:text-white">
                     {prefSharing === 1 ? 'Single Room' : prefSharing === 2 ? 'Double Sharing' : prefSharing === 3 ? 'Triple Sharing' : 'Quad Sharing (4 Sharing)'}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Fully furnished premium layout style</p>
                 </div>
- 
+
                 <div className="space-y-2 border-t border-b border-slate-200/60 dark:border-white/10 py-3 text-left">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-400 dark:text-slate-500 font-medium">Monthly Price:</span>
                     <span className="text-lg font-black text-[#14b8a6]">
-                       ₹{prefSharing === 1 ? '8,500' : prefSharing === 2 ? '6,500' : prefSharing === 3 ? '5,500' : '4,500'}/mo
+                      ₹{prefSharing === 1 ? '8,500' : prefSharing === 2 ? '6,500' : prefSharing === 3 ? '5,500' : '4,500'}/mo
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
@@ -989,7 +987,7 @@ export function PortfolioHero() {
                     </span>
                   </div>
                 </div>
- 
+
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Inclusions</p>
                   <div className="flex gap-1.5 flex-wrap">
@@ -1001,9 +999,9 @@ export function PortfolioHero() {
                   </div>
                 </div>
               </div>
- 
+
               <a href="#cta-section" onClick={(e) => { e.preventDefault(); scrollToSection('cta-section'); }} className="w-full mt-6 block">
-                <Button 
+                <Button
                   className="w-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-bold uppercase tracking-wider text-xs h-11 rounded-xl shadow-md transition-all active:scale-98 cursor-pointer border-none"
                 >
                   Schedule Visit for this room →
@@ -1012,7 +1010,7 @@ export function PortfolioHero() {
             </div>
           </div>
         </section>
-             {/* SECTION: INTERACTIVE FLOOR PLAN & ROOM SELECTION */}
+        {/* SECTION: INTERACTIVE FLOOR PLAN & ROOM SELECTION */}
         <section className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
             <div>
@@ -1021,12 +1019,12 @@ export function PortfolioHero() {
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tap room boxes to inspect real-time bed vacancies, ventilation and orientation</p>
             </div>
-            
+
             <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 text-xs font-bold text-orange-600 dark:text-orange-400 animate-pulse">
               🔥 Urgency Alert: Only 2 beds remaining on {activeFloor}!
             </span>
           </div>
- 
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             {/* Blueprint rendering container */}
             <div className="lg:col-span-2 p-5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 space-y-4 shadow-sm flex flex-col justify-between transition-colors duration-200">
@@ -1038,18 +1036,17 @@ export function PortfolioHero() {
                       <button
                         key={fl}
                         onClick={() => { setActiveFloor(fl); setSelectedCellCoords(null); }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border whitespace-nowrap transition-all shadow-sm cursor-pointer ${
-                          activeFloor === fl 
-                            ? 'bg-[#14b8a6] text-white border-[#14b8a6]' 
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border whitespace-nowrap transition-all shadow-sm cursor-pointer ${activeFloor === fl
+                            ? 'bg-[#14b8a6] text-white border-[#14b8a6]'
                             : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-355 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700'
-                        }`}
+                          }`}
                       >
                         🏢 {fl}
                       </button>
                     ))}
                   </div>
                 </div>
- 
+
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Filter Sharing Options</span>
                   <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
@@ -1057,11 +1054,10 @@ export function PortfolioHero() {
                       <button
                         key={opt}
                         onClick={() => { setOccupancyFilter(opt); setSelectedCellCoords(null); }}
-                        className={`px-2.5 py-1 text-[10px] rounded-full border whitespace-nowrap transition-all font-bold cursor-pointer ${
-                          occupancyFilter === opt 
-                            ? 'bg-[#10b981] text-white border-[#10b981] shadow-sm' 
+                        className={`px-2.5 py-1 text-[10px] rounded-full border whitespace-nowrap transition-all font-bold cursor-pointer ${occupancyFilter === opt
+                            ? 'bg-[#10b981] text-white border-[#10b981] shadow-sm'
                             : 'bg-slate-105 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
+                          }`}
                       >
                         {opt === 'All' ? 'All Layouts' : opt === 'Common' ? 'Common Areas' : `${opt} Sharing`}
                       </button>
@@ -1069,13 +1065,13 @@ export function PortfolioHero() {
                   </div>
                 </div>
               </div>
- 
+
               {/* Visual blueprint drawing board */}
               <div className="p-4 bg-slate-55 dark:bg-slate-950/40 rounded-lg border border-slate-200 dark:border-white/5 overflow-auto flex justify-center scrollbar-none flex-grow mt-4">
-                <div 
+                <div
                   className="relative border border-slate-300 dark:border-white/10 bg-[#f8fafc] dark:bg-slate-950 select-none rounded shadow-inner"
                   style={{
-                    width: `${canvasCols * mobileCellSize}px`, 
+                    width: `${canvasCols * mobileCellSize}px`,
                     height: `${canvasRows * mobileCellSize}px`,
                     backgroundImage: theme === 'light'
                       ? `linear-gradient(to right, #e2e8f0 0.5px, transparent 0.5px), linear-gradient(to bottom, #e2e8f0 0.5px, transparent 0.5px)`
@@ -1091,7 +1087,7 @@ export function PortfolioHero() {
                     const width = room.w * mobileCellSize;
                     const height = room.h * mobileCellSize;
                     const isTextLabel = room.type === 'Text label';
- 
+
                     return (
                       <div
                         key={room.id}
@@ -1224,27 +1220,27 @@ export function PortfolioHero() {
                         <X className="w-4 h-4" />
                       </button>
                     </div>
- 
+
                     <div className="space-y-3.5 text-xs flex-grow py-4">
                       <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                         <span className="text-slate-400 dark:text-slate-500 font-medium">Layout Type:</span>
                         <span className="font-bold text-slate-800 dark:text-slate-200">{selectedRoomDetails.type}</span>
                       </div>
- 
+
                       <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                         <span className="text-slate-400 dark:text-slate-500 font-medium">Beds Config:</span>
                         <span className="font-bold text-[#047857] bg-[#d1fae5] dark:bg-emerald-950/30 px-2 py-0.5 rounded text-[10px]">
                           🛏️ {selectedRoomDetails.beds} Sharing
                         </span>
                       </div>
- 
+
                       <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                         <span className="text-slate-400 dark:text-slate-500 font-medium">Ventilation & View:</span>
                         <span className="font-bold text-teal-700 dark:text-teal-400">
                           🛣️ Road Facing (Good ventilation)
                         </span>
                       </div>
- 
+
                       <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                         <span className="text-slate-400 dark:text-slate-500 font-medium">Real-time Vacancy:</span>
                         <Badge className="bg-[#10b981] text-white border-none text-[9px] font-bold">
@@ -1252,7 +1248,7 @@ export function PortfolioHero() {
                         </Badge>
                       </div>
                     </div>
- 
+
                     {selectedRoomDetails.beds > 0 && (
                       <div className="pt-2">
                         <a href="#cta-section" onClick={(e) => { e.preventDefault(); setSelectedCellCoords(null); scrollToSection('cta-section'); }} className="w-full">
@@ -1291,7 +1287,7 @@ export function PortfolioHero() {
             ))}
           </div>
         </section>
- 
+
         {/* SECTION: LOCATION & COMMUTE OPTIMIZER */}
         <section id="map-commute-section" className="space-y-6">
           <div className="text-center md:text-left">
@@ -1300,7 +1296,7 @@ export function PortfolioHero() {
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Check proximity to your office and transit networks</p>
           </div>
- 
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
             <div className="lg:col-span-1 flex flex-col justify-between gap-4">
               <Card className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 flex items-center gap-4 rounded-xl shadow-sm transition-colors duration-200">
@@ -1311,7 +1307,7 @@ export function PortfolioHero() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">away from your office ({commuteDestination})</p>
                 </div>
               </Card>
- 
+
               <Card className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 flex items-center gap-4 rounded-xl shadow-sm transition-colors duration-200">
                 <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center text-xl shadow-inner text-orange-500 dark:text-orange-400">🏍️</div>
                 <div className="text-left">
@@ -1320,7 +1316,7 @@ export function PortfolioHero() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Quick door-to-office transit</p>
                 </div>
               </Card>
- 
+
               <Card className="p-5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 flex items-center gap-4 rounded-xl shadow-sm transition-colors duration-200">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center text-xl shadow-inner text-blue-500 dark:text-blue-400">🚇</div>
                 <div className="text-left">
@@ -1330,7 +1326,7 @@ export function PortfolioHero() {
                 </div>
               </Card>
             </div>
- 
+
             <div className="lg:col-span-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm h-72 md:h-auto min-h-[300px] overflow-hidden relative transition-colors duration-200">
               <iframe
                 title="Google Map location"
@@ -1349,7 +1345,7 @@ export function PortfolioHero() {
 
         {/* SECTION: SOCIAL PROOF & HOUSE RULES */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          
+
           <section className="space-y-6 flex flex-col justify-between">
             <div className="text-left">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -1357,7 +1353,7 @@ export function PortfolioHero() {
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Read what active co-living residents say about our facilities</p>
             </div>
-            
+
             {testimonials.length > 0 ? (
               <div className="space-y-4 flex-1 mt-4">
                 {testimonials.map((rev, i) => (
@@ -1379,7 +1375,7 @@ export function PortfolioHero() {
               <p className="text-xs text-slate-400 italic text-center py-6">No testimonials published yet.</p>
             )}
           </section>
- 
+
           <section className="space-y-6">
             <div className="text-left">
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -1397,7 +1393,7 @@ export function PortfolioHero() {
             </div>
           </section>
         </div>
-          {/* Video Tour walkthrough if url defined */}
+        {/* Video Tour walkthrough if url defined */}
         {videoUrl && (
           <section className="space-y-6 pt-6">
             <div className="text-center">
@@ -1409,32 +1405,32 @@ export function PortfolioHero() {
             </div>
           </section>
         )}
- 
+
         {/* SECTION: PHYSICAL VISIT / CALL CTA SECTION */}
         <section id="cta-section" className="p-8 md:p-12 rounded-2xl flex flex-col items-center text-center space-y-6 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-md relative overflow-hidden max-w-4xl mx-auto transition-colors duration-200">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#14b8a6]/10 rounded-full translate-x-12 -translate-y-12" />
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
             Book Your Physical Tour
           </h2>
-          <p className="text-sm text-slate-555 dark:text-slate-400 max-w-md">Schedule a physical visit or request a call from our co-living operations manager immediately.</p>
+          <p className="text-sm text-slate-555 dark:text-slate-400 max-w-md">Schedule a physical visit or call our co-living operations manager immediately.</p>
           <span className="px-3.5 py-1 rounded bg-[#d1fae5] dark:bg-emerald-950/30 text-[#047857] dark:text-emerald-400 text-xs font-bold uppercase tracking-wider border border-[#10b981]/20 dark:border-emerald-500/20 shadow-sm">
             Only 2 room vacancies remaining this week
           </span>
- 
+
           <div className="w-full max-w-md space-y-4 pt-2">
             {!showConfirmVisit && !showCallback ? (
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={() => setShowConfirmVisit(true)} 
+                <Button
+                  onClick={() => setShowConfirmVisit(true)}
                   className="flex-1 h-11 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm border-none transition-all active:scale-98 cursor-pointer"
                 >
                   <CalendarCheck className="w-4 h-4" /> Schedule Visit
                 </Button>
-                <Button 
-                  onClick={() => setShowCallback(true)} 
+                <Button
+                  onClick={() => setShowCallback(true)}
                   className="flex-1 h-11 bg-slate-200 dark:bg-slate-800 hover:bg-slate-350 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 rounded-lg shadow-sm transition-all active:scale-98 cursor-pointer"
                 >
-                  <PhoneCall className="w-4 h-4 text-[#14b8a6]" /> REQUEST CALLBACK
+                  <PhoneCall className="w-4 h-4 text-[#14b8a6]" /> CALL NOW
                 </Button>
               </div>
             ) : showConfirmVisit ? (
@@ -1445,11 +1441,10 @@ export function PortfolioHero() {
                     <button
                       key={d}
                       onClick={() => setVisitDate(d)}
-                      className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all border text-xs font-bold cursor-pointer ${
-                        visitDate === d 
-                          ? 'bg-primary-500 text-white border-primary-500 shadow' 
+                      className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all border text-xs font-bold cursor-pointer ${visitDate === d
+                          ? 'bg-primary-500 text-white border-primary-500 shadow'
                           : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
+                        }`}
                     >
                       {d}
                     </button>
@@ -1460,17 +1455,16 @@ export function PortfolioHero() {
                     <button
                       key={t}
                       onClick={() => setVisitTime(t)}
-                      className={`py-2 rounded-lg transition-all border font-bold text-center text-xs cursor-pointer ${
-                        visitTime === t 
-                          ? 'bg-primary-500 text-white border-primary-500 shadow' 
+                      className={`py-2 rounded-lg transition-all border font-bold text-center text-xs cursor-pointer ${visitTime === t
+                          ? 'bg-primary-500 text-white border-primary-500 shadow'
                           : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
+                        }`}
                     >
                       {t}
                     </button>
                   ))}
                 </div>
-                <Button 
+                <Button
                   className="w-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white mt-2 font-bold uppercase tracking-wider text-xs h-10 rounded-lg shadow border-none transition-all active:scale-98 cursor-pointer"
                   onClick={() => {
                     setCustomAlert({ show: true, title: 'Visit Tour Scheduled', message: `Physical visit tour scheduled for ${visitDate} at ${visitTime}!` });
@@ -1482,16 +1476,16 @@ export function PortfolioHero() {
               </div>
             ) : (
               <div className="bg-slate-50 dark:bg-slate-950/40 p-5 rounded-xl space-y-3 text-left border border-slate-200 dark:border-white/10 shadow-inner transition-colors">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Manager will call you back shortly</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">We will initiate a callback request to the verification phone number entered during portal gate entrance login.</p>
-                <Button 
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Manager will call you shortly</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">We will initiate a call request to the verification phone number entered during portal gate entrance login.</p>
+                <Button
                   className="w-full bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-bold uppercase tracking-wider text-xs h-10 rounded-lg shadow border-none transition-all active:scale-98 cursor-pointer"
                   onClick={() => {
-                    setCustomAlert({ show: true, title: 'Callback Requested', message: 'Callback request registered! Expect a call within 15 minutes.' });
+                    setCustomAlert({ show: true, title: 'Call Requested', message: 'Call request registered! Expect a call within 15 minutes.' });
                     setShowCallback(false);
                   }}
                 >
-                  Confirm Callback Request
+                  Confirm Call Request
                 </Button>
               </div>
             )}
@@ -1526,17 +1520,17 @@ export function PortfolioHero() {
 
       {/* COHESIVE LEAD CAPTURE POPUP MODAL (LIGHT/DARK THEMED) */}
       {showLeadPopup && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/70 backdrop-blur-sm p-4 overflow-y-auto"
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
         >
-          <div 
+          <div
             className="relative max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl p-5 md:p-6 text-left space-y-3.5 max-h-[92vh] overflow-y-auto overscroll-contain transition-colors duration-200"
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
           >
-            
+
             {/* Header info */}
             <div>
               <div className="flex items-center justify-between">
@@ -1551,7 +1545,7 @@ export function PortfolioHero() {
                 Enter your details to view rooms blueprint and vacancies at {pgName}
               </p>
             </div>
- 
+
             {/* Form */}
             <form onSubmit={handleLeadSubmit} className="space-y-3 text-left">
               {/* Name */}
@@ -1568,7 +1562,7 @@ export function PortfolioHero() {
                   className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 focus:outline-none focus:ring-1 focus:ring-[#14b8a6] bg-slate-50 dark:bg-slate-800 text-xs text-slate-800 dark:text-white font-semibold transition-colors duration-200"
                 />
               </div>
- 
+
               {/* Phone */}
               <div>
                 <label className="text-[9px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400 dark:text-slate-500">
@@ -1589,7 +1583,7 @@ export function PortfolioHero() {
                   />
                 </div>
               </div>
- 
+
               {/* Look for sharing */}
               <div>
                 <label className="text-[9px] font-extrabold uppercase tracking-wider block mb-1 text-slate-400 dark:text-slate-500">
@@ -1606,7 +1600,7 @@ export function PortfolioHero() {
                   <option value="Quad">Quad Sharing (4 Sharing)</option>
                 </select>
               </div>
- 
+
               {/* Autocomplete Office Search */}
               <div className="relative pt-2">
                 <div className="relative border-2 border-[#14b8a6] rounded-xl bg-white dark:bg-slate-900 px-3 py-2 transition-colors duration-200">
@@ -1632,7 +1626,7 @@ export function PortfolioHero() {
                     </span>
                   </div>
                 </div>
-                
+
                 {showSuggestions && (
                   <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 shadow-xl z-50 overflow-hidden text-slate-800 dark:text-white transition-colors duration-200">
                     <div className="flex justify-between items-center px-4 py-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-wider">
@@ -1641,8 +1635,8 @@ export function PortfolioHero() {
                     </div>
                     <div className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
                       {dynamicSuggestions.map((item, idx) => (
-                        <div 
-                          key={idx} 
+                        <div
+                          key={idx}
                           onClick={() => {
                             setAddressSearch(item.bold + item.normal);
                             setShowSuggestions(false);
@@ -1661,7 +1655,7 @@ export function PortfolioHero() {
                   </div>
                 )}
               </div>
- 
+
               {/* Option to look the PG location in maps */}
               <div className="pt-2">
                 <button
@@ -1672,7 +1666,7 @@ export function PortfolioHero() {
                   <MapPin className="w-3.5 h-3.5" />
                   {showPGMap ? 'Close PG Map View' : 'View PG Locations in Google Maps'}
                 </button>
-                
+
                 {showPGMap && (
                   <div className="mt-2 h-40 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner transition-all">
                     <iframe
@@ -1685,10 +1679,10 @@ export function PortfolioHero() {
                   </div>
                 )}
               </div>
- 
-              <Button 
-                type="submit" 
-                className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 active:scale-98 transition-all rounded-lg shadow-md border-none shadow-teal-500/10 cursor-pointer text-white" 
+
+              <Button
+                type="submit"
+                className="w-full h-10 mt-3 text-xs font-bold uppercase tracking-wider hover:opacity-90 active:scale-98 transition-all rounded-lg shadow-md border-none shadow-teal-500/10 cursor-pointer text-white"
                 style={{ background: '#14b8a6' }}
               >
                 Explore properties now →
@@ -1710,8 +1704,8 @@ export function PortfolioHero() {
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{customAlert.message}</p>
             </div>
             <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-white/10">
-              <Button 
-                style={{ background: '#10b981', color: '#FFFFFF' }} 
+              <Button
+                style={{ background: '#10b981', color: '#FFFFFF' }}
                 className="w-full font-bold uppercase tracking-wider text-xs h-10 rounded-lg border-none active:scale-98 transition-all hover:opacity-90 cursor-pointer"
                 onClick={() => setCustomAlert({ show: false, title: '', message: '' })}
               >
@@ -1735,7 +1729,7 @@ export function PortfolioHero() {
               <span className="font-semibold bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
                 Media {lightbox.currentIndex + 1} of {lightbox.mediaList.length}
               </span>
-              <button 
+              <button
                 onClick={() => setLightbox({ show: false, currentIndex: 0, mediaList: [] })}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-lg"
               >
@@ -1746,15 +1740,15 @@ export function PortfolioHero() {
             {/* Media Content Area */}
             <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
               {lightbox.mediaList[lightbox.currentIndex].type === 'photo' ? (
-                <img 
-                  src={lightbox.mediaList[lightbox.currentIndex].url} 
+                <img
+                  src={lightbox.mediaList[lightbox.currentIndex].url}
                   alt="Gallery Preview"
                   className="w-full h-full object-contain"
                 />
               ) : (
-                <video 
-                  src={lightbox.mediaList[lightbox.currentIndex].url} 
-                  controls 
+                <video
+                  src={lightbox.mediaList[lightbox.currentIndex].url}
+                  controls
                   autoPlay
                   className="w-full h-full object-contain"
                 />
@@ -1766,10 +1760,10 @@ export function PortfolioHero() {
               <p className="text-sm font-semibold tracking-wide italic text-slate-300">
                 ✨ {lightbox.mediaList[lightbox.currentIndex].tag || 'Preview Media'}
               </p>
-              
+
               <div className="flex items-center gap-2">
-                <Button 
-                  style={{ background: '#14b8a6', color: '#FFFFFF' }} 
+                <Button
+                  style={{ background: '#14b8a6', color: '#FFFFFF' }}
                   className="px-6 font-bold uppercase tracking-wider text-xs h-10 rounded-xl"
                   onClick={handleNextMedia}
                 >

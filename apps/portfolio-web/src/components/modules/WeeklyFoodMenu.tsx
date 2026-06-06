@@ -1,6 +1,7 @@
 'use client';
 
 import { ChefHat } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface MealPlan {
   day: string;
@@ -68,7 +69,6 @@ export function WeeklyFoodMenu({
   return (
     <div className="w-full bg-white dark:bg-navy-deep/20 py-12 md:py-16 border-b border-border-subtle dark:border-outline-variant transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-6 text-left space-y-8">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white mb-2">
@@ -78,13 +78,9 @@ export function WeeklyFoodMenu({
               Fresh, healthy, and locally-sourced meals prepared daily in our centralized kitchen.
             </p>
           </div>
-          {/* Powered by stayfloww */}
-          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
-            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
-            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
-              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
-              <span>stayfloww</span>
-            </div>
+          <div className="flex items-center gap-1 opacity-70">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+            <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
           </div>
         </div>
 
@@ -142,9 +138,9 @@ export function WeeklyFoodMenu({
               <ChefHat size={28} />
             </div>
             <div>
-              <h4 className="font-bold text-navy-deep dark:text-white mb-1">stayfloww Smart Food Planning</h4>
+              <h4 className="font-bold text-navy-deep dark:text-white mb-1">Smart Food Planning</h4>
               <p className="text-on-surface-variant dark:text-outline-variant text-sm leading-relaxed">
-                Enjoy hassle-free meal management. Once onboarded, residents can easily view, select preferences, or skip daily meals directly via the stayfloww Mobile App to help us ensure high quality and minimize food waste.
+                Enjoy hassle-free meal management. Once onboarded, residents can easily view, select preferences, or skip daily meals directly via the Mobile App to help us ensure high quality and minimize food waste.
               </p>
             </div>
           </div>

@@ -42,7 +42,7 @@ export function CTASection({
               Book Your Physical Tour
             </h2>
             <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Schedule a physical visit or request a call from our co-living operations manager immediately.
+              Schedule a physical visit or call our co-living operations manager immediately.
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export function CTASection({
               className="w-full sm:w-1/2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-250 border border-slate-350 dark:border-slate-700 font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer uppercase text-xs tracking-wider shadow-sm"
             >
               <Phone size={16} />
-              Request Callback
+              Call Now
             </button>
           </div>
         </div>

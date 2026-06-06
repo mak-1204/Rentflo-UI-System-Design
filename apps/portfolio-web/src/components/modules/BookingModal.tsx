@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -163,41 +164,67 @@ export function BookingModal({
               </div>
             </div>
 
-            <button
-              onClick={handleBook}
-              className="w-full bg-stayflow-teal hover:bg-stayflow-teal-dark text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 text-sm cursor-pointer border-none mt-6"
-            >
-              <Calendar className="w-4 h-4" />
-              Confirm Booking
-            </button>
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setBookingType('tour');
+                  handleBook();
+                }}
+                className="bg-stayflow-teal hover:bg-stayflow-teal-dark text-white py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 shadow-md text-xs cursor-pointer border-none"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Schedule Visit
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBookingType('callback');
+                  handleBook();
+                }}
+                className="border-2 border-stayflow-teal text-stayflow-teal hover:bg-stayflow-teal/5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer bg-transparent"
+              >
+                <Clock className="w-3.5 h-3.5" />
+                Call Now
+              </button>
+            </div>
           </div>
         ) : (
           /* Step 2: Confirmation Screen */
           <div className="space-y-6 flex-grow flex flex-col justify-center items-center text-center py-6 animate-in zoom-in-95 duration-300">
-            <CheckCircle2 className="w-16 h-16 text-teal-500 animate-bounce" />
+            <CheckCircle2 className="w-16 h-16 text-emerald-500 animate-bounce" />
             <div className="space-y-2">
               <h3 className="text-2xl font-black text-navy-deep dark:text-white font-heading">
-                Tour Scheduled!
+                {bookingType === 'tour' ? 'Tour Scheduled!' : 'Call Scheduled!'}
               </h3>
               <p className="text-xs text-slate-400 max-w-sm">
-                Your physical tour at {pgName} has been successfully scheduled.
+                {bookingType === 'tour'
+                  ? `Your physical tour at ${pgName} has been successfully scheduled.`
+                  : `We have received your request. Our team will call you shortly.`}
               </p>
             </div>
 
-            <div className="w-full bg-slate-50 dark:bg-navy-deep/40 border border-slate-100 dark:border-outline-variant/20 rounded-2xl p-4 space-y-3.5 text-xs text-slate-700 dark:text-slate-350 text-left">
+            <div className="w-full bg-slate-50 dark:bg-navy-deep/40 border border-slate-100 dark:border-outline-variant/20 rounded-2xl p-4 space-y-3.5 text-xs text-slate-700 dark:text-slate-355 text-left">
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-4 h-4 text-stayflow-teal" />
-                <span className="font-bold">{formattedBookingDate}</span>
+                <span className="font-bold">{bookingType === 'tour' ? 'Preferred Date:' : 'Date:'} {formattedBookingDate}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Clock className="w-4 h-4 text-stayflow-teal" />
-                <span className="font-bold">{selectedTime}</span>
+                <span className="font-bold">{bookingType === 'tour' ? 'Time Slot:' : 'Time:'} {selectedTime}</span>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-400 italic">
-              * A stayfloww manager will call you shortly to coordinate the visit details.
-            </p>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[11px] text-slate-450 italic">
+                * Our support team will contact you shortly to coordinate details.
+              </p>
+              {/* Subtle branding */}
+              <div className="flex items-center gap-1 opacity-70">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+                <img src={logoImg.src} alt="stayfloww" className="h-3 w-auto object-contain dark:brightness-0 dark:invert" />
+              </div>
+            </div>
 
             <button
               onClick={onClose}

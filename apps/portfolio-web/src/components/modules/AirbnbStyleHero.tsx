@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface AirbnbStyleHeroProps {
   pgName: string;
@@ -27,6 +28,7 @@ export function AirbnbStyleHero({
 }: AirbnbStyleHeroProps & { leadData?: any }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [activeMobileIndex, setActiveMobileIndex] = useState(2);
 
   const displayImages = images && images.length > 0
     ? images
@@ -94,12 +96,17 @@ export function AirbnbStyleHero({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div className="space-y-2">
             <h1 className="text-3xl md:text-5xl font-black text-navy-deep dark:text-white tracking-tight">
-              Hello {greetingName}, welcome to {pgName}
+              Hello {greetingName}, welcome to <span className="bg-gradient-to-r from-[#ffc3a0] via-[#ff6a88] to-[#c084fc] bg-clip-text text-transparent animate-gradient-shift">{pgName}</span>
             </h1>
-            <p className="text-base md:text-lg text-on-surface-variant dark:text-outline-variant flex items-center gap-2">
-              <span className="material-symbols-outlined text-stayflow-teal">location_on</span>
-              {location}
-            </p>
+            <a 
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base md:text-lg text-on-surface-variant dark:text-outline-variant hover:text-[#228822] dark:hover:text-white flex items-center gap-2 transition-colors cursor-pointer group no-underline w-fit"
+            >
+              <span className="material-symbols-outlined text-stayflow-teal group-hover:scale-110 transition-transform">location_on</span>
+              <span className="hover:underline">{location}</span>
+            </a>
           </div>
           <div className="flex gap-3 shrink-0">
             <span className="px-4 py-1.5 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap">
@@ -111,8 +118,8 @@ export function AirbnbStyleHero({
           </div>
         </div>
 
-        {/* Airbnb style Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[320px] sm:h-[450px] md:h-[550px] lg:h-[600px] rounded-2xl overflow-hidden shadow-lg">
+        {/* Desktop Presentation: Airbnb style Grid */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[320px] sm:h-[450px] md:h-[550px] lg:h-[600px] rounded-2xl overflow-hidden shadow-lg">
           {/* Main image */}
           <div 
             className="md:col-span-3 md:row-span-2 relative overflow-hidden group cursor-pointer"
@@ -203,6 +210,59 @@ export function AirbnbStyleHero({
           </div>
         </div>
 
+        {/* Mobile Presentation: Interactive Accordion */}
+        <div className="flex flex-col gap-3.5 md:hidden w-full">
+          {[
+            { name: 'Common Area', img: displayImages[0] },
+            { name: 'Corridor', img: displayImages[1] || displayImages[0] },
+            { name: 'Play Area', img: displayImages[2] || displayImages[0] }
+          ].map((card, i) => {
+            const isExpanded = activeMobileIndex === i;
+            return (
+              <div
+                key={i}
+                className={`relative w-full rounded-2xl overflow-hidden shadow-md cursor-pointer transition-all duration-500 ease-in-out ${
+                  isExpanded ? 'h-[280px] shadow-lg' : 'h-[80px]'
+                }`}
+                onClick={() => {
+                  if (isExpanded) {
+                    setCurrentImageIndex(i);
+                    setShowAllPhotos(true);
+                  } else {
+                    setActiveMobileIndex(i);
+                  }
+                }}
+              >
+                <img
+                  src={card.img}
+                  alt={card.name}
+                  className="w-full h-full object-cover object-center transition-transform duration-700"
+                />
+                
+                {/* Dimming overlay to make badge pop */}
+                <div
+                  className={`absolute inset-0 transition-colors duration-500 ${
+                    isExpanded ? 'bg-black/10' : 'bg-black/35 hover:bg-black/30'
+                  }`}
+                />
+
+                {/* Badge Label */}
+                <div
+                  className={`absolute left-4 transition-all duration-500 ease-in-out z-10 ${
+                    isExpanded 
+                      ? 'bottom-4 scale-100' 
+                      : 'top-1/2 -translate-y-1/2 scale-95 origin-left'
+                  }`}
+                >
+                  <span className="bg-neutral-900/85 backdrop-blur-sm text-white px-4.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider border border-white/10 shadow-md">
+                    {card.name}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* Detailed Property Description */}
         <div className="max-w-4xl border-t border-border-subtle dark:border-outline-variant pt-8 mt-4 space-y-6">
           <div className="pb-6 border-b border-border-subtle dark:border-outline-variant">
@@ -214,34 +274,61 @@ export function AirbnbStyleHero({
             </p>
           </div>
 
-          {/* What this place offers */}
-          <div className="grid grid-cols-2 gap-6 pb-6 border-b border-border-subtle dark:border-outline-variant">
-            <div className="flex items-start gap-4">
-              <span className="material-symbols-outlined text-3xl text-stayflow-teal">bed</span>
-              <div>
-                <p className="font-bold text-navy-deep dark:text-white">Premium Single Rooms</p>
-                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Well designed layouts with work desks</p>
+          {/* Auto-scrolling Amenities Row (replaces old What this place offers) */}
+          <div className="pb-6 border-b border-border-subtle dark:border-outline-variant space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-on-surface-variant dark:text-outline-variant uppercase tracking-widest">
+                World-Class Amenities
+              </h3>
+              <div className="flex items-center gap-1 opacity-70">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+                <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
               </div>
             </div>
-            <div className="flex items-start gap-4">
-              <span className="material-symbols-outlined text-3xl text-stayflow-teal">wifi</span>
-              <div>
-                <p className="font-bold text-navy-deep dark:text-white">High Speed WiFi</p>
-                <p className="text-xs text-on-surface-variant dark:text-outline-variant">1 Gbps connection for remote working</p>
+            <div className="relative w-full flex overflow-x-hidden group py-1">
+              {/* Marquee Track 1 */}
+              <div className="animate-marquee flex gap-4 shrink-0 min-w-full justify-around group-hover:[animation-play-state:paused]">
+                {[
+                  { name: '1 Gbps WiFi', icon: 'wifi' },
+                  { name: 'Air Conditioned', icon: 'ac_unit' },
+                  { name: 'Daily Cleaning', icon: 'cleaning_services' },
+                  { name: 'In-house Laundry', icon: 'local_laundry_service' },
+                  { name: 'Smart LED TV', icon: 'tv' },
+                  { name: 'Gaming Lounge', icon: 'sports_esports' },
+                  { name: 'Power Backup', icon: 'power' },
+                  { name: 'CCTV Security', icon: 'videocam' },
+                  { name: 'Biometric Entry', icon: 'fingerprint' },
+                  { name: 'Parking Space', icon: 'local_parking' },
+                  { name: 'Rooftop Lounge', icon: 'deck' },
+                  { name: 'Chef Cooked Meals', icon: 'restaurant' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-surface-container-low dark:bg-navy-deep/60 px-4 py-2.5 rounded-xl border border-border-subtle dark:border-outline-variant/45 shadow-sm shrink-0">
+                    <span className="material-symbols-outlined text-stayflow-teal text-lg">{item.icon}</span>
+                    <span className="text-xs font-bold text-navy-deep dark:text-white whitespace-nowrap">{item.name}</span>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="material-symbols-outlined text-3xl text-stayflow-teal">verified_user</span>
-              <div>
-                <p className="font-bold text-navy-deep dark:text-white">24/7 Gate Security</p>
-                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Smart CCTV & security verified access</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="material-symbols-outlined text-3xl text-stayflow-teal">restaurant</span>
-              <div>
-                <p className="font-bold text-navy-deep dark:text-white">Chef Cooked Meals</p>
-                <p className="text-xs text-on-surface-variant dark:text-outline-variant">Breakfast, Lunch and Dinner daily</p>
+              {/* Duplicate Marquee Track 1 for seamless loop */}
+              <div className="animate-marquee2 absolute top-1 left-0 flex gap-4 shrink-0 min-w-full justify-around group-hover:[animation-play-state:paused]">
+                {[
+                  { name: '1 Gbps WiFi', icon: 'wifi' },
+                  { name: 'Air Conditioned', icon: 'ac_unit' },
+                  { name: 'Daily Cleaning', icon: 'cleaning_services' },
+                  { name: 'In-house Laundry', icon: 'local_laundry_service' },
+                  { name: 'Smart LED TV', icon: 'tv' },
+                  { name: 'Gaming Lounge', icon: 'sports_esports' },
+                  { name: 'Power Backup', icon: 'power' },
+                  { name: 'CCTV Security', icon: 'videocam' },
+                  { name: 'Biometric Entry', icon: 'fingerprint' },
+                  { name: 'Parking Space', icon: 'local_parking' },
+                  { name: 'Rooftop Lounge', icon: 'deck' },
+                  { name: 'Chef Cooked Meals', icon: 'restaurant' },
+                ].map((item, idx) => (
+                  <div key={`dup-${idx}`} className="flex items-center gap-2 bg-surface-container-low dark:bg-navy-deep/60 px-4 py-2.5 rounded-xl border border-border-subtle dark:border-outline-variant/45 shadow-sm shrink-0">
+                    <span className="material-symbols-outlined text-stayflow-teal text-lg">{item.icon}</span>
+                    <span className="text-xs font-bold text-navy-deep dark:text-white whitespace-nowrap">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

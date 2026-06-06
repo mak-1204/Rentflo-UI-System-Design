@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Compass } from 'lucide-react';
+import logoImg from '../../../logo.png';
 
 interface RoomRectangle {
   id: string;
@@ -358,13 +359,9 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
             Interactive Blueprint & Floor Plans
           </h2>
-          {/* Powered by stayfloww */}
-          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
-            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
-            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
-              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
-              <span>stayfloww</span>
-            </div>
+          <div className="flex items-center gap-1 opacity-70">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+            <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
           </div>
         </div>
         <p className="text-lg text-gray-600 dark:text-slate-400 mb-8">

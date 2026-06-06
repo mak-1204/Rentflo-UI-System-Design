@@ -77,11 +77,11 @@ export function Header({
   return (
     <>
       <header className="fixed top-0 left-0 right-0 w-full h-20 z-50 bg-white/95 dark:bg-navy-deep/95 backdrop-blur-md border-b border-border-subtle dark:border-outline-variant shadow-sm transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex justify-between items-center relative">
           {/* Left Brand Area */}
-          <div className="flex items-center gap-8">
-            <a 
-              className="flex items-center gap-3 relative cursor-pointer" 
+          <div className="flex items-center z-10">
+            <a
+              className="flex items-center gap-2 relative cursor-pointer"
               href="#hero"
               onClick={(e) => {
                 e.preventDefault();
@@ -92,20 +92,14 @@ export function Header({
                 });
               }}
             >
-              <div className="flex items-center gap-1.5 sm:gap-3">
-                <span className="text-sm sm:text-xl font-black uppercase tracking-wider text-navy-deep dark:text-white font-heading">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-xs sm:text-xl font-black uppercase tracking-wider text-navy-deep dark:text-white font-heading whitespace-nowrap">
                   {pgName}
                 </span>
-                <span className="hidden xs:inline text-slate-300 dark:text-outline-variant/30 text-lg font-light">|</span>
-                <div className="hidden xs:flex items-center gap-1.5 sm:gap-2">
-                  <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-slate-755 dark:text-slate-250 font-black whitespace-nowrap">
-                    POWERED BY
-                  </span>
-                  <img 
-                    alt="stayfloww Logo" 
-                    className="h-[10px] sm:h-[14px] w-auto object-contain dark:brightness-0 dark:invert"
-                    src={logoImg.src} 
-                  />
+                <span className="text-slate-300 dark:text-outline-variant/30 text-xs sm:text-lg font-light">|</span>
+                <div className="flex items-center gap-0.5 sm:gap-1 translate-y-[1px] sm:translate-y-[2px]">
+                  <span className="text-[6px] sm:text-[9px] font-bold text-slate-400 tracking-widest leading-none">By</span>
+                  <img src={logoImg.src} alt="stayfloww" className="h-[6px] sm:h-[10px] w-auto object-contain dark:brightness-0 dark:invert" />
                 </div>
               </div>
             </a>
@@ -134,11 +128,10 @@ export function Header({
                         });
                       }
                     }}
-                    className={`flex flex-col text-left justify-center h-full border-b-2 transition-all duration-200 ${
-                      isActive
-                        ? 'text-navy-deep dark:text-white border-navy-deep dark:border-white font-extrabold'
-                        : 'text-slate-500 hover:text-navy-deep dark:text-slate-400 dark:hover:text-white border-transparent font-bold'
-                    }`}
+                    className={`flex flex-col text-left justify-center h-full border-b-2 transition-all duration-200 ${isActive
+                      ? 'text-navy-deep dark:text-white border-navy-deep dark:border-white font-extrabold'
+                      : 'text-slate-500 hover:text-navy-deep dark:text-slate-400 dark:hover:text-white border-transparent font-bold'
+                      }`}
                   >
                     <span className="text-xs uppercase tracking-wider whitespace-nowrap">
                       {item.label}
@@ -150,14 +143,7 @@ export function Header({
 
             <div className="hidden lg:block w-px h-6 bg-border-subtle dark:bg-outline-variant/50"></div>
 
-            {/* Rating Pill */}
-            <div className="hidden md:flex items-center gap-1.5 bg-[#ECFDF5] dark:bg-emerald-950/20 text-[#047857] dark:text-emerald-450 px-3 py-1 rounded-full border border-[#D1FAE5] dark:border-emerald-900/30 shrink-0">
-              <Star className="w-3.5 h-3.5 fill-[#10B981] text-[#10B981]" />
-              <div className="flex flex-col text-[10px] font-extrabold leading-none">
-                <span>{rating.toFixed(1)}</span>
-                <span className="text-[7px] text-[#059669] dark:text-emerald-500 uppercase tracking-widest mt-0.5">Rating</span>
-              </div>
-            </div>
+
 
             {/* Phone Action */}
             <button
@@ -169,12 +155,12 @@ export function Header({
               <Phone size={16} />
             </button>
 
-            {/* Book Now Button */}
+            {/* Schedule a Visit Button */}
             <button
               onClick={onBookClick}
-              className="bg-stayflow-teal hover:bg-stayflow-teal-dark text-white px-3 sm:px-5 py-2.5 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-wider shadow transition-all cursor-pointer whitespace-nowrap shrink-0 border-none"
+              className="bg-stayflow-teal hover:bg-stayflow-teal-dark text-white px-3.5 sm:px-5.5 py-2.5 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-wider shadow transition-all cursor-pointer whitespace-nowrap shrink-0 border-none"
             >
-              Book Now
+              Schedule a Visit
             </button>
 
             {/* Mobile Hamburger Button */}
@@ -213,9 +199,8 @@ export function Header({
                       });
                     }
                   }}
-                  className={`text-lg font-bold pb-2 border-b border-border-subtle/40 dark:border-outline-variant/15 flex items-center justify-between ${
-                    isActive ? 'text-stayflow-teal' : 'text-slate-655 dark:text-slate-350'
-                  }`}
+                  className={`text-lg font-bold pb-2 border-b border-border-subtle/40 dark:border-outline-variant/15 flex items-center justify-between ${isActive ? 'text-stayflow-teal' : 'text-slate-655 dark:text-slate-350'
+                    }`}
                 >
                   <span>{item.label}</span>
                   <span className="text-xs">➔</span>
@@ -223,7 +208,7 @@ export function Header({
               );
             })}
           </nav>
-          
+
           <div className="space-y-6 pb-8">
             <div className="flex gap-4">
               <button
@@ -236,17 +221,6 @@ export function Header({
                 <Phone size={14} />
                 Call Owner
               </button>
-            </div>
-            
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-[9px] uppercase tracking-widest text-slate-400 font-extrabold">
-                POWERED BY
-              </span>
-              <img 
-                alt="stayfloww Logo" 
-                className="h-[12px] w-auto object-contain dark:brightness-0 dark:invert"
-                src={logoImg.src} 
-              />
             </div>
           </div>
         </div>

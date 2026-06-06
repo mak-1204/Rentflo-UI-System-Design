@@ -25,14 +25,6 @@ export function AmenitiesShowcase({
           <h2 className="text-2xl md:text-3xl font-bold text-navy-deep dark:text-white">
             World-Class Amenities
           </h2>
-          {/* Powered by stayfloww */}
-          <div className="flex items-center gap-1.5 bg-white/80 dark:bg-navy-deep/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle dark:border-outline-variant shadow-sm w-fit self-start sm:self-auto">
-            <span className="text-[8px] uppercase tracking-widest text-slate-500 font-extrabold">POWERED BY</span>
-            <div className="flex items-center gap-0.5 text-[#14b8a6] font-bold text-[10px]">
-              <span className="w-3.5 h-3.5 rounded bg-[#14b8a6] text-white flex items-center justify-center text-[9px] font-black">s</span>
-              <span>stayfloww</span>
-            </div>
-          </div>
         </div>
 
         {/* Horizontal scroll list on mobile, grid on larger screens */}
