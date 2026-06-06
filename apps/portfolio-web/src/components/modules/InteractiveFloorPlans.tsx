@@ -360,7 +360,7 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
             Interactive Blueprint & Floor Plans
           </h2>
           <div className="flex items-center gap-1 opacity-70">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+            <span className="text-[10px] font-bold text-slate-400 normal-case tracking-widest">by</span>
             <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
           </div>
         </div>

@@ -139,12 +139,12 @@ export function PreferredSharingSpaces({
               Living Options
             </h2>
             <div className="flex items-center gap-1 opacity-70">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">by</span>
+              <span className="text-[10px] font-bold text-slate-400 normal-case tracking-widest">by</span>
               <img src={logoImg.src} alt="stayfloww" className="h-3.5 w-auto object-contain dark:brightness-0 dark:invert" />
             </div>
           </div>
           <span className="text-xs font-bold text-on-surface-variant dark:text-outline-variant uppercase tracking-wider bg-surface-container dark:bg-navy-deep px-4.5 py-2 rounded-full">
-            All prices include utilities &amp; food
+            All prices include food (utilities extra)
           </span>
         </div>
 
@@ -250,50 +250,50 @@ export function PreferredSharingSpaces({
             )}
 
             {/* Bottom Thumbnails Scroll Tray */}
-            <div className="absolute bottom-4 inset-x-0 px-2 flex items-center justify-between z-20">
+            <div className="absolute bottom-4 inset-x-0 px-3 flex items-center justify-between z-20">
               {/* Scroll Left Button */}
               {currentRoom.media.length > 3 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     if (thumbnailScrollRef.current) {
-                      thumbnailScrollRef.current.scrollBy({ left: -80, behavior: 'smooth' });
+                      thumbnailScrollRef.current.scrollBy({ left: -100, behavior: 'smooth' });
                     }
                   }}
-                  className="bg-black/60 hover:bg-stayflow-teal text-white p-1 rounded-full cursor-pointer border-none flex items-center justify-center shrink-0 z-30"
+                  className="bg-black/70 hover:bg-stayflow-teal text-white p-2 rounded-full cursor-pointer border-none flex items-center justify-center shrink-0 z-30 shadow-lg"
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={18} />
                 </button>
               )}
 
               <div 
                 ref={thumbnailScrollRef}
-                className="flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth w-full px-2 py-1 justify-center"
+                className="flex items-center gap-4 overflow-x-auto hide-scrollbar scroll-smooth w-full px-2 py-2 justify-center"
               >
                 {currentRoom.media.map((item, idx) => {
                   const isActive = activeCardMediaIndex === idx;
                   return (
-                    <div key={idx} className="flex flex-col items-center gap-1 shrink-0">
+                    <div key={idx} className="flex flex-col items-center gap-1.5 shrink-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveCardMediaIndex(idx);
                         }}
-                        className={`w-14 h-9 sm:w-16 sm:h-10 rounded-lg overflow-hidden border-2 transition-all relative cursor-pointer ${
+                        className={`w-16 h-10 sm:w-24 sm:h-15 rounded-xl overflow-hidden border-2 sm:border-[2.5px] transition-all relative cursor-pointer ${
                           isActive 
-                            ? 'border-stayflow-teal scale-105 shadow-lg' 
+                            ? 'border-stayflow-teal scale-105 shadow-xl' 
                             : 'border-white/40 opacity-75 hover:opacity-100 hover:border-white'
                         }`}
                       >
                         {item.type === 'video' ? (
                           <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white relative">
-                            <Play className="w-3.5 h-3.5 fill-white text-white" />
+                            <Play className="w-4 h-4 fill-white text-white" />
                           </div>
                         ) : (
                           <img src={item.url} className="w-full h-full object-cover" alt="thumbnail" />
                         )}
                       </button>
-                      <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-colors ${
+                      <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest transition-colors ${
                         isActive ? 'text-stayflow-teal' : 'text-white/80'
                       }`}>
                         {item.label || (item.type === 'video' ? 'VIDEO' : `IMAGE ${idx + 1}`)}
@@ -309,12 +309,12 @@ export function PreferredSharingSpaces({
                   onClick={(e) => {
                     e.stopPropagation();
                     if (thumbnailScrollRef.current) {
-                      thumbnailScrollRef.current.scrollBy({ left: 80, behavior: 'smooth' });
+                      thumbnailScrollRef.current.scrollBy({ left: 100, behavior: 'smooth' });
                     }
                   }}
-                  className="bg-black/60 hover:bg-stayflow-teal text-white p-1 rounded-full cursor-pointer border-none flex items-center justify-center shrink-0 z-30"
+                  className="bg-black/70 hover:bg-stayflow-teal text-white p-2 rounded-full cursor-pointer border-none flex items-center justify-center shrink-0 z-30 shadow-lg"
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={18} />
                 </button>
               )}
             </div>

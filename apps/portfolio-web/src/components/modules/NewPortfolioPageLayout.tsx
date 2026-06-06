@@ -172,6 +172,7 @@ export function NewPortfolioPageLayout({
       <LeadCaptureModal 
         isHardGate={true} 
         onClose={handleLeadModalClose} 
+        pgName={pgName}
       />
     );
   }
@@ -183,6 +184,7 @@ export function NewPortfolioPageLayout({
         <LeadCaptureModal 
           isHardGate={false} 
           onClose={() => setShowLeadModal(false)} 
+          pgName={pgName}
         />
       )}
 
@@ -273,15 +275,18 @@ export function NewPortfolioPageLayout({
       {/* Footer */}
       <Footer pgName={pgName} />
 
-      {/* Floating CTA Button - Call Now (Unified for all screens) */}
-      <a
-        href="tel:9876543210"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-stayflow-teal hover:bg-stayflow-teal-dark text-white rounded-full shadow-2xl hover:scale-110 transition-all flex items-center justify-center z-45 border-none cursor-pointer"
-        title="Call Now"
-        aria-label="Call Now"
+      {/* Floating CTA Button - Schedule a Visit (Unified for all screens) */}
+      <button
+        onClick={() => {
+          setBookingDefaultDate('');
+          setShowBookingModal(true);
+        }}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-stayflow-teal hover:bg-stayflow-teal/90 text-white rounded-full shadow-2xl hover:scale-110 transition-all flex items-center justify-center z-45 border-none cursor-pointer"
+        title="Schedule a Visit"
+        aria-label="Schedule a Visit"
       >
         <Phone className="w-6 h-6 animate-pulse" />
-      </a>
+      </button>
 
       {/* Booking Modal */}
       <BookingModal

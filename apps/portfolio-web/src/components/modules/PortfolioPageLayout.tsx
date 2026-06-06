@@ -49,7 +49,7 @@ export function PortfolioPageLayout({
   return (
     <>
       {/* Lead Capture Modal */}
-      {showLeadModal && <LeadCaptureModal onClose={handleLeadModalClose} />}
+      {showLeadModal && <LeadCaptureModal onClose={handleLeadModalClose} pgName={pgName} />}
 
       {/* Header */}
       <Header />

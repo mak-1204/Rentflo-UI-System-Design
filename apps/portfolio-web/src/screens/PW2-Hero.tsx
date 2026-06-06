@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; import { useRouter } from 'next/navigation'; import { Star, MapPin, Wifi, Shield, Coffee, Compass, Check, ArrowRight, PhoneCall, CalendarCheck, X } from 'lucide-react'; import { Button } from '@stayflo/ui';
+import { useState, useEffect, useRef } from 'react'; import { useRouter } from 'next/navigation'; import { Star, MapPin, Wifi, Shield, Coffee, Compass, Check, ArrowRight, PhoneCall, CalendarCheck, X } from 'lucide-react'; import { Button } from '@stayflo/ui';
 import { Card } from '@stayflo/ui';
 import { Badge } from '@stayflo/ui';
 
@@ -232,7 +232,7 @@ export function PortfolioHero() {
       localStorage.setItem('stayflo_lead_submitted', 'true');
     }
     try {
-      await fetch('http://localhost:3000/api/leads', {
+      await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -345,25 +345,24 @@ export function PortfolioHero() {
     const delayDebounceFn = setTimeout(async () => {
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearch)}&limit=5`
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(addressSearch)}&lat=12.9345&lon=77.6269&limit=5`
         );
         const data = await response.json();
-        if (data && Array.isArray(data)) {
-          const formatted = data.map((item: any) => {
-            const displayName = item.display_name;
-            const commaIndex = displayName.indexOf(',');
-            let bold = displayName;
-            let normal = '';
-            if (commaIndex !== -1) {
-              bold = displayName.substring(0, commaIndex);
-              normal = displayName.substring(commaIndex);
-            }
-            return { bold, normal };
+        if (data && data.features) {
+          const formatted = data.features.map((feature: any) => {
+            const p = feature.properties;
+            const name = p.name || '';
+            const parts = [];
+            if (p.street) parts.push(p.street);
+            if (p.city) parts.push(p.city);
+            if (p.state) parts.push(p.state);
+            const normal = parts.length > 0 ? `, ${parts.join(', ')}` : '';
+            return { bold: name, normal };
           });
           setDynamicSuggestions(formatted);
         }
       } catch (error) {
-        console.error('Error fetching locations:', error);
+        console.error('Error fetching Photon locations:', error);
       }
     }, 450);
 
@@ -1650,7 +1649,7 @@ export function PortfolioHero() {
                       ))}
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-900 px-4 py-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-start text-[9px] text-slate-400 dark:text-slate-500 font-medium">
-                      <span>powered by Google</span>
+                      <span>powered by Photon</span>
                     </div>
                   </div>
                 )}

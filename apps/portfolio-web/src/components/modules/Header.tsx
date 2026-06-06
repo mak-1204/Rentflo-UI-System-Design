@@ -98,7 +98,7 @@ export function Header({
                 </span>
                 <span className="text-slate-300 dark:text-outline-variant/30 text-xs sm:text-lg font-light">|</span>
                 <div className="flex items-center gap-0.5 sm:gap-1 translate-y-[1px] sm:translate-y-[2px]">
-                  <span className="text-[6px] sm:text-[9px] font-bold text-slate-400 tracking-widest leading-none">By</span>
+                  <span className="text-[6px] sm:text-[9px] font-bold text-slate-400 tracking-widest leading-none">by</span>
                   <img src={logoImg.src} alt="stayfloww" className="h-[6px] sm:h-[10px] w-auto object-contain dark:brightness-0 dark:invert" />
                 </div>
               </div>

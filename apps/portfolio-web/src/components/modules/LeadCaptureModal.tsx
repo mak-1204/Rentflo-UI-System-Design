@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import logoImg from '../../../logo.png';
 
@@ -12,9 +12,11 @@ interface SuggestionItem {
 export function LeadCaptureModal({
   onClose,
   isHardGate = false,
+  pgName = 'Sunrise PG',
 }: {
   onClose?: () => void;
   isHardGate?: boolean;
+  pgName?: string;
 }) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +38,6 @@ export function LeadCaptureModal({
   const [dynamicSuggestions, setDynamicSuggestions] = useState<SuggestionItem[]>(mockSuggestions);
 
   const TOTAL_STEPS = 4;
-  const pgName = 'Sunrise PG';
 
   // Lock scroll when open
   useEffect(() => {
@@ -48,30 +49,36 @@ export function LeadCaptureModal({
     };
   }, []);
 
-  // Debounced address search via Nominatim
+  // Debounced address search via Photon API
   useEffect(() => {
     if (!formData.officeLocation || formData.officeLocation.length < 3) {
       setDynamicSuggestions(mockSuggestions);
       return;
     }
+
     const delay = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.officeLocation)}&limit=5`
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(formData.officeLocation)}&lat=12.9345&lon=77.6269&limit=5`
         );
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (data && data.features) {
           setDynamicSuggestions(
-            data.map((item: any) => {
-              const name = item.display_name as string;
-              const idx = name.indexOf(',');
-              return idx !== -1
-                ? { bold: name.slice(0, idx), normal: name.slice(idx) }
-                : { bold: name, normal: '' };
+            data.features.map((feature: any) => {
+              const p = feature.properties;
+              const name = p.name || '';
+              const parts = [];
+              if (p.street) parts.push(p.street);
+              if (p.city) parts.push(p.city);
+              if (p.state) parts.push(p.state);
+              const normal = parts.length > 0 ? `, ${parts.join(', ')}` : '';
+              return { bold: name, normal };
             })
           );
         }
-      } catch {/* ignore */}
+      } catch (err) {
+        console.error('Photon fetch failed:', err);
+      }
     }, 450);
     return () => clearTimeout(delay);
   }, [formData.officeLocation]);
@@ -96,18 +103,14 @@ export function LeadCaptureModal({
       localStorage.setItem('stayflo_lead_submitted', 'true');
     }
     try {
-      await fetch('http://localhost:3000/api/leads', {
+      await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pgId: 'prop-1',
           name: formData.name,
           phone: formData.phone,
-          preferredSharing:
-            formData.roomPreference === 'Single Occupancy' ? 1
-            : formData.roomPreference === 'Double Sharing' ? 2
-            : 3,
-          source: 'portfolio-web',
+          sharing_type: formData.roomPreference.toLowerCase().replace(' occupancy', '').replace(' sharing', ''),
           officeLocation: formData.officeLocation,
         }),
       });
@@ -142,15 +145,16 @@ export function LeadCaptureModal({
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
       >
-        {/* Top: progress */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-2">
-            <img src={logoImg.src} alt="logo" className="h-6 w-auto object-contain" />
-            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">
-              Step {step} of {TOTAL_STEPS}
-            </span>
+        {/* Top: PG name & Brand logo */}
+        <div className="flex flex-col items-center justify-center gap-1.5 mb-8 text-center">
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight leading-none uppercase">
+            {pgName}
+          </h1>
+          <div className="flex items-center justify-center gap-1.5 opacity-80">
+            <span className="text-[10px] font-bold text-slate-400 normal-case tracking-widest">by</span>
+            <img src={logoImg.src} alt="stayfloww" className="h-4 w-auto object-contain" />
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 mt-3">
             {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
               <div
                 key={s}
@@ -213,24 +217,23 @@ export function LeadCaptureModal({
           {step === 3 && (
             <div className="space-y-5" style={{ animation: 'fadeSlideIn 0.3s ease-out' }}>
               <label className="text-2xl font-extrabold text-slate-800 tracking-tight block leading-snug">
-                Hey {firstName},{' '}
-                <span className="text-teal-600">what's your room preference?</span>
+                Excellent {firstName},{' '}
+                <span className="text-teal-600">which occupancy do you prefer?</span>
               </label>
-              <div className="grid grid-cols-1 gap-3 pt-1">
-                {['Single Occupancy', 'Double Sharing', 'Triple Sharing'].map((option) => (
+              <p className="text-sm text-slate-400">Select your ideal room layout format.</p>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                {['Single Occupancy', 'Double Sharing', 'Triple Sharing', 'Quad Sharing'].map((option) => (
                   <button
                     key={option}
                     type="button"
                     onClick={() => setFormData({ ...formData, roomPreference: option })}
-                    className={`w-full p-4 text-left text-base font-semibold rounded-2xl border-2 transition-all duration-200 cursor-pointer ${
+                    className={`w-full p-4 text-left text-base font-semibold rounded-2xl border-2 outline-none transition-all duration-200 cursor-pointer ${
                       formData.roomPreference === option
-                        ? 'border-teal-500 bg-teal-50 text-teal-700 shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-teal-500 bg-teal-50 text-teal-700 shadow-md ring-2 ring-teal-500/20'
+                        : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50/30'
                     }`}
                   >
-                    <span className="mr-2">
-                      {option === 'Single Occupancy' ? '🛏️' : option === 'Double Sharing' ? '🛏️🛏️' : '🛏️🛏️🛏️'}
-                    </span>
                     {option}
                   </button>
                 ))}
@@ -284,7 +287,7 @@ export function LeadCaptureModal({
                       </button>
                     ))}
                     <div className="px-4 py-2 bg-slate-50 text-[9px] text-slate-400 font-medium">
-                      Powered by OpenStreetMap
+                      Powered by Photon
                     </div>
                   </div>
                 )}

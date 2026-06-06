@@ -98,4 +98,54 @@ body {
   animation: gradient-shift 4s ease infinite;
 }
 
-
+/* Google Places Autocomplete dropdown overrides */
+.pac-container {
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  margin-top: 4px;
+  z-index: 99999 !important; /* Make sure it appears above dialogs/modals */
+  padding: 8px 0;
+}
+.dark .pac-container {
+  background-color: #001A33;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.pac-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #43474f;
+  border-top: 1px solid #f5f5f5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 150ms ease;
+}
+.dark .pac-item {
+  color: #c3c6d0;
+  border-top-color: rgba(255, 255, 255, 0.05);
+}
+.pac-item:hover {
+  background-color: rgba(0, 150, 136, 0.05);
+}
+.dark .pac-item:hover {
+  background-color: rgba(0, 150, 136, 0.15);
+}
+.pac-item-query {
+  font-size: 13px;
+  font-weight: 700;
+  color: #001A33;
+  padding-right: 4px;
+}
+.dark .pac-item-query {
+  color: #ffffff;
+}
+.pac-matched {
+  color: #009688;
+}
+.pac-icon {
+  margin-right: 10px;
+}
