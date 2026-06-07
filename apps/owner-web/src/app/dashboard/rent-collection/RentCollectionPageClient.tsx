@@ -210,113 +210,106 @@ export function RentCollectionPageClient({
       )}
 
       {/* Page Header */}
-      <div
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2"
-        style={{ gap: '1rem' }}
-      >
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         {/* Title */}
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-heading)' }}>Rent & Utility Bills</h1>
-          <p className="text-xs text-slate-400 mt-1.5 font-medium">Track monthly rent collections, calculate utility bills, and manage dues</p>
+          <p className="text-xs text-slate-500 mt-1.5 font-medium">Track monthly rent collections, calculate utility bills, and manage dues</p>
         </div>
         {/* Month Selector */}
-        <div className="flex items-center" style={{ gap: '1rem' }}>
-          <div>
-            <select
-              value={selectedMonth}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              className="bg-white border border-slate-200 focus:border-teal-500 focus:outline-none text-sm font-medium text-slate-800 h-10 px-4 rounded-xl cursor-pointer transition-colors shadow-sm"
-            >
-              {MONTHS.map((m) => (
-                <option key={m.value} value={m.value}>{m.label}</option>
-              ))}
-            </select>
-          </div>
+        <div className="flex-shrink-0">
+          <select
+            value={selectedMonth}
+            onChange={(e) => handleMonthChange(e.target.value)}
+            className="bg-slate-900 border border-slate-700 focus:border-teal-500 focus:outline-none text-sm font-semibold text-white h-10 px-5 rounded-full cursor-pointer transition-colors shadow-sm appearance-none"
+            style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto', paddingRight: '2.5rem' }}
+          >
+            {MONTHS.map((m) => (
+              <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       {/* ── HEADER ROW: Metrics & Tabs ── */}
-      <div
-        className="flex flex-col lg:flex-row justify-between items-start lg:items-end pb-2"
-        style={{ gap: '1.5rem' }}
-      >
-        {/* Main Tab Toggle */}
-        <div className="flex flex-1 w-full max-w-[440px] bg-slate-100 rounded-full p-2 border border-slate-200 shadow-sm self-start lg:self-auto">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-6">
+        {/* Main Tab Toggle - Compact Pill */}
+        <div className="flex bg-slate-900 rounded-full p-1.5 shadow-sm border border-slate-800 self-start">
           <button
             onClick={() => { setActiveTab('ledger'); setSelectedTenant(null); }}
-            className={`flex-1 py-3 text-[15px] font-bold rounded-full flex items-center justify-center transition-all ${
+            className={`px-6 py-2.5 text-[14px] font-bold rounded-full flex items-center justify-center transition-all ${
               activeTab === 'ledger'
-                ? 'bg-white text-slate-900 shadow-md border border-slate-200/50 scale-[1.02]'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                ? 'bg-slate-800 text-white shadow-md'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
-            style={{ gap: '0.5rem' }}
+            style={{ gap: '0.6rem' }}
           >
-            <span className={`w-2.5 h-2.5 rounded-full ${activeTab === 'ledger' ? 'bg-[#14b8a6]' : 'bg-slate-400'}`} />
+            <span className={`w-2 h-2 rounded-full ${activeTab === 'ledger' ? 'bg-[#14b8a6]' : 'bg-slate-500'}`} />
             <span>Rent Ledger</span>
           </button>
           <button
             onClick={() => { setActiveTab('utilities'); setSelectedTenant(null); }}
-            className={`flex-1 py-3 text-[15px] font-bold rounded-full flex items-center justify-center transition-all ${
+            className={`px-6 py-2.5 text-[14px] font-bold rounded-full flex items-center justify-center transition-all ${
               activeTab === 'utilities'
-                ? 'bg-white text-slate-900 shadow-md border border-slate-200/50 scale-[1.02]'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                ? 'bg-slate-800 text-white shadow-md'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
-            style={{ gap: '0.5rem' }}
+            style={{ gap: '0.6rem' }}
           >
-            <span className={`w-2.5 h-2.5 rounded-full ${activeTab === 'utilities' ? 'bg-[#14b8a6]' : 'bg-slate-400'}`} />
+            <span className={`w-2 h-2 rounded-full ${activeTab === 'utilities' ? 'bg-[#14b8a6]' : 'bg-slate-500'}`} />
             <span>Utility Billing</span>
           </button>
         </div>
 
         {/* Right: Metrics Grid */}
-        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto justify-end">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full xl:w-auto flex-1 xl:max-w-[700px]">
           {/* Card 1: Collected Dues */}
-          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[220px] p-5 rounded-2xl bg-[#ccfbf1] text-[#0f766e] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+          <div className="p-5 rounded-2xl bg-[#0f2e22] text-[#10b981] flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-[#064e3b]">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Collected Dues</p>
-                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-80">Collected Dues</p>
+                <p className="text-[9px] font-bold opacity-60 mb-2 uppercase tracking-wide">for {selectedMonthLabel}</p>
                 <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{collectedDues.toLocaleString('en-IN')}</p>
               </div>
-              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                <IndianRupee className="w-4 h-4 text-[#0f766e]" />
+              <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#10b981]" />
               </div>
             </div>
-            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+            <div className="text-[10px] font-bold opacity-90 mt-4 flex items-center gap-1">
               <span>+12%</span>
             </div>
           </div>
 
           {/* Card 2: Pending Dues */}
-          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[220px] p-5 rounded-2xl bg-[#ffedd5] text-[#c2410c] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+          <div className="p-5 rounded-2xl bg-[#3f2113] text-[#ea580c] flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-[#2a140a]">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Pending Dues</p>
-                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-80">Pending Dues</p>
+                <p className="text-[9px] font-bold opacity-60 mb-2 uppercase tracking-wide">for {selectedMonthLabel}</p>
                 <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{pendingDues.toLocaleString('en-IN')}</p>
               </div>
-              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                <IndianRupee className="w-4 h-4 text-[#c2410c]" />
+              <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#ea580c]" />
               </div>
             </div>
-            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+            <div className="text-[10px] font-bold opacity-90 mt-4 flex items-center gap-1">
               <span>-8%</span>
             </div>
           </div>
 
           {/* Card 3: Late Fees */}
-          <div className="flex-1 min-w-[190px] lg:flex-none lg:w-[190px] p-5 rounded-2xl bg-[#fee2e2] text-[#991b1b] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md border-none text-left">
+          <div className="p-5 rounded-2xl bg-[#3f1619] text-[#ef4444] flex flex-col justify-between relative overflow-hidden transition-all duration-300 border border-[#2a0e10]">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-85">Late Fees</p>
-                <p className="text-[9px] font-bold opacity-60 mb-1 uppercase tracking-wide">for {selectedMonthLabel}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider mb-1 opacity-80">Late Fees</p>
+                <p className="text-[9px] font-bold opacity-60 mb-2 uppercase tracking-wide">for {selectedMonthLabel}</p>
                 <p className="text-3xl font-extrabold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>₹{totalLateFees.toLocaleString('en-IN')}</p>
               </div>
-              <div className="p-2 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                <IndianRupee className="w-4 h-4 text-[#991b1b]" />
+              <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#ef4444]" />
               </div>
             </div>
-            <div className="text-[10px] font-bold opacity-90 mt-3 flex items-center gap-1">
+            <div className="text-[10px] font-bold opacity-90 mt-4 flex items-center gap-1">
               <span>Accumulated</span>
             </div>
           </div>

@@ -1,12 +1,11 @@
 'use server';
 
-import { supabase } from '@stayflo/utils';
+import { getAuthUser, auditLog } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 export async function updateLeadStatus(leadId: string, newStatus: string) {
-  // In a real app, add auth check here:
-  // const session = await auth(); if (!session) throw new Error('Unauthorized');
+  const { supabase } = await getAuthUser();
   
   const { error } = await supabase
     .from('leads')
@@ -17,6 +16,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     console.error('[updateLeadStatus] Supabase error:', error);
     return { error: error.message };
   }
+  await auditLog('Update Lead Status', 'Lead', leadId);
 
   revalidatePath('/dashboard/leads');
   return { success: true };
@@ -30,6 +30,7 @@ const CreateLeadSchema = z.object({
 });
 
 export async function createLeadAction(formData: FormData) {
+  const { supabase, user } = await getAuthUser();
   const rawData = {
     name: formData.get('name') as string,
     phone: formData.get('phone') as string,
@@ -51,10 +52,10 @@ export async function createLeadAction(formData: FormData) {
   else if (validated.data.room.includes('Double')) sharingType = 'double';
   else if (validated.data.room.includes('Triple')) sharingType = 'triple';
 
-  const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const inviteCode = crypto.randomUUID();
 
   const { error } = await supabase.from('leads').insert([{
-    owner_id: '00000000-0000-0000-0000-000000000001', // Dummy owner until Auth is implemented
+    owner_id: user.id,
     name: validated.data.name || 'Unnamed Prospect',
     phone_number: phoneWithPrefix,
     pg_type: 'co-living',
@@ -67,6 +68,9 @@ export async function createLeadAction(formData: FormData) {
     console.error('[createLeadAction] Supabase error:', error);
     return { error: error.message };
   }
+
+  // Wait, I need the leadId that was just created to log it, but insert returns nothing unless we .select()
+  await auditLog('Create Lead', 'Lead', inviteCode); // using inviteCode as resourceId for now
 
   revalidatePath('/dashboard/leads');
   return { success: true, inviteCode };

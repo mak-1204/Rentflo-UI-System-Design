@@ -26,24 +26,35 @@ interface PortfolioPageProps {
   images?: string[];
   layoutData?: any;
   leadData?: any;
+  stats?: any;
 }
 
 interface BookingSidebarBoxProps {
   setBookingDefaultDate: (date: 'today' | 'tomorrow' | '') => void;
   setShowBookingModal: (show: boolean) => void;
+  stats?: any;
 }
 
 function BookingSidebarBox({
   setBookingDefaultDate,
   setShowBookingModal,
+  stats,
 }: BookingSidebarBoxProps) {
+  const minRent = stats?.roomTypeStats 
+    ? Object.values(stats.roomTypeStats).reduce((min: number, r: any) => 
+        (r.pricing?.monthlyRent && r.pricing.monthlyRent < min) ? r.pricing.monthlyRent : min
+      , Infinity) 
+    : 12500;
+  
+  const displayRent = minRent === Infinity ? 12500 : minRent;
+
   return (
     <div className="bg-white dark:bg-navy-deep rounded-3xl p-8 border border-border-subtle dark:border-outline-variant shadow-xl transition-colors duration-200">
       <div className="space-y-8">
         <div>
           <p className="text-xs text-stayflow-teal font-bold uppercase tracking-widest mb-2">Starting from</p>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-black text-navy-deep dark:text-white">₹12,500</span>
+            <span className="text-4xl font-black text-navy-deep dark:text-white">₹{displayRent.toLocaleString()}</span>
             <span className="text-on-surface-variant dark:text-outline-variant font-bold text-sm">/mo</span>
           </div>
         </div>
@@ -106,7 +117,7 @@ function BookingSidebarBox({
         <div className="bg-surface-container-low dark:bg-navy-deep/40 rounded-xl p-4 flex items-center gap-3">
           <span className="text-xl">⚡️</span>
           <p className="text-xs text-navy-deep dark:text-white font-semibold">
-            Popular: 14 people booked a tour in last 24h
+            {stats?.totalAvailableBeds ? `${stats.totalAvailableBeds} Beds Currently Available!` : 'Popular: 14 people booked a tour in last 24h'}
           </p>
         </div>
       </div>
@@ -122,6 +133,7 @@ export function NewPortfolioPageLayout({
   images = [],
   layoutData,
   leadData,
+  stats,
 }: PortfolioPageProps) {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
@@ -156,6 +168,53 @@ export function NewPortfolioPageLayout({
   const handleReserveClick = () => {
     setShowLeadModal(true);
   };
+
+  // Generate dynamic rooms for PreferredSharingSpaces from layoutData
+  let dynamicRooms = undefined;
+  if (layoutData?.roomsData) {
+    const roomMap: Record<string, any> = {};
+    Object.values(layoutData.roomsData).forEach((floorRooms: any) => {
+      if (Array.isArray(floorRooms)) {
+        floorRooms.forEach(room => {
+          if (room.beds > 0) {
+            const name = room.type || 'Room';
+            if (!roomMap[name]) {
+              // Get category media if it matches the room type, otherwise empty
+              const catMedia = layoutData.categoryMedia?.[name] || [];
+              const media = catMedia.map((url: string, index: number) => ({
+                type: 'image',
+                url,
+                title: `${name} View ${index + 1}`,
+                label: 'PHOTO'
+              }));
+              
+              roomMap[name] = {
+                id: name,
+                name: name,
+                occupancy: room.beds === 1 ? 'Single' : room.beds === 2 ? 'Double' : `${room.beds}-Sharing`,
+                price: '₹' + (room.beds === 1 ? '15,000' : room.beds === 2 ? '12,000' : '8,000'), // Fallback if no pricing provided
+                image: catMedia[0] || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80',
+                media: media.length > 0 ? media : [
+                  { type: 'image', url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80', title: `${name} View`, label: 'PHOTO' }
+                ],
+                title: name,
+                description: `Comfortable ${name} layout.`,
+                inclusions: room.roomAmenities || ['WiFi', 'Bed', 'Cupboard'],
+                vacancy: room.bedStatuses ? room.bedStatuses.filter((s: string) => s === 'Vacant').length : 0,
+              };
+            } else {
+              // Aggregate vacancy
+              roomMap[name].vacancy += room.bedStatuses ? room.bedStatuses.filter((s: string) => s === 'Vacant').length : 0;
+            }
+          }
+        });
+      }
+    });
+    const parsedRooms = Object.values(roomMap);
+    if (parsedRooms.length > 0) {
+      dynamicRooms = parsedRooms;
+    }
+  }
 
   // SSR hydration safety loader
   if (!isMounted) {
@@ -212,7 +271,8 @@ export function NewPortfolioPageLayout({
                   tagline={tagline}
                   location={location}
                   price={price}
-                  images={images}
+                  images={layoutData?.categoryMedia?.['Common Area'] || layoutData?.categoryMedia?.['Common Areas'] || images}
+                  videoUrl={layoutData?.videoUrl}
                   onLeadCaptureClick={handleReserveClick}
                   leadData={leadData}
                 />
@@ -224,6 +284,7 @@ export function NewPortfolioPageLayout({
               <BookingSidebarBox
                 setBookingDefaultDate={setBookingDefaultDate}
                 setShowBookingModal={setShowBookingModal}
+                stats={stats}
               />
             </aside>
           </div>
@@ -237,7 +298,7 @@ export function NewPortfolioPageLayout({
 
             {/* Preferred Sharing Spaces / Living Options */}
             <section id="rooms" className="w-full">
-              <PreferredSharingSpaces leadData={leadData} />
+              <PreferredSharingSpaces leadData={leadData} rooms={dynamicRooms} />
             </section>
 
             {/* Interactive Floor Plans */}
@@ -266,6 +327,7 @@ export function NewPortfolioPageLayout({
             <BookingSidebarBox
               setBookingDefaultDate={setBookingDefaultDate}
               setShowBookingModal={setShowBookingModal}
+              stats={stats}
             />
           </div>
 

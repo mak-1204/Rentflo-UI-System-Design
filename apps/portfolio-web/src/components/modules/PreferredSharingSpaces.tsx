@@ -1,6 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Play, Image as ImageIcon } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, Image as ImageIcon, PlayCircle } from 'lucide-react';
 import logoImg from '../../../logo.png';
+import Image from 'next/image';
+
+function HydratedVideo({ src, className }: { src: string, className?: string }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  if (!isPlaying) {
+    return (
+      <div 
+        className={`relative flex items-center justify-center bg-slate-900 cursor-pointer group ${className}`}
+        onClick={() => setIsPlaying(true)}
+      >
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+        <PlayCircle className="w-16 h-16 text-white/90 drop-shadow-xl group-hover:scale-110 transition-transform z-20" strokeWidth={1.5} />
+      </div>
+    );
+  }
+
+  return (
+    <video
+      autoPlay
+      controls
+      src={src}
+      className={className}
+    />
+  );
+}
 
 interface MediaItem {
   type: 'image' | 'video';
@@ -178,20 +204,19 @@ export function PreferredSharingSpaces({
               }}
             >
               {currentRoom.media[activeCardMediaIndex].type === 'video' ? (
-                <video
+                <HydratedVideo
                   key={currentRoom.media[activeCardMediaIndex].url}
                   src={currentRoom.media[activeCardMediaIndex].url}
                   className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
                 />
               ) : (
-                <img 
-                  className="w-full h-full object-cover" 
+                <Image 
+                  key={currentRoom.media[activeCardMediaIndex].url}
                   src={currentRoom.media[activeCardMediaIndex].url} 
+                  className="object-cover transition-transform duration-500 group-hover:scale-105" 
                   alt={currentRoom.media[activeCardMediaIndex].title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               )}
               {/* Dark Gradient Overlay at bottom for thumbnail legibility */}
@@ -290,7 +315,7 @@ export function PreferredSharingSpaces({
                             <Play className="w-4 h-4 fill-white text-white" />
                           </div>
                         ) : (
-                          <img src={item.url} className="w-full h-full object-cover" alt="thumbnail" />
+                          <Image src={item.url} className="w-full h-full object-cover" alt="thumbnail" fill sizes="64px" />
                         )}
                       </button>
                       <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest transition-colors ${
@@ -379,21 +404,22 @@ export function PreferredSharingSpaces({
           {/* Media Player Area */}
           <div className="flex-1 relative flex items-center justify-center p-2">
             {activeMediaRoom.media[activeMediaIndex].type === 'video' ? (
-              <video
+              <HydratedVideo
                 key={activeMediaRoom.media[activeMediaIndex].url}
                 src={activeMediaRoom.media[activeMediaIndex].url}
-                className="max-h-[75vh] max-w-full rounded-xl shadow-2xl object-contain"
-                controls
-                autoPlay
-                loop
-                playsInline
+                className="max-h-[75vh] max-w-full rounded-xl shadow-2xl object-contain w-full h-full bg-black"
               />
             ) : (
-              <img
-                src={activeMediaRoom.media[activeMediaIndex].url}
-                alt={activeMediaRoom.media[activeMediaIndex].title}
-                className="max-h-[75vh] max-w-full rounded-xl shadow-2xl object-contain animate-in fade-in duration-300"
-              />
+              <div className="relative w-full h-full max-h-[75vh]">
+                <Image
+                  key={activeMediaRoom.media[activeMediaIndex].url}
+                  src={activeMediaRoom.media[activeMediaIndex].url}
+                  className="rounded-xl shadow-2xl object-contain"
+                  alt="Full view"
+                  fill
+                  sizes="100vw"
+                />
+              </div>
             )}
 
             {/* Left and Right navigation buttons */}

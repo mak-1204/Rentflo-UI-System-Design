@@ -1,77 +1,93 @@
 # Tech Stack and Features Implementation Guide
 
-This document outlines the technology stack and feature implementation details for the `@stayflo/owner-web` and `@stayflo/portfolio-web` applications within the Stayflo monorepo.
+This document outlines the technology stack, feature implementations, and the current architectural state of the `@stayflo/owner-web` and `@stayflo/portfolio-web` applications within the Stayflo monorepo. 
+
+> [!NOTE]
+> This is a living document. It has been recently updated to reflect the successful migration to a strict, Zero-Trust Architecture using Next.js Server Actions, HTTP-Only Cookies, and Supabase RLS.
+
+---
 
 ## 1. Global Architecture
 
-The project is structured as a Monorepo using **npm workspaces**. It is separated into `apps` (front-end web applications) and `packages` (shared resources).
+The project is structured as a Monorepo using **npm workspaces**. It is separated into `apps` (front-end web applications) and `packages` (shared UI/Utils).
 
-### Packages
-- `@stayflo/ui`: Shared UI components (e.g., `Avatar`, `Badge`, `Button`, `Card`).
-- `@stayflo/utils`: Shared utility functions.
-- `@stayflo/types`: Shared TypeScript definitions.
-
----
-
-## 2. Technology Stack
-
-Both the `owner-web` and `portfolio-web` apps have recently been migrated to a modern Next.js architecture:
-
-- **Framework**: [Next.js 16](https://nextjs.org/) (specifically using the App Router `src/app`)
-- **UI Library**: [React 18.3.1](https://react.dev/)
-- **Styling**: [TailwindCSS 4.1.12](https://tailwindcss.com/) (integrated via `@tailwindcss/postcss`)
-- **Language**: [TypeScript 5.2.2](https://www.typescriptlang.org/)
-- **Validation**: [Zod](https://zod.dev/) (v3.23.8) for strict schema validation.
-- **Icons**: [Lucide React](https://lucide.dev/) (v0.487.0)
-- **Charts/Data Viz** (specifically in `owner-web`): [Recharts](https://recharts.org/) (v2.15.2)
+### Current Tech Stack
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router, using Turbopack for local dev)
+- **Database / Backend**: [Supabase](https://supabase.com/) (PostgreSQL with Row Level Security)
+- **Authentication**: `@supabase/ssr` (HTTP-Only Secure Cookies)
+- **UI Library**: [React 18/19](https://react.dev/)
+- **Styling**: [TailwindCSS](https://tailwindcss.com/)
+- **Validation**: [Zod](https://zod.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
 ---
 
-## 3. App-Specific Implementation Details
+## 2. Zero-Trust Security & Database Schema (Supabase)
+
+Our architecture relies entirely on secure Next.js Server Actions. We have eliminated all arbitrary `fetch()` calls and Express-style proxy routes. The database is strictly protected by **Row Level Security (RLS)** which matches the authenticated `user.id` against the `owner_id` column on every table. All permissive prototype policies have been purged.
+
+1. **`pg_owners` / `auth.users`**:
+   - **Purpose**: Authenticated PG operators.
+2. **`pg_properties`**: 
+   - **Purpose**: Core configuration for the PG.
+   - **Key Columns**: `layout_data` (JSONB containing the Website Builder canvas state), `due_day` (Int), `late_fee` (Int).
+3. **`leads`**: 
+   - **Purpose**: Tracks prospective tenants.
+   - **Key Columns**: `invite_code` (unique short URL generator), `name`, `phone`, `preferredSharing`, `moveInDate`.
+4. **`tenants`**: 
+   - **Purpose**: Active tenant directory.
+   - **Key Columns**: `name`, `room`, `floor`, `rent`, `status` (Paid/Overdue), `moveIn`.
+5. **`rent_bills`**: 
+   - **Purpose**: Monthly rent and utility tracking.
+   - **Key Columns**: `tenant_id` (FK to tenants), `month` (e.g. "2026-06"), `rent`, `utilities`, `lateFee`, `status` (Paid/Overdue/Delay Approved).
+6. **`food_bookings`**: 
+   - **Purpose**: Daily meal tracking to prevent food waste.
+   - **Key Columns**: `tenant_id` (FK), `date`, `breakfast`, `lunch`, `dinner` (booleans for booking), and `_served` booleans for tracking consumption.
+7. **`complaints` / `operations`**: 
+   - **Purpose**: Maintenance ticketing system.
+   - **Key Columns**: `tenant_id` (FK), `title`, `description`, `status` (Open/In Progress/Resolved).
+
+---
+
+## 3. Detailed Implementation Status
 
 ### A. Owner Web (`@stayflo/owner-web`)
+The administrative dashboard for PG/Hostel owners to manage their properties, tenants, operations, and public-facing websites. **All features are fully secured and bound to the authenticated owner's session.**
 
-**Purpose**: The administrative dashboard for PG/Hostel owners to manage their properties, tenants, rent collections, and operations.
+#### Core Feature: The Custom Website Builder (`/website-builder`)
+- **Interactive 2D Grid Canvas**: Drag, drop, and resize rooms on a pixel grid. It handles multi-floor layouts and precise coordinate mapping for beds, doors, and windows.
+- **Supabase Integration**: The canvas state is serialized into a highly efficient `JSONB` object and saved to `pg_properties.layout_data`. 
+- **Secure Auto-Save**: LocalStorage has been completely eradicated. The builder utilizes a 1.5s debounced `startTransition` to securely stream state updates directly to the Supabase Postgres instance via the `saveWebsiteData` Server Action.
 
-**Implementation Highlights**:
-- **Routing**: Driven by Next.js App Router within `src/app/`. Nested routes like `/dashboard` are handled natively by the folder structure. Server Components (e.g., `src/app/layout.tsx`) are used for root layouts and font injection.
+#### Core Feature: Personalized Lead Generation (`/leads`)
+- **The WhatsApp Invite Flow**: Owners enter lead details which safely executes `createLeadAction`. This validates inputs via Zod and generates a unique `invite_code`.
+- **Dynamic Portfolio Linking**: A dynamic WhatsApp URL linking to the personalized Portfolio (e.g., `rentflo.com/portfolio/sunrise?invite=v8kP2x`) is auto-generated.
 
-**Feature Breakdowns**:
-1. **Website Builder (`src/screens/OW5-WebsiteBuilder.tsx`)**:
-   - **Interactive 2D Canvas**: Implements a complex drag-and-drop floor plan builder using native mouse event listeners (`mousemove`, `mouseup`) and CSS Grid mathematics. Allows owners to place rooms, beds, doors, and windows (rendered dynamically via SVG).
-   - **State Synchronization**: Uses a debounced `useEffect` hook to serialize the entire builder state (rooms, amenities, menus, pricing) to `localStorage` under the key `'stayflo_builder_state'`. It emits a custom window event (`stayflo_website_update`) to allow real-time cross-tab synchronization.
-   - **Error Handling**: Implements a custom class-based `ErrorBoundary` to catch rendering crashes in the complex canvas and provides a "Clear Storage & Reset App" fallback.
-
-2. **Dashboard (`src/screens/OW1-Dashboard.tsx`)**:
-   - Integrates high-level metrics, pending dues monitoring, and recent activity logs.
-   - Utilizes `Recharts` for "Revenue & Utility Tracking" through Stacked Bar Charts.
-
-3. **Other Core Screens**:
-   - **Tenants Management (`OW2-Tenants.tsx`)**: Listing and managing individual tenant details.
-   - **Rent Collection (`OW3-RentCollection.tsx`)**: Detailed monitoring of tenant dues and payment history.
-   - **Food Management (`OW4-Food.tsx`)**: Interface for tracking meal bookings to prevent food waste.
-   - **Leads & Operations (`OW6-Leads.tsx`, `OW7-Operations.tsx`)**: Captures prospective tenant inquiries and tracks daily utility billing and maintenance requests.
+#### Operational Features
+- **Tenants Directory (`/tenants`)**: Secure CRUD operations for managing active tenant profiles. Joins with `pg_properties` to fetch PG context securely.
+- **Rent Collection (`/rent-collection`)**: 
+  - Dynamically calculates prorated rent based on the tenant's exact move-in date.
+  - Automatically calculates late fees based on the PG's `due_day` and `late_fee` settings.
+- **Food Management (`/food`)**: Provides a daily view of tenant meal bookings (Breakfast, Lunch, Dinner). Staff can click to mark individual meals as "Served" using Server Actions.
+- **Operations & Complaints (`/operations`)**: Fully migrated to Server Actions. The legacy `api-client.ts` was permanently deleted.
 
 ---
 
 ### B. Portfolio Web (`@stayflo/portfolio-web`)
+The highly-optimized, public-facing promotional website designed to convert leads into confirmed tenants.
 
-**Purpose**: The public-facing promotional website for individual PG/Hostel properties. It acts as a marketing funnel to attract and capture tenant leads.
-
-**Implementation Highlights**:
-- **Routing**: Driven by Next.js App Router. Dynamic routing is implemented through the folder structure (e.g., `src/app/portfolio/[pgId]`).
-
-**Feature Breakdowns**:
-1. **Hero & Dynamic Real-time Preview (`src/screens/PW2-Hero.tsx`)**:
-   - **Live Syncing**: The component continuously listens to the `'stayflo_builder_state'` in `localStorage`. As the owner edits the Website Builder in `owner-web`, the portfolio site updates instantly (e.g., pricing, amenities, room layouts).
-   - **SVG Rendering**: It renders realistic room floorplans, swing doors, and window frames using custom SVG logic based on the owner's configurations.
-   - **Lead Capture API Integration**: Features an aggressive lead generation popup that sends `POST` requests to `http://localhost:3000/api/leads` using native `fetch`.
-   - **External API Integration**: Uses the OpenStreetMap Nominatim API for debounced, dynamic address searching and suggestions (`dynamicSuggestions`).
-   - **Media Lightbox**: Includes a custom-built, immersive photo/video carousel lightbox for showcasing property images and virtual tours.
+#### Core Feature: Server-Driven Personalization
+- **Next.js Server Components (`page.tsx`)**: Fetches `layout_data` directly from Supabase at render time.
+- **Dynamic Greeting & Preferences**: Parses the `?invite=...` parameter to fetch personalized `leadData`. Greets the lead by name and defaults their view to their preferred room sharing type.
+- **Real-Time Interactive Floor Plans (`InteractiveFloorPlans.tsx`)**: Renders the SVG floor plan using the JSON data. Beds marked as "Occupied" by the owner instantly appear in Red on the Portfolio site.
 
 ---
 
-## 4. Design Aesthetics & Best Practices Used
-- **Rich Aesthetics**: Heavy reliance on tailored Tailwind utility classes and curated color palettes (e.g., `#1D9E75` for positive actions, dark slate themes for sleek components).
-- **Component-Driven**: Maximum reuse of base components from the `@stayflo/ui` package to maintain consistency across both apps.
-- **Dynamic Feedback**: Use of micro-animations and interactive layout elements, fully leveraging Server/Client components boundaries in Next.js for optimized performance.
+## 4. Project Plan & Future Roadmap
+
+With the successful migration of our entire architecture to a strict Zero-Trust Server Action model, our core administrative data loop is complete and secure. The next phases focus on expansion and monetization:
+
+### Immediate Next Steps
+1. **Checkout & Booking Pipeline**: Implement Razorpay to allow prospective leads to select a green (Vacant) bed on the Portfolio site, pay the security deposit directly, and instantly transform from a Lead to an Active Tenant.
+2. **True Modularization of the Builder**: Wrap the massive 2500-line `BuilderCanvas.tsx` in a React `Context API` (`BuilderProvider`) to cleanly split the Grid, Palette, and Settings into smaller files.
+3. **Automated Tenant Onboarding**: Auto-generate digital rental agreements and KYC forms upon successful Razorpay deposits.

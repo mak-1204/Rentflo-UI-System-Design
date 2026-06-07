@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/utils/supabase/server';
 import type { RentRecord } from './types';
 
 const TABLE = 'rent_bills';
@@ -34,6 +34,7 @@ function parseMoveInDate(moveInStr: string): Date | null {
 }
 
 export async function fetchRentRecords(monthString: string): Promise<RentRecord[]> {
+  const { supabase } = await getAuthUser();
   // Query all active tenants and left-join their monthly rent bills
   const { data: tenants, error: tenantsError } = await supabase
     .from('tenants')
@@ -65,7 +66,7 @@ export async function fetchRentRecords(monthString: string): Promise<RentRecord[
   const { data: pgData, error: pgError } = await supabase
     .from('pg_properties')
     .select('due_day, late_fee')
-    .eq('id', '11111111-1111-1111-1111-111111111111')
+    .limit(1)
     .single();
 
   const due_day = pgData?.due_day ?? 5;
@@ -152,6 +153,7 @@ export async function fetchRentRecords(monthString: string): Promise<RentRecord[
 export async function saveRentBill(
   bill: Omit<RentRecord, 'name' | 'room' | 'phone'>
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const payload = {
     tenant_id:     bill.tenant_id,
     month:         bill.month,
@@ -182,6 +184,7 @@ export async function approveDelayRequest(
   tenantId: string,
   monthStr: string
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   // Check if bill exists
   const { data: bill, error: selectError } = await supabase
     .from(TABLE)
@@ -228,6 +231,7 @@ export async function collectRentPayment(
   lateFeeAmount: number,
   method: string
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const formattedToday = new Date().toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'short',
@@ -261,14 +265,16 @@ export async function collectRentPayment(
 // ─── Property Settings ────────────────────────────────────────────────────────
 
 export async function fetchPGSettings(): Promise<{ due_day: number; late_fee: number }> {
+  const { supabase, user } = await getAuthUser();
   const { data, error } = await supabase
     .from('pg_properties')
     .select('due_day, late_fee')
-    .eq('id', '11111111-1111-1111-1111-111111111111')
-    .single();
+    .eq('owner_id', user.id)
+    .limit(1)
+    .maybeSingle();
 
-  if (error) {
-    console.error('[fetchPGSettings]', error.message);
+  if (error || !data) {
+    if (error) console.error('[fetchPGSettings]', error.message);
     return { due_day: 5, late_fee: 250 };
   }
 
@@ -282,10 +288,27 @@ export async function updatePGSettings(
   dueDay: number,
   lateFee: number
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
+  const { supabase, user } = await getAuthUser();
+  
+  const { data: existing } = await supabase
     .from('pg_properties')
-    .update({ due_day: dueDay, late_fee: lateFee })
-    .eq('id', '11111111-1111-1111-1111-111111111111');
+    .select('id')
+    .eq('owner_id', user.id)
+    .maybeSingle();
+
+  let error;
+  if (existing) {
+    const res = await supabase
+      .from('pg_properties')
+      .update({ due_day: dueDay, late_fee: lateFee })
+      .eq('owner_id', user.id);
+    error = res.error;
+  } else {
+    const res = await supabase
+      .from('pg_properties')
+      .insert([{ owner_id: user.id, name: 'My PG', due_day: dueDay, late_fee: lateFee }]);
+    error = res.error;
+  }
 
   if (error) {
     console.error('[updatePGSettings]', error.message);

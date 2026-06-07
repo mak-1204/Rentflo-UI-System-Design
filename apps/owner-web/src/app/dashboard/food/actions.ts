@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/utils/supabase/server';
 import type { FoodBooking } from './types';
 
 const TABLE = 'food_bookings';
@@ -10,6 +10,7 @@ const PAGE  = '/dashboard/food';
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function fetchFoodBookings(dateString: string): Promise<FoodBooking[]> {
+  const { supabase } = await getAuthUser();
   // Query all active tenants and left-join their food bookings for this specific date
   const { data, error } = await supabase
     .from('tenants')
@@ -64,6 +65,7 @@ export async function fetchFoodBookings(dateString: string): Promise<FoodBooking
 export async function saveFoodBooking(
   booking: Omit<FoodBooking, 'name' | 'room' | 'phone'>
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const payload = {
     tenant_id:        booking.tenant_id,
     date:             booking.date,
@@ -96,6 +98,7 @@ export async function markMealServed(
   dateString: string,
   mealType: 'breakfast' | 'lunch' | 'dinner'
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const servedCol = `${mealType}_served`;
 
   // Check if booking already exists

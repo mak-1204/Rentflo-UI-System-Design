@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'; import { Check, AlertTriangle, Mega
 import { Badge } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Input } from '@stayflo/ui';
+import { updateComplaintStatus } from '@/app/dashboard/operations/actions';
 
 interface Complaint {
   id: number;
@@ -164,9 +165,18 @@ export function OwnerWebOperations({ initialComplaints }: { initialComplaints?: 
     setTimeout(() => setNotif(null), 3000);
   };
 
-  const handleStatusChange = (complaintId: number, nextStatus: 'Open' | 'In Progress' | 'Resolved') => {
+  const handleStatusChange = async (complaintId: number, nextStatus: 'Open' | 'In Progress' | 'Resolved') => {
+    // Optimistic UI update
     setComplaints(prev => prev.map(c => c.id === complaintId ? { ...c, status: nextStatus } : c));
-    triggerToast(`Complaint status updated to ${nextStatus}!`);
+    
+    // Server Action
+    const res = await updateComplaintStatus(complaintId.toString(), nextStatus);
+    if (res.success) {
+      triggerToast(`Complaint status updated to ${nextStatus}!`);
+    } else {
+      triggerToast(`Error updating complaint: ${res.error}`);
+      // Revert on failure (simple reload or re-fetch in a real app)
+    }
   };
 
   const handleCreateAnnouncement = (e: React.FormEvent) => {

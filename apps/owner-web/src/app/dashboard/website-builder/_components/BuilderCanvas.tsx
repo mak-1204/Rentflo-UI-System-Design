@@ -5,7 +5,8 @@ import { Card } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Input } from '@stayflo/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@stayflo/ui';
-import { Check, Plus, Trash2, MapPin, X, HelpCircle, Download, Move, Edit, Loader2 } from 'lucide-react'; 
+import { Save, Plus, X, Trash2, Edit, Edit2, GripVertical, Check, PlusCircle, Smartphone, Map, MapPin, Utensils, Info, HelpCircle, Star, Sparkles, Building, PlayCircle, Eye, Building2, UploadCloud, Download, Move, Loader2 } from 'lucide-react'; 
+import { createClient } from '@/utils/supabase/client'; 
 import { Badge } from '@stayflo/ui';
 import { saveWebsiteData } from '../actions';
 
@@ -114,7 +115,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
           <div className="pt-2">
             <button 
               onClick={() => {
-                localStorage.removeItem('stayflo_builder_state');
                 window.location.reload();
               }}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-sm text-xs transition-all cursor-pointer"
@@ -131,6 +131,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 }
 
 export function BuilderCanvas({ initialData }: { initialData: any }) {
+
   return (
     <ErrorBoundary>
       <BuilderCanvasComponent initialData={initialData} />
@@ -139,6 +140,34 @@ export function BuilderCanvas({ initialData }: { initialData: any }) {
 }
 
 function BuilderCanvasComponent({ initialData }: { initialData: any }) {
+  const supabase = createClient();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (file: File | null, folder: string): Promise<string | null> => {
+    if (!file) return null;
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `sunrise-pg/${folder}/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('property-media')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('property-media').getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (e) {
+      console.error('Upload failed', e);
+      alert('Upload failed. See console.');
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const [isPending, startTransition] = useTransition();
   const [pgName, setPgName] = useState('Sunrise PG');
   const [tagline, setTagline] = useState('Your home away from home in Koramangala');
@@ -160,29 +189,15 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
   });
 
   // Room category photos
-  const [categoryMedia, setCategoryMedia] = useState<Record<string, string[]>>({
-    '1 Sharing': [
-      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80',
-    ],
-    '2 Sharing': [
-      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80',
-    ],
-    'Play Room': [
-      'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80',
-    ],
-  });
+  const [categoryMedia, setCategoryMedia] = useState<Record<string, string[]>>({});
 
   // Video walkthrough state and uploader temporary fields
-  const [videoUrl, setVideoUrl] = useState('https://www.w3schools.com/html/mov_bbb.mp4');
+  const [videoUrl, setVideoUrl] = useState('');
   const [newPhotoUrls, setNewPhotoUrls] = useState<Record<string, string>>({});
   const [newCategoryName, setNewCategoryName] = useState('');
 
   // Photo Tag Overlays
-  const [photoTags, setPhotoTags] = useState<Record<string, string>>({
-    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&q=80': 'Spacious Common Area',
-    'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=300&q=80': 'Modern 2 Sharing Room',
-    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=300&q=80': 'Equipped Gym & Play Area'
-  });
+  const [photoTags, setPhotoTags] = useState<Record<string, string>>({});
 
   // Commute Proximity & Optimizer
   const [commuteWalkTime, setCommuteWalkTime] = useState('5 mins');
@@ -433,8 +448,10 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
       const serialized = JSON.stringify(stateObj);
       if (lastSavedRef.current !== serialized) {
         lastSavedRef.current = serialized;
-        // Auto-save to localStorage as a draft
-        localStorage.setItem('stayflo_builder_state', serialized);
+        // Auto-save securely to database via Server Action
+        startTransition(() => {
+          saveWebsiteData(stateObj).catch(err => console.error("Auto-save failed", err));
+        });
       }
     }, 1500); // 1.5s debounce
 
@@ -2438,12 +2455,17 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
                 <div className="mt-4 space-y-4">
                   <div className="group">
                     <Input 
-                      value={videoUrl} 
-                      onChange={(e) => setVideoUrl(e.target.value)} 
-                      placeholder="Enter Walkthrough Video URL (mp4 or Youtube link)" 
-                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner"
+                      type="file"
+                      accept="video/*"
+                      disabled={isUploading}
+                      onChange={async (e) => {
+                        const url = await handleFileUpload(e.target.files?.[0] || null, 'videos');
+                        if (url) setVideoUrl(url);
+                      }} 
+                      className="w-full bg-[#f8fafc] border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-800 font-semibold h-11 px-4 rounded-xl transition-all shadow-inner file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
                     />
                   </div>
+                  {isUploading && <p className="text-xs text-teal-600 font-bold animate-pulse">Uploading video...</p>}
                   {videoUrl && (
                     <div className="mt-2 p-4 bg-[#f8fafc] border border-slate-200 rounded-2xl flex flex-col items-center justify-center shadow-inner">
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-3">Video Preview</p>
@@ -2562,26 +2584,22 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
                       {/* Add Image URL for this category */}
                       <div className="flex gap-3 items-center group">
                         <Input 
-                          value={newPhotoUrls[catName] || ''} 
-                          onChange={(e) => setNewPhotoUrls(prev => ({ ...prev, [catName]: e.target.value }))}
-                          placeholder="Paste photo URL" 
-                          className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-855 font-semibold h-10 px-4 rounded-xl transition-all shadow-inner"
-                        />
-                        <Button 
-                          onClick={() => {
-                            const url = (newPhotoUrls[catName] || '').trim();
-                            if (!url) return;
-                            setCategoryMedia(prev => ({
-                              ...prev,
-                              [catName]: [...(prev[catName] || []), url]
-                            }));
-                            setNewPhotoUrls(prev => ({ ...prev, [catName]: '' }));
+                          type="file"
+                          accept="image/*"
+                          disabled={isUploading}
+                          onChange={async (e) => {
+                            const url = await handleFileUpload(e.target.files?.[0] || null, 'rooms');
+                            if (url) {
+                              setCategoryMedia(prev => ({
+                                ...prev,
+                                [catName]: [...(prev[catName] || []), url]
+                              }));
+                            }
                           }}
-                          className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10 text-xs font-bold uppercase tracking-wider px-4 rounded-xl shadow-sm"
-                        >
-                          Add
-                        </Button>
+                          className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none text-xs text-slate-855 font-semibold h-10 px-4 rounded-xl transition-all shadow-inner file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
+                        />
                       </div>
+                      {isUploading && <p className="text-[10px] text-teal-600 font-bold animate-pulse">Uploading photo...</p>}
 
                       {/* Images Grid */}
                       {categoryMedia[catName]?.length > 0 ? (

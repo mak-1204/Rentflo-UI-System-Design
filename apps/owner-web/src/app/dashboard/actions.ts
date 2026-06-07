@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/utils/supabase/server';
 
 export interface DashboardData {
   tenants: any[];
@@ -10,6 +10,7 @@ export interface DashboardData {
 }
 
 export async function fetchDashboardData(monthStr: string, dateStr: string): Promise<DashboardData> {
+  const { supabase } = await getAuthUser();
   const [
     { data: tenants, error: tenantsError },
     { data: bills, error: billsError },
@@ -35,11 +36,12 @@ export async function fetchDashboardData(monthStr: string, dateStr: string): Pro
   };
 }
 
-export async function fetchOwnerProperties(ownerId: string = '00000000-0000-0000-0000-000000000001'): Promise<string[]> {
+export async function fetchOwnerProperties(): Promise<string[]> {
+  const { supabase, user } = await getAuthUser();
   const { data, error } = await supabase
     .from('pg_properties')
     .select('name')
-    .eq('owner_id', ownerId)
+    .eq('owner_id', user.id)
     .order('name');
 
   if (error) {
