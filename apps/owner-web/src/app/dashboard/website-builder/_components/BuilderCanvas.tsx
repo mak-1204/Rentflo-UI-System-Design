@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Component, ReactNode, useTransition } from 'react'; 
+import React, { useState, useEffect, useRef, Component, ReactNode, useTransition } from 'react'; 
 import { Card } from '@stayflo/ui';
 import { Button } from '@stayflo/ui';
 import { Input } from '@stayflo/ui';
@@ -28,6 +28,7 @@ interface RoomRectangle {
   roomAmenities?: string[];
   bedPositions?: { x: number; y: number; w?: number; h?: number; rotated?: boolean }[];
   labelPos?: { x: number; y: number };
+  windowFacing?: 'Road side' | 'Building side' | 'Ground side' | 'None';
 }
 
 const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: number; h?: number; rotated?: boolean }[] => {
@@ -55,26 +56,35 @@ const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: 
   return [];
 };
 
+// ── Unified colour constants (matches inspo photo) ──────────────────────────
+const ROOM_COLOR   = '#1aab8b';   // all residential rooms — teal
+const COMMON_COLOR = '#EF9F27';   // kitchen, dining, common room — amber
+const DARK_COLOR   = '#374151';   // parking, access road, other building — dark navy
+const GARDEN_COLOR = '#3d7a2e';   // garden, empty land — green
+const GREY_COLOR   = '#8b949e';   // corridor, staircase — grey
+const DOOR_COLOR   = '#ef4444';   // door wall marker — red
+const WINDOW_COLOR = '#f59e0b';   // window wall marker — amber
+
 const PALETTE = [
-  // ROOMS
-  { name: 'Single room', category: 'ROOMS', color: '#14b8a6', text: '#FFFFFF', initials: 'SR' },
-  { name: 'Double room', category: 'ROOMS', color: '#0f766e', text: '#FFFFFF', initials: 'DR' },
-  { name: 'Triple room', category: 'ROOMS', color: '#111827', text: '#FFFFFF', initials: 'TR' },
-  { name: '4 sharing room', category: 'ROOMS', color: '#0b4c3c', text: '#FFFFFF', initials: 'FR' },
+  // ROOMS — all use the same teal
+  { name: 'Single room',   category: 'ROOMS',   color: ROOM_COLOR,   text: '#FFFFFF', initials: 'SR' },
+  { name: 'Double room',   category: 'ROOMS',   color: ROOM_COLOR,   text: '#FFFFFF', initials: 'DR' },
+  { name: 'Triple room',   category: 'ROOMS',   color: ROOM_COLOR,   text: '#FFFFFF', initials: 'TR' },
+  { name: '4 sharing room',category: 'ROOMS',   color: ROOM_COLOR,   text: '#FFFFFF', initials: 'FR' },
   // COMMON AREAS
-  { name: 'Kitchen', category: 'COMMON', color: '#EF9F27', text: '#FFFFFF', initials: 'KT' },
-  { name: 'Dining area', category: 'COMMON', color: '#854F0B', text: '#FFFFFF', initials: 'DA' },
-  { name: 'Common room', category: 'COMMON', color: '#993C1D', text: '#FFFFFF', initials: 'CR' },
-  { name: 'Corridor', category: 'COMMON', color: '#6B7280', text: '#FFFFFF', initials: 'CO' },
-  { name: 'Staircase', category: 'COMMON', color: '#9CA3AF', text: '#FFFFFF', initials: 'SC' },
+  { name: 'Kitchen',       category: 'COMMON',  color: COMMON_COLOR, text: '#FFFFFF', initials: 'KT' },
+  { name: 'Dining area',   category: 'COMMON',  color: COMMON_COLOR, text: '#FFFFFF', initials: 'DA' },
+  { name: 'Common room',   category: 'COMMON',  color: COMMON_COLOR, text: '#FFFFFF', initials: 'CR' },
+  { name: 'Corridor',      category: 'COMMON',  color: GREY_COLOR,   text: '#FFFFFF', initials: 'CO' },
+  { name: 'Staircase',     category: 'COMMON',  color: GREY_COLOR,   text: '#FFFFFF', initials: 'SC' },
   // OUTDOOR
-  { name: 'Garden', category: 'OUTDOOR', color: '#3B6D11', text: '#FFFFFF', initials: 'GD' },
-  { name: 'Parking', category: 'OUTDOOR', color: '#374151', text: '#FFFFFF', initials: 'PK' },
-  { name: 'Access road', category: 'OUTDOOR', color: '#111827', text: '#FFFFFF', initials: 'RD' },
-  { name: 'Terrace', category: 'OUTDOOR', color: '#0f766e', text: '#FFFFFF', initials: 'TC' },
-  { name: 'Other building', category: 'OUTDOOR', color: '#475569', text: '#FFFFFF', initials: 'OB' },
-  { name: 'Empty land', category: 'OUTDOOR', color: '#FEF08A', text: '#854F0B', initials: 'EL' },
-  { name: 'Text label', category: 'OUTDOOR', color: 'transparent', text: '#1E293B', initials: 'TX' },
+  { name: 'Garden',        category: 'OUTDOOR', color: GARDEN_COLOR, text: '#FFFFFF', initials: 'GD' },
+  { name: 'Parking',       category: 'OUTDOOR', color: DARK_COLOR,   text: '#FFFFFF', initials: 'PK' },
+  { name: 'Access road',   category: 'OUTDOOR', color: DARK_COLOR,   text: '#FFFFFF', initials: 'RD' },
+  { name: 'Terrace',       category: 'OUTDOOR', color: GARDEN_COLOR, text: '#FFFFFF', initials: 'TC' },
+  { name: 'Other building',category: 'OUTDOOR', color: DARK_COLOR,   text: '#FFFFFF', initials: 'OB' },
+  { name: 'Empty land',    category: 'OUTDOOR', color: GARDEN_COLOR, text: '#FFFFFF', initials: 'EL' },
+  { name: 'Text label',    category: 'OUTDOOR', color: 'transparent',text: '#1E293B', initials: 'TX' },
 ];
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -1561,57 +1571,40 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
               )}
             </div>
 
-            {/* Grid Controls Panel */}
-            <Card className="p-6 bg-white text-slate-800 flex flex-wrap gap-4 items-center justify-between border border-[#E5E7EB] rounded-2xl shadow-sm">
-              <div className="flex gap-4 items-center text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">GRID:</span>
-                  {[
-                    { label: 'Standard (40px)', val: 40 },
-                    { label: 'Fine (20px)', val: 20 },
-                    { label: 'Large (60px)', val: 60 }
-                  ].map(g => (
-                    <button
-                      key={g.val}
-                      onClick={() => setGridSize(g.val)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${gridSize === g.val ? 'bg-[#14b8a6] border-[#14b8a6] text-white shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                      {g.label}
-                    </button>
-                  ))}
-                </div>
+            {/* Floor Layout Controls */}
+            <Card className="p-4 bg-white text-slate-800 flex flex-wrap gap-4 items-center justify-between border border-[#E5E7EB] rounded-2xl shadow-sm">
+              <div className="flex gap-3 items-center text-xs flex-wrap">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">GRID SIZE:</span>
+                {[{ label: 'Fine (20px)', val: 20 }, { label: 'Standard (40px)', val: 40 }, { label: 'Large (60px)', val: 60 }].map(g => (
+                  <button key={g.val} onClick={() => setGridSize(g.val)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${gridSize === g.val ? 'bg-[#14b8a6] border-[#14b8a6] text-white shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                    {g.label}
+                  </button>
+                ))}
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider ml-2">CANVAS:</span>
+                <button onClick={() => setCanvasCols(Math.max(8, canvasCols - 2))} className="px-2 py-1 rounded border border-slate-200 text-[10px] font-bold text-slate-600 bg-white hover:bg-slate-50">− W</button>
+                <button onClick={() => setCanvasCols(canvasCols + 2)} className="px-2 py-1 rounded border border-slate-200 text-[10px] font-bold text-slate-600 bg-white hover:bg-slate-50">+ W</button>
+                <button onClick={() => setCanvasRows(Math.max(6, canvasRows - 2))} className="px-2 py-1 rounded border border-slate-200 text-[10px] font-bold text-slate-600 bg-white hover:bg-slate-50">− H</button>
+                <button onClick={() => setCanvasRows(canvasRows + 2)} className="px-2 py-1 rounded border border-slate-200 text-[10px] font-bold text-slate-600 bg-white hover:bg-slate-50">+ H</button>
               </div>
-
-              {/* Canvas Resize Controls */}
-              <div className="flex gap-2.5 text-xs items-center">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CANVAS:</span>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasCols(Math.max(4, canvasCols - 1)); saveState({ canvasCols: canvasCols - 1 }); }}>- Width</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasCols(canvasCols + 1); saveState({ canvasCols: canvasCols + 1 }); }}>+ Width</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasRows(Math.max(4, canvasRows - 1)); saveState({ canvasRows: canvasRows - 1 }); }}>- Height</Button>
-                <Button size="sm" variant="outline" className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg" onClick={() => { setCanvasRows(canvasRows + 1); saveState({ canvasRows: canvasRows + 1 }); }}>+ Height</Button>
-                <div className="border-l border-slate-200 pl-2.5 flex gap-1">
-                  <Button size="sm" variant="destructive" className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg shadow-sm" onClick={clearFloor}>Clear floor</Button>
-                </div>
-              </div>
+              <Button size="sm" variant="destructive" className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg shadow-sm" onClick={clearFloor}>Clear floor</Button>
             </Card>
 
             {/* Vector Layout Canvas */}
-            <div className="flex flex-col lg:flex-row gap-6 lg:h-[550px] lg:overflow-hidden h-auto overflow-visible">
+            <div className="flex flex-col lg:flex-row gap-6 lg:h-[620px] lg:overflow-hidden h-auto overflow-visible">
               
-              {/* Palette Column Left */}
+              {/* Palette Column Left — Rooms only */}
               <div className="w-full lg:w-56 bg-white border border-[#E5E7EB] p-6 rounded-2xl overflow-y-auto space-y-5 text-left shadow-sm">
                 
-                {/* Rooms selection */}
+                {/* Room Types */}
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Drag Rooms to Blueprint</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Add Room</p>
                   <div className="space-y-1.5">
                     {PALETTE.filter(p => p.category === 'ROOMS').map(p => (
                       <button
                         key={p.name}
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData('text/plain', p.name)}
                         onClick={() => handleAddRoom(p.name)}
-                        className="w-full p-2.5 rounded flex items-center justify-between text-xs transition-all border text-slate-700 bg-white hover:bg-slate-50 cursor-grab active:cursor-grabbing"
+                        className="w-full p-2.5 rounded flex items-center justify-between text-xs transition-all border text-slate-700 bg-white hover:bg-slate-50"
                       >
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
@@ -1623,275 +1616,315 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
                   </div>
                 </div>
 
-                {/* Common Areas */}
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Common Areas</p>
+                {/* Context / Environment Blocks */}
+                <div className="mt-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Surroundings</p>
+                  <p className="text-[9px] text-slate-400 mb-2 leading-tight">Place context blocks beside rooms so leads understand window-facing direction.</p>
                   <div className="space-y-1.5">
-                    {PALETTE.filter(p => p.category === 'COMMON').map(p => (
+                    {PALETTE.filter(p => ['Access road', 'Other building', 'Garden', 'Parking', 'Corridor', 'Staircase'].includes(p.name)).map(p => (
                       <button
                         key={p.name}
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData('text/plain', p.name)}
                         onClick={() => handleAddRoom(p.name)}
-                        className="w-full p-2.5 rounded flex items-center justify-between text-xs transition-all border text-slate-700 bg-white hover:bg-slate-50 cursor-grab active:cursor-grabbing"
+                        className="w-full p-2.5 rounded flex items-center justify-between text-xs transition-all border text-slate-700 bg-white hover:bg-slate-50"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
+                          <span className="w-2.5 h-2.5 rounded-sm border border-slate-300" style={{ background: p.color }} />
                           <span className="font-semibold">{p.name}</span>
                         </div>
-                        <span className="text-[9px] text-[#14b8a6] font-bold">+ ADD</span>
+                        <span className="text-[9px] text-slate-400 font-bold">+ ADD</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Outdoor */}
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Outdoor</p>
-                  <div className="space-y-1.5">
-                    {PALETTE.filter(p => p.category === 'OUTDOOR').map(p => (
-                      <button
-                        key={p.name}
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData('text/plain', p.name)}
-                        onClick={() => handleAddRoom(p.name)}
-                        className="w-full p-2.5 rounded flex items-center justify-between text-xs transition-all border text-slate-700 bg-white hover:bg-slate-50 cursor-grab active:cursor-grabbing"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-sm" style={{ background: p.color }} />
-                          <span className="font-semibold">{p.name}</span>
-                        </div>
-                        <span className="text-[9px] text-[#14b8a6] font-bold">+ ADD</span>
-                      </button>
-                    ))}
-                  </div>
+                {/* Tip */}
+                <div className="p-3 bg-teal-50 rounded-xl border border-teal-100 text-[10px] text-teal-700 leading-relaxed">
+                  <strong>Tip:</strong> Place an "Access road" block next to a room, then set that room's window wall to "Window" — leads will see it faces the road.
                 </div>
 
               </div>
 
-              {/* Drawing Canvas Area (Center) */}
-              <div 
-                className="flex-1 bg-slate-50 rounded-xl overflow-auto border border-slate-200 p-6 flex items-start justify-start relative shadow-inner select-none"
-                onClick={() => setActiveRoomId(null)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleCanvasDrop}
-              >
-                {/* SVG/Grid Drawing Board */}
-                <div 
-                  className="grid-board relative border border-slate-200 bg-white shadow-md rounded overflow-visible"
-                  style={{
-                    width: `${canvasCols * gridSize}px`, 
-                    height: `${canvasRows * gridSize}px`,
-                    backgroundImage: `linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)`,
-                    backgroundSize: `${gridSize}px ${gridSize}px`
-                  }}
+              {/* Drawing Canvas Area (Center) — Full Grid Canvas with Room + Context Blocks */}
+              <div className="flex-1 flex flex-col gap-3 min-w-0">
+                {/* Grid canvas */}
+                <div
+                  className="flex-1 bg-slate-50 rounded-xl overflow-auto border border-slate-200 p-4 flex items-start justify-start relative shadow-inner select-none"
+                  onClick={() => setActiveRoomId(null)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleCanvasDrop}
                 >
-                  {/* Render Room Rectangles */}
-                  {activeRooms.map(room => {
-                    const isSelected = activeRoomId === room.id;
-                    const left = room.x * gridSize;
-                    const top = room.y * gridSize;
-                    const width = room.w * gridSize;
-                    const height = room.h * gridSize;
+                  {/* Legend strip */}
+                  <div className="absolute top-2 right-3 flex gap-2 z-20 pointer-events-none">
+                    <span className="text-[9px] bg-white border border-slate-200 rounded px-1.5 py-0.5 text-slate-500 font-semibold shadow-sm">Drag to move · Handles to resize · Click to select</span>
+                  </div>
 
-                    const isTextLabel = room.type === 'Text label';
-                    return (
-                      <div
-                        key={room.id}
-                        onMouseDown={(e) => handleDragStart(room.id, e)}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`absolute rounded flex flex-col items-center justify-center select-none ${isTextLabel ? '' : 'border-2'} cursor-grab active:cursor-grabbing`}
-                        style={{
-                          left: `${left}px`,
-                          top: `${top}px`,
-                          width: `${width}px`,
-                          height: `${height}px`,
-                          backgroundColor: room.color,
-                          borderColor: isSelected ? '#EF9F27' : (isTextLabel ? 'transparent' : '#475569'),
-                          borderWidth: isTextLabel ? (isSelected ? '2px' : '0px') : (isSelected ? '3px' : '2px'),
-                          borderStyle: isTextLabel && isSelected ? 'dashed' : 'solid',
-                          boxShadow: isSelected ? '0 0 12px rgba(239, 159, 39, 0.6)' : 'none',
-                          zIndex: isSelected ? 30 : 10
-                        }}
-                      >
-                        {/* Room label/number inside room */}
-                        {(() => {
-                           const labelX = room.labelPos?.x !== undefined ? room.labelPos.x : 50;
-                           const labelY = room.labelPos?.y !== undefined ? room.labelPos.y : 50;
-                           const isNarrow = room.w < room.h;
-                           
-                           return (
-                             <div 
-                               onMouseDown={(e) => handleLabelDragStart(room.id, e)}
-                               onClick={(e) => e.stopPropagation()}
-                               className={`absolute text-xs font-bold font-sans z-10 rounded cursor-move select-none flex items-center justify-center pointer-events-auto ${
-                                 isTextLabel 
-                                   ? 'text-slate-800 bg-transparent shadow-none font-medium' 
-                                   : 'text-white bg-slate-900/60 px-1.5 py-0.5 shadow'
-                               }`}
-                               style={{
-                                 left: `${labelX}%`,
-                                 top: `${labelY}%`,
-                                 transform: `translate(-50%, -50%) ${isNarrow ? 'rotate(180deg)' : ''}`,
-                                 writingMode: isNarrow ? 'vertical-rl' : 'horizontal-tb',
-                               }}
-                               title="Room Label - Drag to move"
-                             >
-                               {room.customName}
-                             </div>
-                           );
-                        })()}
+                  {/* SVG/Grid Drawing Board */}
+                  <div
+                    className="grid-board relative border border-slate-300 bg-white shadow-md rounded overflow-visible"
+                    style={{
+                      width: `${canvasCols * gridSize}px`,
+                      height: `${canvasRows * gridSize}px`,
+                      backgroundImage: `linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)`,
+                      backgroundSize: `${gridSize}px ${gridSize}px`
+                    }}
+                  >
+                    {activeRooms.map(room => {
+                      const isSelected = activeRoomId === room.id;
+                      const left = room.x * gridSize;
+                      const top = room.y * gridSize;
+                      const width = room.w * gridSize;
+                      const height = room.h * gridSize;
+                      const isRoom = room.type.toLowerCase().includes('room');
+                      const isRoad = room.type === 'Access road';
+                      const isBuilding = room.type === 'Other building';
+                      const isGarden = room.type === 'Garden';
+                      const isParking = room.type === 'Parking';
+                      const isCorridor = room.type === 'Corridor';
+                      const isStaircase = room.type === 'Staircase';
+                      const isTextLabel = room.type === 'Text label';
 
-                        {/* Access Road symbol */}
-                        {room.type === 'Access road' && (
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1">
-                            {room.w >= room.h ? (
-                              <div className="w-full border-t-[3px] border-dashed border-white opacity-70" />
-                            ) : (
-                              <div className="h-full border-l-[3px] border-dashed border-white opacity-70" />
-                            )}
-                          </div>
-                        )}
+                      // Compute window-facing from what block is adjacent on the window side
+                      let inferredFacing: string | null = null;
+                      if (isRoom && room.windows && room.windows.length > 0) {
+                        const windowSide = room.windows[0];
+                        // Find any block adjacent on that side
+                        const neighbor = activeRooms.find(other => {
+                          if (other.id === room.id) return false;
+                          if (windowSide === 'right') return other.x === room.x + room.w && other.y < room.y + room.h && other.y + other.h > room.y;
+                          if (windowSide === 'left') return other.x + other.w === room.x && other.y < room.y + room.h && other.y + other.h > room.y;
+                          if (windowSide === 'top') return other.y + other.h === room.y && other.x < room.x + room.w && other.x + other.w > room.x;
+                          if (windowSide === 'bottom') return other.y === room.y + room.h && other.x < room.x + room.w && other.x + other.w > room.x;
+                          return false;
+                        });
+                        if (neighbor) {
+                          if (neighbor.type === 'Access road') inferredFacing = 'Road side';
+                          else if (neighbor.type === 'Other building') inferredFacing = 'Building side';
+                          else if (neighbor.type === 'Garden' || neighbor.type === 'Parking' || neighbor.type === 'Empty land') inferredFacing = 'Ground side';
+                        }
+                      }
 
-                        {/* Staircase symbol */}
-                        {room.type === 'Staircase' && (
-                          <div className="absolute inset-0 flex flex-col justify-around pointer-events-none p-1 opacity-60">
-                            <div className="flex flex-col h-full w-full justify-between border-x border-slate-700/40">
-                              {[...Array(6)].map((_, i) => (
-                                <div key={i} className="border-t border-slate-700/40 w-full h-0" />
-                              ))}
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-slate-855" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                </svg>
+                      return (
+                        <div
+                          key={room.id}
+                          onMouseDown={(e) => handleDragStart(room.id, e)}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`absolute rounded-xl select-none ${isTextLabel ? '' : 'border-2'} cursor-grab active:cursor-grabbing overflow-hidden`}
+                          style={{
+                            left: `${left}px`,
+                            top: `${top}px`,
+                            width: `${width}px`,
+                            height: `${height}px`,
+                            backgroundColor: room.color,
+                            borderColor: isSelected ? '#EF9F27' : (isTextLabel ? 'transparent' : '#1e293b'),
+                            borderWidth: isTextLabel ? (isSelected ? '2px' : '0px') : (isSelected ? '3px' : '2px'),
+                            borderStyle: isTextLabel && isSelected ? 'dashed' : 'solid',
+                            boxShadow: isSelected ? '0 0 14px rgba(239,159,39,0.65)' : '0 2px 8px rgba(0,0,0,0.18)',
+                            zIndex: isSelected ? 30 : 10
+                          }}
+                        >
+                          {/* ── ROOM BLOCK: card-style interior ── */}
+                          {isRoom ? (
+                            <div className="absolute inset-0 flex flex-col p-2 pointer-events-none select-none">
+                              {/* Top row: room name + facing icon */}
+                              <div className="flex items-center justify-between mb-1.5 flex-shrink-0">
+                                <span className="text-[9px] font-black text-white tracking-widest uppercase leading-none drop-shadow">
+                                  ROOM {room.customName}
+                                </span>
+                                {inferredFacing && (
+                                  <span className="text-[9px] leading-none drop-shadow">
+                                    {inferredFacing === 'Road side' ? '🚗' : inferredFacing === 'Building side' ? '🏢' : '🌳'}
+                                  </span>
+                                )}
                               </div>
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Kitchen symbol */}
-                        {room.type === 'Kitchen' && (
-                          <div className="absolute inset-0 pointer-events-none p-1.5 flex items-center justify-around opacity-55">
-                            <div className="border-2 border-amber-900/60 rounded p-0.5 flex gap-0.5 bg-amber-50/20">
-                              <div className="w-3.5 h-3.5 rounded-full border border-amber-955 flex items-center justify-center">
-                                <div className="w-2 h-2 rounded-full border border-dashed border-amber-955" />
+                              {/* Bed cards — centered in remaining space */}
+                              {room.beds > 0 && (() => {
+                                const bedsCount = room.beds;
+                                const bedStatuses = room.bedStatuses || Array(bedsCount).fill('Vacant');
+                                // Scale bed card size to fit room block
+                                const availW = width - 16;
+                                const availH = height - 36;
+                                const gapPx = 4;
+                                const maxBedW = Math.min(36, Math.floor((availW - gapPx * (bedsCount - 1)) / bedsCount));
+                                const bedW = Math.max(14, maxBedW);
+                                const bedH = Math.min(52, Math.max(20, availH));
+                                const totalBedsW = bedW * bedsCount + gapPx * (bedsCount - 1);
+                                const show = bedW >= 14 && bedH >= 18;
+
+                                return show ? (
+                                  <div
+                                    className="flex-1 flex items-center justify-center"
+                                    style={{ gap: `${gapPx}px` }}
+                                  >
+                                    {Array(bedsCount).fill(0).map((_, bIdx) => {
+                                      const isOccupied = bedStatuses[bIdx] === 'Occupied';
+                                      return (
+                                        <div
+                                          key={bIdx}
+                                          style={{ width: bedW, height: bedH, flexShrink: 0 }}
+                                          className={`rounded-lg flex items-center justify-center pointer-events-none ${
+                                            isOccupied
+                                              ? 'bg-[#0f1c2e] shadow-md'
+                                              : 'border-2 border-dashed border-teal-300 bg-white/10'
+                                          }`}
+                                        >
+                                          {isOccupied ? (
+                                            <svg
+                                              style={{ width: Math.max(8, bedW * 0.45), height: Math.max(8, bedW * 0.45) }}
+                                              viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"
+                                            >
+                                              <circle cx="12" cy="7" r="4"/>
+                                              <path strokeLinecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                                            </svg>
+                                          ) : (
+                                            <svg
+                                              style={{ width: Math.max(8, bedW * 0.4), height: Math.max(8, bedW * 0.4) }}
+                                              viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2.5"
+                                            >
+                                              <path strokeLinecap="round" d="M12 5v14M5 12h14"/>
+                                            </svg>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  // Too small — just show a compact label
+                                  <div className="flex-1 flex items-center justify-center">
+                                    <span className="text-[8px] font-bold text-white/70">{bedsCount}B</span>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          ) : (
+                            /* ── NON-ROOM block: simple label ── */
+                            <>
+                              <div
+                                className={`absolute text-[10px] font-bold z-10 rounded px-1 py-0.5 select-none pointer-events-none flex items-center justify-center ${
+                                  isTextLabel ? 'text-slate-800 bg-transparent' : 'text-white bg-slate-900/50 shadow'
+                                }`}
+                                style={{ left: '50%', top: '50%', transform: 'translate(-50%,-50%)' }}
+                              >
+                                {room.customName}
                               </div>
-                              <div className="w-3.5 h-3.5 rounded-full border border-amber-955 flex items-center justify-center">
-                                <div className="w-2 h-2 rounded-full border border-dashed border-amber-955" />
+
+                              {/* Road stripe */}
+                              {isRoad && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-1 overflow-hidden">
+                                  {room.w >= room.h
+                                    ? <div className="w-full border-t-[3px] border-dashed border-white/70" />
+                                    : <div className="h-full border-l-[3px] border-dashed border-white/70" />}
+                                  <span className="absolute text-[8px] font-black text-white/80 uppercase tracking-widest top-1 left-1">ROAD</span>
+                                </div>
+                              )}
+                              {isBuilding && (
+                                <div className="absolute inset-0 pointer-events-none opacity-30 overflow-hidden rounded" style={{
+                                  backgroundImage: 'repeating-linear-gradient(45deg,#fff 0,#fff 2px,transparent 0,transparent 8px)',
+                                  backgroundSize: '10px 10px'
+                                }} />
+                              )}
+                              {isGarden && (
+                                <div className="absolute inset-0 pointer-events-none p-1 overflow-hidden flex flex-wrap gap-1.5 items-center justify-center opacity-60">
+                                  {[...Array(6)].map((_, i) => (
+                                    <svg key={i} className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M12 2a1 1 0 0 1 1 1v7.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V3a1 1 0 0 1 1-1z" />
+                                    </svg>
+                                  ))}
+                                </div>
+                              )}
+                              {isParking && (
+                                <span className="absolute inset-0 flex items-center justify-center text-white/50 text-3xl font-black pointer-events-none select-none">P</span>
+                              )}
+                              {isStaircase && (
+                                <div className="absolute inset-0 flex flex-col justify-around pointer-events-none p-1 opacity-40">
+                                  {[...Array(5)].map((_, i) => <div key={i} className="border-t border-white w-full" />)}
+                                </div>
+                              )}
+                              {isCorridor && (
+                                <div className="absolute inset-0 flex items-center pointer-events-none px-2">
+                                  <div className="w-full border-t-2 border-dashed border-white/50" />
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {/* ── Door markers: thick solid bar on the wall, flush inside edge ── */}
+                          {isRoom && (room.doors || []).map(side => (
+                            <div key={`door-${side}`} className="absolute pointer-events-none z-20" style={{
+                              backgroundColor: DOOR_COLOR,
+                              borderRadius: 3,
+                              ...(side === 'top'    ? { top: 0,    left: '18%', width: '32%', height: 9 } : {}),
+                              ...(side === 'bottom' ? { bottom: 0, left: '18%', width: '32%', height: 9 } : {}),
+                              ...(side === 'left'   ? { left: 0,   top: '18%',  width: 9, height: '32%' } : {}),
+                              ...(side === 'right'  ? { right: 0,  top: '18%',  width: 9, height: '32%' } : {}),
+                            }} />
+                          ))}
+
+                          {/* ── Window markers: short amber bar with inner slot, centered on wall ── */}
+                          {isRoom && (room.windows || []).map(side => (
+                            <div key={`win-${side}`} className="absolute pointer-events-none z-20" style={{
+                              backgroundColor: WINDOW_COLOR,
+                              borderRadius: 3,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              ...(side === 'top'    ? { top: 0,    left: '58%', width: '22%', height: 7 } : {}),
+                              ...(side === 'bottom' ? { bottom: 0, left: '58%', width: '22%', height: 7 } : {}),
+                              ...(side === 'left'   ? { left: 0,   top: '58%',  width: 7, height: '22%' } : {}),
+                              ...(side === 'right'  ? { right: 0,  top: '58%',  width: 7, height: '22%' } : {}),
+                            }}>
+                              {/* Inner white slot — simulates glazing gap */}
+                              <div style={{
+                                borderRadius: 1,
+                                backgroundColor: 'rgba(255,255,255,0.5)',
+                                ...(side === 'top' || side === 'bottom'
+                                  ? { width: '55%', height: '45%' }
+                                  : { width: '45%', height: '55%' }),
+                              }} />
+                            </div>
+                          ))}
+
+                          {/* Resize handles */}
+                          {isSelected && (
+                            <>
+                              <div className="absolute -right-2 top-2 bottom-2 w-4 cursor-e-resize z-35" onMouseDown={(e) => handleResizeStart(room.id, 'right', e)}>
+                                <div className="absolute right-[6px] top-0 bottom-0 w-1.5 bg-amber-500 rounded shadow-sm" />
                               </div>
-                            </div>
-                            <div className="border border-dashed border-amber-900/60 w-7 h-7 rounded flex items-center justify-center text-[7px] font-bold text-amber-900">
-                              SINK
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Dining Area symbol */}
-                        {room.type === 'Dining area' && (
-                          <div className="absolute inset-0 pointer-events-none p-1.5 flex items-center justify-center opacity-50 gap-2">
-                            <div className="relative border-2 border-amber-900/60 w-10 h-5 rounded flex items-center justify-center bg-amber-50/10">
-                              <div className="absolute -top-1 left-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
-                              <div className="absolute -top-1 right-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
-                              <div className="absolute -bottom-1 left-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
-                              <div className="absolute -bottom-1 right-1.5 w-1.5 h-1.5 rounded-full border border-amber-955 bg-amber-100" />
-                              <span className="text-[6px] font-bold text-amber-955">TABLE</span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Other Building hatch pattern */}
-                        {room.type === 'Other building' && (
-                          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden" style={{
-                            backgroundImage: 'repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 0, transparent 8px)',
-                            backgroundSize: '12px 12px'
-                          }} />
-                        )}
-
-                        {/* Empty Land grass graphic */}
-                        {room.type === 'Empty land' && (
-                          <div className="absolute inset-0 pointer-events-none p-1 opacity-55 overflow-hidden flex flex-wrap gap-2 justify-around items-center">
-                            {[...Array(Math.max(2, Math.floor((room.w * room.h) / 3)))].map((_, i) => (
-                              <svg key={i} className="w-3.5 h-3.5 text-emerald-800/60" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2a1 1 0 0 1 1 1v7.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42l2.3 2.3V3a1 1 0 0 1 1-1z" />
-                              </svg>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Realistic Beds Layout */}
-                        {renderBeds(room)}
-
-                        {/* Red swing doors */}
-                        {renderDoors(room.doors)}
-
-                        {/* Red windows */}
-                        {renderWindows(room.windows)}
-
-                        {/* Multi-axis Resize handles */}
-                        {isSelected && (
-                          <>
-                            {/* Right edge resize handle */}
-                            <div 
-                              className="absolute -right-2 top-2 bottom-2 w-4 cursor-e-resize group/right z-35"
-                              onMouseDown={(e) => handleResizeStart(room.id, 'right', e)}
-                            >
-                              <div className="absolute right-[6px] top-0 bottom-0 w-1.5 bg-amber-500 opacity-0 group-hover/right:opacity-100 rounded transition-opacity shadow-sm" />
-                            </div>
-                            {/* Bottom edge resize handle */}
-                            <div 
-                              className="absolute -bottom-2 left-2 right-2 h-4 cursor-s-resize group/bottom z-35"
-                              onMouseDown={(e) => handleResizeStart(room.id, 'bottom', e)}
-                            >
-                              <div className="absolute bottom-[6px] left-0 right-0 h-1.5 bg-amber-500 opacity-0 group-hover/bottom:opacity-100 rounded transition-opacity shadow-sm" />
-                            </div>
-                            {/* Bottom-right corner resize handle */}
-                            <div 
-                              className="absolute bottom-0 right-0 w-6 h-6 translate-x-1/2 translate-y-1/2 cursor-se-resize bg-amber-500 hover:bg-amber-600 border-2 border-white rounded-full flex items-center justify-center z-50 shadow-lg"
-                              style={{ width: '24px', height: '24px' }}
-                              onMouseDown={(e) => handleResizeStart(room.id, 'both', e)}
-                            >
-                              <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
+                              <div className="absolute -bottom-2 left-2 right-2 h-4 cursor-s-resize z-35" onMouseDown={(e) => handleResizeStart(room.id, 'bottom', e)}>
+                                <div className="absolute bottom-[6px] left-0 right-0 h-1.5 bg-amber-500 rounded shadow-sm" />
+                              </div>
+                              <div
+                                className="absolute bottom-0 right-0 w-5 h-5 translate-x-1/2 translate-y-1/2 cursor-se-resize bg-amber-500 hover:bg-amber-600 border-2 border-white rounded-full flex items-center justify-center z-50 shadow-lg"
+                                onMouseDown={(e) => handleResizeStart(room.id, 'both', e)}
+                              >
+                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-
               </div>
 
               {/* Properties Panel (Right) */}
               <div className="w-full lg:w-64 bg-white border border-slate-200 p-4 rounded-xl flex flex-col justify-between text-left text-slate-800 shadow-sm">
                 <div className="space-y-4 overflow-y-auto max-h-[420px] pr-1">
                   <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center justify-between">
-                    <span>Blueprint Inspector</span>
-                    {selectedRoom && <span className="text-xs font-mono text-slate-400">[{selectedRoom.w}x{selectedRoom.h}m]</span>}
+                    <span>Room Inspector</span>
+                    {selectedRoom && (
+                      <span className="text-[10px] font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
+                        {selectedRoom.beds} bed{selectedRoom.beds !== 1 ? 's' : ''}
+                      </span>
+                    )}
                   </h3>
 
                   {selectedRoom ? (
                     <div className="space-y-4 text-xs">
                       <div>
-                        <label className="block text-slate-500 font-bold mb-1">Block Category</label>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" style={{ background: selectedRoom.color, color: '#FFF' }} className="border-none font-semibold">
-                            {selectedRoom.type}
-                          </Badge>
-                          <button
-                            onClick={() => {
-                              const nextW = Math.max(2, Math.min(canvasCols - selectedRoom.x, selectedRoom.h));
-                              const nextH = Math.max(2, Math.min(canvasRows - selectedRoom.y, selectedRoom.w));
-                              updateRoomProperties({ w: nextW, h: nextH });
-                            }}
-                            className="flex items-center gap-1 px-2 py-1 text-[9px] font-bold rounded-md bg-[#14b8a6] text-white hover:bg-[#0f766e] transition-all shadow-sm"
-                            title="Rotate 90° — swaps width and height"
-                          >
-                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
-                            </svg>
-                            Rotate 90°
-                          </button>
-                        </div>
+                        <label className="block text-slate-500 font-bold mb-1">Room Type</label>
+                        <Badge variant="secondary" style={{ background: selectedRoom.color, color: '#FFF' }} className="border-none font-semibold">
+                          {selectedRoom.type}
+                        </Badge>
                       </div>
 
                       <div>
@@ -1962,6 +1995,21 @@ function BuilderCanvasComponent({ initialData }: { initialData: any }) {
                               <option value="2 Sharing">2 Sharing (Double)</option>
                               <option value="3 Sharing">3 Sharing (Triple)</option>
                               <option value="4 Sharing">4 Sharing (Quad)</option>
+                            </select>
+                          </div>
+
+                          {/* Window Facing Direction */}
+                          <div>
+                            <label className="block text-slate-500 font-bold mb-1">Window Facing</label>
+                            <select
+                              value={selectedRoom.windowFacing || 'Road side'}
+                              onChange={(e) => updateRoomProperty('windowFacing', e.target.value)}
+                              className="w-full h-8 text-xs bg-white border border-slate-200 rounded px-2 text-slate-900 focus:ring-[#14b8a6]"
+                            >
+                              <option value="Road side">Road side (🚗)</option>
+                              <option value="Building side">Building side (🏢)</option>
+                              <option value="Ground side">Ground side (🌳)</option>
+                              <option value="None">None</option>
                             </select>
                           </div>
 

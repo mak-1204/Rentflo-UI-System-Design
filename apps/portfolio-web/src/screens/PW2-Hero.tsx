@@ -20,6 +20,7 @@ interface RoomRectangle {
   pricePerBed?: number;
   roomAmenities?: string[];
   bedPositions?: { x: number; y: number; w?: number; h?: number; rotated?: boolean }[];
+  windowFacing?: 'Road side' | 'Building side' | 'Ground side' | 'None';
 }
 
 const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: number; h?: number; rotated?: boolean }[] => {

@@ -22,6 +22,7 @@ interface RoomRectangle {
   pricePerBed?: number;
   roomAmenities?: string[];
   bedPositions?: { x: number; y: number; w?: number; h?: number; rotated?: boolean }[];
+  windowFacing?: 'Road side' | 'Building side' | 'Ground side' | 'None';
 }
 
 const getDefaultBedPositions = (bedsCount: number): { x: number; y: number; w?: number; h?: number; rotated?: boolean }[] => {
@@ -478,6 +479,27 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                         </div>
                       )}
 
+                      {/* Window-facing badge inferred from canvas adjacency */}
+                      {!isTextLabel && (room.type.includes('room') || room.type.includes('Room')) && (() => {
+                        if (!room.windows || room.windows.length === 0) return null;
+                        const wSide = room.windows[0];
+                        const neighbor = activeRooms.find(other => {
+                          if (other.id === room.id) return false;
+                          if (wSide === 'right') return other.x === room.x + room.w && other.y < room.y + room.h && other.y + other.h > room.y;
+                          if (wSide === 'left') return other.x + other.w === room.x && other.y < room.y + room.h && other.y + other.h > room.y;
+                          if (wSide === 'top') return other.y + other.h === room.y && other.x < room.x + room.w && other.x + other.w > room.x;
+                          if (wSide === 'bottom') return other.y === room.y + room.h && other.x < room.x + room.w && other.x + other.w > room.x;
+                          return false;
+                        });
+                        if (!neighbor) return null;
+                        const icon = neighbor.type === 'Access road' ? '🚗' : neighbor.type === 'Other building' ? '🏢' : '🌳';
+                        return (
+                          <div className="absolute bottom-0.5 right-0.5 text-[8px] leading-none z-20 pointer-events-none bg-white/80 rounded px-0.5">
+                            {icon}
+                          </div>
+                        );
+                      })()}
+
                       {/* Room label/number */}
                       <div className={`text-[9.5px] font-extrabold pointer-events-none z-10 ${isTextLabel ? 'text-slate-800 font-medium' : 'text-slate-800'}`}>
                         {room.customName}
@@ -568,6 +590,16 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                 })}
               </div>
             </div>
+
+            {/* Canvas Legend */}
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 px-1">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#111827] border border-slate-500 inline-block" /> Road</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#475569] border border-slate-400 inline-block" /> Other Building</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3B6D11] border border-slate-400 inline-block" /> Garden</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Door</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Window</span>
+              <span className="flex items-center gap-1.5">🚗 Road-facing · 🏢 Building-facing · 🌳 Ground-facing</span>
+            </div>
           </div>
 
           {/* Right Column: Room Details Inspector Card */}
@@ -604,7 +636,29 @@ export function InteractiveFloorPlans({ layoutData }: { layoutData?: any }) {
                     <div className="flex justify-between border-b border-slate-100 dark:border-white/5 pb-2">
                       <span className="text-slate-400 dark:text-slate-500 font-medium">Ventilation & View:</span>
                       <span className="font-bold text-stayflow-teal-dark dark:text-stayflow-teal">
-                        🛣️ Road Facing (Good ventilation)
+                        {(() => {
+                          // Infer from canvas: check what's adjacent on the window side
+                          const room = selectedRoomDetails;
+                          if (room.windows && room.windows.length > 0) {
+                            const wSide = room.windows[0];
+                            const neighbor = activeRooms.find(other => {
+                              if (other.id === room.id) return false;
+                              if (wSide === 'right') return other.x === room.x + room.w && other.y < room.y + room.h && other.y + other.h > room.y;
+                              if (wSide === 'left') return other.x + other.w === room.x && other.y < room.y + room.h && other.y + other.h > room.y;
+                              if (wSide === 'top') return other.y + other.h === room.y && other.x < room.x + room.w && other.x + other.w > room.x;
+                              if (wSide === 'bottom') return other.y === room.y + room.h && other.x < room.x + room.w && other.x + other.w > room.x;
+                              return false;
+                            });
+                            if (neighbor?.type === 'Access road') return '🛣️ Road Facing — Good ventilation';
+                            if (neighbor?.type === 'Other building') return '🏢 Building Side — Indirect light';
+                            if (neighbor?.type === 'Garden' || neighbor?.type === 'Parking') return '🌳 Ground / Open Side';
+                          }
+                          // Fallback to stored windowFacing
+                          if (room.windowFacing === 'Road side') return '🛣️ Road Facing — Good ventilation';
+                          if (room.windowFacing === 'Building side') return '🏢 Building Side — Indirect light';
+                          if (room.windowFacing === 'Ground side') return '🌳 Ground / Open Side';
+                          return '— Not specified';
+                        })()}
                       </span>
                     </div>
 
