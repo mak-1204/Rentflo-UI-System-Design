@@ -1,21 +1,31 @@
 import { supabase } from '@stayflo/utils';
 
+import { unstable_cache } from 'next/cache';
+
 export async function getPortfolioData(slug: string) {
-  // Hardcoded for now. In a real app, query by slug.
-  const PROPERTY_ID = '11111111-1111-1111-1111-111111111111';
+  const fetchLayout = unstable_cache(
+    async () => {
+      // Convert slug back to title case, or just fetch 'Sunrise PG' for the MVP
+      const pgNameQuery = slug === 'sunrise-pg' ? 'Sunrise PG' : 'Sunrise PG';
+      
+      const { data, error } = await supabase
+        .from('pg_properties')
+        .select('layout_data')
+        .eq('name', pgNameQuery)
+        .limit(1)
+        .maybeSingle();
 
-  const { data, error } = await supabase
-    .from('pg_properties')
-    .select('layout_data')
-    .eq('id', PROPERTY_ID)
-    .single();
+      if (error) {
+        console.error('Error fetching layout data:', error);
+        return null;
+      }
+      return data?.layout_data || null;
+    },
+    [`pg-${slug}`],
+    { tags: [`pg-${slug}`], revalidate: 86400 } // Cache for 24 hours, purge manually
+  );
 
-  if (error) {
-    console.error('Error fetching layout data:', error);
-    return null;
-  }
-
-  return data.layout_data;
+  return fetchLayout();
 }
 
 export async function getLeadData(inviteCode: string) {

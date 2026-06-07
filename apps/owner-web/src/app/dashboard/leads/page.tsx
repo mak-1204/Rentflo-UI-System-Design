@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { supabase } from '@stayflo/utils';
+import { getAuthUser } from '@/utils/supabase/server';
 import { Download, Phone, MessageSquare, Calendar, Users, MapPin, IndianRupee } from 'lucide-react';
 import { Button, Card, Badge } from '@stayflo/ui';
 import { WhatsAppForm } from './_components/WhatsAppForm';
@@ -25,10 +25,12 @@ function formatLeadDate(dateString: string) {
 }
 
 export default async function LeadsPage() {
-  // Fetch data natively on the server
+  const { supabase, user } = await getAuthUser();
+  // Fetch data natively on the server securely
   const { data: leads, error } = await supabase
     .from('leads')
     .select('*')
+    .eq('owner_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {

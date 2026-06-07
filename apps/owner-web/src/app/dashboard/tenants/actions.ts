@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { supabase } from '@/lib/supabase';
+import { getAuthUser } from '@/utils/supabase/server';
 import type { Tenant } from './types';
 
 const TABLE = 'tenants';
@@ -10,6 +10,8 @@ const PAGE  = '/dashboard/tenants';
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function fetchTenants(query?: string): Promise<Tenant[]> {
+  const { supabase } = await getAuthUser();
+
   let dbQuery = supabase
     .from(TABLE)
     // Join pg_properties to get the PG name alongside each tenant
@@ -62,6 +64,7 @@ export async function addTenant(
   tenant: Omit<Tenant, 'id' | 'pg_name'>,
   pgId?: string
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const { error } = await supabase.from(TABLE).insert([{
     pg_id:        pgId ?? tenant.pg_id ?? null,
     name:         tenant.name,
@@ -90,6 +93,7 @@ export async function updateTenant(
   id: string,
   updates: Partial<Omit<Tenant, 'id' | 'pg_name'>>
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const { error } = await supabase
     .from(TABLE)
     .update({
@@ -120,6 +124,7 @@ export async function updateTenant(
 export async function deleteTenant(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
+  const { supabase } = await getAuthUser();
   const { error } = await supabase
     .from(TABLE)
     .delete()
@@ -137,6 +142,7 @@ export async function deleteTenant(
 // ─── Fetch PG list (for dropdown in add-tenant form) ─────────────────────────
 
 export async function fetchPGProperties(): Promise<{ id: string; name: string }[]> {
+  const { supabase } = await getAuthUser();
   const { data, error } = await supabase
     .from('pg_properties')
     .select('id, name')

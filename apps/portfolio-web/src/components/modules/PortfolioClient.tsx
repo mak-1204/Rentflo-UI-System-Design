@@ -2,7 +2,7 @@
 
 import { NewPortfolioPageLayout } from './NewPortfolioPageLayout';
 
-export const PortfolioClient = ({ layoutData, leadData }: { layoutData?: any, leadData?: any }) => {
+export const PortfolioClient = ({ layoutData, leadData, stats }: { layoutData?: any, leadData?: any, stats?: any }) => {
   return (
     <NewPortfolioPageLayout
       pgName="Sunrise PG"
@@ -12,6 +12,7 @@ export const PortfolioClient = ({ layoutData, leadData }: { layoutData?: any, le
       images={[]}
       layoutData={layoutData}
       leadData={leadData}
+      stats={stats}
     />
   );
 };

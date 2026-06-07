@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PortfolioClient } from '@/components/modules/PortfolioClient';
 import { getPortfolioData, getLeadData } from './actions';
+import { computeLayoutStats } from '@/lib/layoutStats';
 
 export const metadata: Metadata = {
   title: 'Explore Sunrise PG',
@@ -21,6 +22,7 @@ export default async function LeadCapturePage({
   
   const layoutData = await getPortfolioData(resolvedParams.slug);
   const leadData = inviteCode ? await getLeadData(inviteCode) : null;
+  const stats = computeLayoutStats(layoutData);
 
-  return <PortfolioClient layoutData={layoutData} leadData={leadData} />;
+  return <PortfolioClient layoutData={layoutData} leadData={leadData} stats={stats} />;
 }

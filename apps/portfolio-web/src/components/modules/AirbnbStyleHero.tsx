@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import logoImg from '../../../logo.png';
+import Image from 'next/image';
 
 interface AirbnbStyleHeroProps {
   pgName: string;
@@ -12,6 +13,7 @@ interface AirbnbStyleHeroProps {
   rating?: number;
   reviews?: number;
   images: string[];
+  videoUrl?: string;
   onLeadCaptureClick?: () => void;
 }
 
@@ -23,11 +25,13 @@ export function AirbnbStyleHero({
   rating = 4.8,
   reviews = 150,
   images,
+  videoUrl,
   onLeadCaptureClick,
   leadData,
 }: AirbnbStyleHeroProps & { leadData?: any }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [activeMobileIndex, setActiveMobileIndex] = useState(2);
 
   const displayImages = images && images.length > 0
@@ -91,6 +95,29 @@ export function AirbnbStyleHero({
         </div>
       )}
 
+      {/* Video Modal */}
+      {showVideoModal && videoUrl && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col">
+          <div className="flex items-center justify-between p-4">
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
+            >
+              <X size={28} />
+            </button>
+            <span className="text-white font-medium">Video Tour</span>
+          </div>
+          <div className="flex-1 relative flex items-center justify-center p-4">
+            <video
+              src={videoUrl}
+              controls
+              autoPlay
+              className="w-full max-w-5xl max-h-full rounded-xl shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Main Hero Gallery Section */}
       <section className="space-y-6 text-left">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -127,10 +154,13 @@ export function AirbnbStyleHero({
               setShowAllPhotos(true);
             }}
           >
-            <img 
-              className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105" 
+            <Image 
+              className="object-cover transition-transform duration-700 md:group-hover:scale-105" 
               src={displayImages[currentImageIndex]} 
               alt={currentImageIndex === 0 ? 'Common Area' : currentImageIndex === 1 ? 'Corridor' : 'Play Area'}
+              fill
+              sizes="(max-width: 768px) 100vw, 66vw"
+              priority
             />
             {/* Mobile Carousel Navigation Arrows */}
             <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -167,6 +197,22 @@ export function AirbnbStyleHero({
             <div className="absolute bottom-6 right-6 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider">
               {currentImageIndex + 1} / {displayImages.length}
             </div>
+            
+            {/* Play Video Tour Button */}
+            {videoUrl && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVideoModal(true);
+                }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-900 px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl transition-transform hover:scale-105 border-none cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center">
+                  <span className="material-symbols-outlined text-sm">play_arrow</span>
+                </div>
+                Watch Video Tour
+              </button>
+            )}
           </div>
 
           {/* Side Image 1 */}
@@ -177,10 +223,12 @@ export function AirbnbStyleHero({
               setShowAllPhotos(true);
             }}
           >
-            <img 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            <Image 
+              className="object-cover transition-transform duration-700 group-hover:scale-105" 
               src={displayImages[1] || displayImages[0]} 
               alt="Corridor"
+              fill
+              sizes="33vw"
             />
             <div className="absolute bottom-4 left-4">
               <span className="bg-black/75 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow">
@@ -197,10 +245,12 @@ export function AirbnbStyleHero({
               setShowAllPhotos(true);
             }}
           >
-            <img 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            <Image 
+              className="object-cover transition-transform duration-700 group-hover:scale-105" 
               src={displayImages[2] || displayImages[0]} 
               alt="Play Area"
+              fill
+              sizes="33vw"
             />
             <div className="absolute bottom-4 left-4">
               <span className="bg-black/75 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow">
